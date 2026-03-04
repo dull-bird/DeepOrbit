@@ -2,7 +2,9 @@
 
 > Not just Personal Knowledge Management. A fully automated, Agent-driven Digital Research Assistant.
 
-DeepOrbit is a highly customized, agent-driven Personal Knowledge Management (PKM) and Research Assistant system, inspired by and built upon the core philosophy of OrbitOS.
+DeepOrbit is a highly customized, agent-driven Personal Knowledge Management (PKM) and Research Assistant system.
+
+🙏 **Acknowledgments**: DeepOrbit is deeply inspired by and built upon the core philosophy and foundational workflows of [OrbitOS by MarsWang42](https://github.com/MarsWang42/OrbitOS). We extend our sincere gratitude for their innovative approach to vault structure and agent-driven workflows.
 
 While traditional PKM systems focus on manual knowledge entry and linking, **DeepOrbit** is supercharged with specialized AI agents (via Gemini CLI / Claude Code) that automate deep research, literature translation, content curation, and structural maintenance.
 
