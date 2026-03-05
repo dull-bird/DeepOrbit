@@ -1,5 +1,8 @@
 # DeepOrbit
 
+![DeepOrbit Banner](deeporbit.png)
+
+
 > Not just Personal Knowledge Management. A fully automated, Agent-driven Digital Research Assistant.
 
 DeepOrbit is a highly customized, agent-driven Personal Knowledge Management (PKM) and Research Assistant system.
@@ -7,6 +10,12 @@ DeepOrbit is a highly customized, agent-driven Personal Knowledge Management (PK
 🙏 **Acknowledgments**: DeepOrbit is deeply inspired by and built upon the core philosophy and foundational workflows of [OrbitOS by MarsWang42](https://github.com/MarsWang42/OrbitOS). We extend our sincere gratitude for their innovative approach to vault structure and agent-driven workflows.
 
 While traditional PKM systems focus on manual knowledge entry and linking, **DeepOrbit** is supercharged with specialized AI agents (via Gemini CLI / Claude Code) that automate deep research, literature translation, content curation, and structural maintenance.
+
+
+## 🗺️ Architecture & Workflows
+
+Curious about how the DeepOrbit Agent Engine works under the hood? 
+Check out our **[Architecture & Workflows Documentation](Architecture.md)** for detailed mermaid diagrams illustrating the system architecture, academic translation pipelines, and automated knowledge maintenance loops.
 
 ## Core Features & Skill Packs
 
@@ -37,7 +46,7 @@ DeepOrbit comes with a powerful set of pre-configured Agent Skills designed for 
    - Some skills require additional local tools (e.g., `xelatex` for `arxiv-translator`, `playwright` for `notebooklm`, `marker` for `marker-pdf`).
 2. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/DeepOrbit.git
+   git clone https://github.com/dull-bird/DeepOrbit.git
    ```
 3. **Load Skills**:
    In your CLI configuration file (`AGENTS.md` or `.clauderc`), point the skill locations to the cloned `skills` directory.

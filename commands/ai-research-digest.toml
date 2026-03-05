@@ -1,0 +1,3 @@
+prompt = """
+Please execute the ai-research-digest workflow. {{args}}
+"""

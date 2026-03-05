@@ -1,0 +1,3 @@
+prompt = """
+Please execute the research workflow. {{args}}
+"""

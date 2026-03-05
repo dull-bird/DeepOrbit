@@ -1,0 +1,3 @@
+prompt = """
+Please execute the marker-pdf workflow to convert the PDF. {{args}}
+"""

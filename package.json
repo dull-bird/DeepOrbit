@@ -1,0 +1,12 @@
+{
+  "name": "deeporbit",
+  "version": "1.0.0",
+  "description": "DeepOrbit: Agent-driven Digital Research Assistant for Gemini CLI",
+  "keywords": [
+    "gemini-cli-extension",
+    "pkm",
+    "research",
+    "agent",
+    "obsidian"
+  ]
+}
