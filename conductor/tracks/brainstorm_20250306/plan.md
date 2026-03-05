@@ -1,10 +1,10 @@
 # Implementation Plan: Interactive Brainstorming Skill
 
 ## Phase 1: Foundation & Scaffolding
-- [ ] Task: Create skill directory and basic metadata
-    - [ ] Create `skills/brainstorm/` directory
-    - [ ] Create `skills/brainstorm/SKILL.md` with basic instructions
-    - [ ] Create `commands/do-brainstorm.toml`
+- [x] Task: Create skill directory and basic metadata [a9249ee]
+    - [x] Create `skills/brainstorm/` directory
+    - [x] Create `skills/brainstorm/SKILL.md` with basic instructions
+    - [x] Create `commands/do-brainstorm.toml`
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Scaffolding' (Protocol in workflow.md)
 
 ## Phase 2: Interactive Brainstorming Logic
