@@ -34,7 +34,16 @@ foreach ($d in $vaultDirs) { New-Item -ItemType Directory -Path (Join-Path $Dest
 }
 Write-Host "Created vault folders: 00_收件箱 .. 99_系统, 50_资源/Newsletters, 50_资源/产品发布, 99_系统/模板, 99_系统/提示词, 99_系统/归档"
 
-# 4. Inject DEST\.gemini\settings.json (project-level); create dir if needed
+# 4. Copy plugin 99_系统 contents into DEST\99_系统 (even if 99_系统 already exists — overlay)
+$PluginRoot = Split-Path -Parent $Source
+$Sys99Source = Join-Path $PluginRoot "99_系统"
+if (Test-Path $Sys99Source) {
+  $Sys99Dest = Join-Path $DestDir "99_系统"
+  Get-ChildItem -Path $Sys99Source -Force | Copy-Item -Destination $Sys99Dest -Recurse -Force
+  Write-Host "Copied 99_系统 contents (templates, etc.) from plugin into $Sys99Dest"
+}
+
+# 5. Inject DEST\.gemini\settings.json (project-level); create dir if needed
 $GeminiDir = Join-Path $DestDir ".gemini"
 $SettingsPath = Join-Path $GeminiDir "settings.json"
 if (-not (Test-Path $GeminiDir)) { New-Item -ItemType Directory -Path $GeminiDir -Force | Out-Null }

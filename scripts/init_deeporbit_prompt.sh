@@ -32,7 +32,15 @@ mkdir -p "$DEST/50_资源/Newsletters" "$DEST/50_资源/产品发布"
 mkdir -p "$DEST/99_系统/模板" "$DEST/99_系统/提示词" "$DEST/99_系统/归档"
 echo "Created vault folders: $VAULT_DIRS, 50_资源/Newsletters, 50_资源/产品发布, 99_系统/模板, 99_系统/提示词, 99_系统/归档"
 
-# 4. Inject DEST/.gemini/settings.json (project-level); create dir if needed
+# 4. Copy plugin 99_系统 contents into DEST/99_系统 (even if 99_系统 already exists — overlay)
+PLUGIN_ROOT="$(dirname "$SOURCE")"
+if [[ -d "$PLUGIN_ROOT/99_系统" ]]; then
+  mkdir -p "$DEST/99_系统"
+  cp -r "$PLUGIN_ROOT/99_系统/"* "$DEST/99_系统/" 2>/dev/null || true
+  echo "Copied 99_系统 contents (templates, etc.) from plugin into $DEST/99_系统"
+fi
+
+# 5. Inject DEST/.gemini/settings.json (project-level); create dir if needed
 GEMINI_DIR="$DEST/.gemini"
 GEMINI_SETTINGS="$GEMINI_DIR/settings.json"
 mkdir -p "$GEMINI_DIR"
