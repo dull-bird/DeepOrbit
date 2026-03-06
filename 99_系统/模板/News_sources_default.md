@@ -1,4 +1,4 @@
-# 默认新闻源（来自 do.ai-newsletters / do.ai-products / do.ai-research-digest）
+# 默认新闻源
 
 复制以下内容到日记的 `## News sources` 中即可。可每日增删改，start-my-day 会从**昨日日记**的该小节读取链接并用脚本拉取。
 

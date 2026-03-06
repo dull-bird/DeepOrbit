@@ -120,7 +120,7 @@ Output a concise summary in Chinese:
 
 ---
 
-**AI 摘要:**（来自昨日日记 News sources 拉取结果）
+**新闻摘要:**（来自昨日日记 News sources 拉取结果）
 - [标题或摘要](原文链接) - [一句话角度]
 - …
 
