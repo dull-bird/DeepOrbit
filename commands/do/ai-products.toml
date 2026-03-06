@@ -1,0 +1,7 @@
+# AI Products
+
+description = "Curate AI product launches from Product Hunt, HN, GitHub, Techmeme via do.ai-products"
+prompt = """
+Use the do.ai-products skill. Fetch, summarize, and curate today's AI product launches.
+User input: {{args}}
+"""

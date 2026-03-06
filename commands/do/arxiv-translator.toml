@@ -1,0 +1,7 @@
+# arXiv Translator
+
+description = "Download arXiv LaTeX, translate to target language, compile to PDF via do.arxiv-translator"
+prompt = """
+Use the do.arxiv-translator skill. Download LaTeX from arXiv, translate (default Chinese), compile with xelatex.
+User input: {{args}}
+"""

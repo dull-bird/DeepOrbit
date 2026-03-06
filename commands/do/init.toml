@@ -1,0 +1,14 @@
+# Init (DeepOrbit prompt setup)
+
+description = "Copy plugin DeepOrbitPrompt.md to work dir and inject context.fileName into .gemini/settings.json"
+prompt = """
+Use the do.init workflow. Run the init script for the current OS; pass the user's target directory from {{args}} if provided, otherwise use current working directory.
+
+1. On Windows (PowerShell): run scripts\\init_deeporbit_prompt.ps1 [TARGET], or from extension folder: & "%USERPROFILE%\\.gemini\\extensions\\deeporbit\\scripts\\init_deeporbit_prompt.ps1" [TARGET].
+
+2. On macOS/Linux (Bash): run scripts/init_deeporbit_prompt.sh [TARGET], or from extension folder: bash "$HOME/.gemini/extensions/deeporbit/scripts/init_deeporbit_prompt.sh" [TARGET]. Optional: install jq to merge existing .gemini/settings.json.
+
+3. The script copies the plugin's DeepOrbitPrompt.md to TARGET/DeepOrbitPrompt.md, creates TARGET/.gemini/ if needed, and writes or merges TARGET/.gemini/settings.json so context.fileName includes DeepOrbitPrompt.md.
+
+4. Remind the user to run /memory refresh in Gemini CLI to load the prompt.
+"""

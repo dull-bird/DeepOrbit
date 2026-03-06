@@ -23,23 +23,23 @@ graph TD
         CLI{Gemini CLI / Claude Code}
         
         subgraph Academic_Pack [🧠 Academic & Research Pack]
-            P_Arxiv["/arxiv-translator"]
-            P_Marker["/marker-pdf"]
-            P_Translate["/translate-pdf"]
-            P_NLM["/notebooklm"]
+            P_Arxiv["/do:arxiv-translator"]
+            P_Marker["/do:marker"]
+            P_Translate["/do:translate-pdf"]
+            P_NLM["/do:notebooklm"]
         end
         
         subgraph Curation_Pack [🕸️ Maintenance & Curation Pack]
-            C_Summary["/note-summary"]
-            C_Fix["/fix-links"]
-            C_Digest["/ai-research-digest</br>/ai-newsletters</br>/ai-products"]
+            C_Summary["/do:note_summary"]
+            C_Fix["/do:fix-links"]
+            C_Digest["/do:ai-research-digest</br>/do:ai-newsletters</br>/do:ai-products"]
         end
         
         subgraph Core_Pack [⚙️ Core Workflows]
-            W_Kickoff["/kickoff"]
-            W_Research["/research"]
-            W_Parse["/parse-knowledge"]
-            W_SMD["/start-my-day"]
+            W_Kickoff["/do:kickoff"]
+            W_Research["/do:research"]
+            W_Parse["/do:parse-knowledge"]
+            W_SMD["/do:start-my-day"]
         end
 
         CLI --> Academic_Pack & Curation_Pack & Core_Pack
@@ -75,20 +75,20 @@ graph TD
 
 ## 2. Detailed Workflows: Academic & Research
 
-### 🎓 `/arxiv-translator` & `/marker-pdf`
+### 🎓 `/do:arxiv-translator` & `/do:marker`
 DeepOrbit automates the heavy lifting of parsing and translating complex academic papers.
 
 ```mermaid
 graph LR
     Input[arXiv URL / Local PDF] --> Router{Format Check}
     
-    Router -- arXiv Source --> ArxivAgent["/arxiv-translator"]
+    Router -- arXiv Source --> ArxivAgent["/do:arxiv-translator"]
     ArxivAgent --> DL[Download LaTeX]
     DL --> Trans[LLM Translation]
     Trans --> Compile[xeLaTeX Compile]
     Compile --> Out_PDF[Chinese PDF]
     
-    Router -- PDF File --> MarkerAgent["/marker-pdf"]
+    Router -- PDF File --> MarkerAgent["/do:marker"]
     MarkerAgent --> OCR[marker_single OCR]
     OCR --> Markdown[Preserve Math/Layout]
     Markdown --> Out_MD[Structured Markdown]
@@ -100,13 +100,13 @@ graph LR
 
 ## 3. Detailed Workflows: Knowledge Maintenance
 
-### 🔗 `/fix-links` (Ghost Link Fixer)
+### 🔗 `/do:fix-links` (Ghost Link Fixer)
 This skill ensures your Obsidian Wiki never has dead ends by automatically generating content based on first principles.
 
 ```mermaid
 graph TD
     Scan[Scan Vault for Ghost Links] --> Identify{Missing Entities Found?}
-    Identify -- Yes --> Agent["/fix-links"]
+    Identify -- Yes --> Agent["/do:fix-links"]
     Identify -- No --> End[Done]
     
     Agent --> Prompt[LLM: 1st Principle Reasoning]
@@ -120,7 +120,7 @@ Automated curation of industry news and product launches.
 
 ```mermaid
 graph LR
-    Sources[Product Hunt / HN / Newsletters] --> Agent["/ai-newsletters</br>/ai-products"]
+    Sources[Product Hunt / HN / Newsletters] --> Agent["/do:ai-newsletters</br>/do:ai-products"]
     Agent --> Fetch[Fetch Full Content]
     Fetch --> Dedup[Smart Deduplication]
     Dedup --> Rank[Ranking & Summarization]

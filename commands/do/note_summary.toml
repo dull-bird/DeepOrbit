@@ -1,0 +1,7 @@
+# Note Summary
+
+description = "Summarize content from URL, file, or topic and archive into 60_笔记 using the do.note_summary skill"
+prompt = """
+Use the do.note_summary skill. Fetch, summarize, classify, and archive the content to the vault.
+User input: {{args}}
+"""

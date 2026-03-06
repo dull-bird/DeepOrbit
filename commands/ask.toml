@@ -1,3 +1,0 @@
-prompt = """
-Please execute the ask workflow. {{args}}
-"""

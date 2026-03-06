@@ -33,10 +33,10 @@ DeepOrbit comes with a powerful set of pre-configured Agent Skills designed for 
 - **`ai-research-digest` / `ai-newsletters` / `ai-products`**: Automated pipelines that curate, deduplicate, and summarize the latest AI research, product launches, and industry newsletters into daily digests.
 
 ### ⚙️ Core Workflows (Inherited from OrbitOS)
-- **`/kickoff`**: Instantly convert an inbox idea into a structured active Project.
-- **`/start-my-day`**: A guided morning planning workflow.
-- **`/research`**: Deep dive into any topic with a two-agent architecture that outputs structured Areas and Wiki entries.
-- **`/parse-knowledge`**: Consolidates unstructured text blobs into your vault's structural framework.
+- **`/do:kickoff`**: Instantly convert an inbox idea into a structured active Project.
+- **`/do:start-my-day`**: A guided morning planning workflow.
+- **`/do:research`**: Deep dive into any topic with a two-agent architecture that outputs structured Areas and Wiki entries.
+- **`/do:parse-knowledge`**: Consolidates unstructured text blobs into your vault's structural framework.
 
 ## Installation & Setup
 
@@ -49,8 +49,10 @@ DeepOrbit comes with a powerful set of pre-configured Agent Skills designed for 
    git clone https://github.com/dull-bird/DeepOrbit.git
    ```
 3. **Load Skills**:
-   In your CLI configuration file (`AGENTS.md` or `.clauderc`), point the skill locations to the cloned `skills` directory.
-   
+   In your CLI configuration file (`AGENTS.md` or `.clauderc`), point the skill locations to the cloned `skills` directory (skill folders are named `do.<name>`, e.g. `skills/do.kickoff/`). Commands live under `commands/do/` and are invoked as `/do:kickoff`, `/do:research`, etc.
+4. **Init prompt in a vault (optional)**:
+   In your Obsidian vault (or any workspace), run `/do:init` to copy the plugin’s system prompt to the current directory as DeepOrbitPrompt.md and inject into .gemini/settings.json. Windows uses `scripts\init_deeporbit_prompt.ps1`, macOS/Linux use `scripts/init_deeporbit_prompt.sh`.
+
 ## Philosophy
 
 Everything orbits around you. Keep your knowledge in motion, but let the AI agents do the heavy lifting of parsing, translating, summarizing, and fixing.

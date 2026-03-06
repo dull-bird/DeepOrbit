@@ -1,3 +1,0 @@
-prompt = """
-Please execute the ai-products workflow. {{args}}
-"""

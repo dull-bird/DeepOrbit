@@ -1,3 +1,0 @@
-prompt = """
-Please execute the note_summary workflow. {{args}}
-"""

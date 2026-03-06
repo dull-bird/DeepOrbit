@@ -1,0 +1,7 @@
+# NotebookLM
+
+description = "Query Google NotebookLM for source-grounded, citation-backed answers via do.notebooklm"
+prompt = """
+Use the do.notebooklm skill. Query the user's NotebookLM notebooks (browser automation). Return answers with citations from uploaded documents.
+User input: {{args}}
+"""

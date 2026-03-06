@@ -1,0 +1,7 @@
+# AI Newsletters
+
+description = "Curate AI newsletter digest (TLDR AI, The Rundown AI) with deduplication and ranking via do.ai-newsletters"
+prompt = """
+Use the do.ai-newsletters skill. Fetch, deduplicate, rank, and summarize today's AI newsletters.
+User input: {{args}}
+"""

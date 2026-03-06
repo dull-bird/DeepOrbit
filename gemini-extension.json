@@ -1,6 +1,5 @@
 {
-  "name": "deeporbit",
-  "version": "1.0.0",
-  "description": "DeepOrbit: A fully automated, Agent-driven Digital Research Assistant.",
-  "contextFileName": "GEMINI.md"
+    "name": "deeporbit",
+    "version": "1.0.0",
+    "description": "DeepOrbit: A fully automated, Agent-driven Digital Research Assistant."
 }

@@ -1,0 +1,7 @@
+# Translate PDF
+
+description = "Translate PDF to another language preserving layout and styling via do.translate-pdf"
+prompt = """
+Use the do.translate-pdf skill. Translate the PDF to the target language while preserving structure, colors, and layout.
+User input: {{args}}
+"""
