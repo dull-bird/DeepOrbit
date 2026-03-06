@@ -28,9 +28,9 @@ echo "Copied prompt to: $DEST/DeepOrbitPrompt.md"
 # 3. Create folder structure per DeepOrbitPrompt.md "Structure" section
 VAULT_DIRS="00_收件箱 10_日记 20_项目 30_研究 40_知识库 50_资源 60_笔记 90_计划 99_系统"
 for d in $VAULT_DIRS; do mkdir -p "$DEST/$d"; done
-mkdir -p "$DEST/50_资源/Newsletters" "$DEST/50_资源/产品发布"
+mkdir -p "$DEST/50_资源/Newsletters" "$DEST/50_资源/产品发布" "$DEST/50_资源/新闻"
 mkdir -p "$DEST/99_系统/模板" "$DEST/99_系统/提示词" "$DEST/99_系统/归档"
-echo "Created vault folders: $VAULT_DIRS, 50_资源/Newsletters, 50_资源/产品发布, 99_系统/模板, 99_系统/提示词, 99_系统/归档"
+echo "Created vault folders: $VAULT_DIRS, 50_资源/Newsletters, 50_资源/产品发布, 50_资源/新闻, 99_系统/模板, 99_系统/提示词, 99_系统/归档"
 
 # 4. Copy plugin 99_系统 contents into DEST/99_系统 (even if 99_系统 already exists — overlay)
 PLUGIN_ROOT="$(dirname "$SOURCE")"

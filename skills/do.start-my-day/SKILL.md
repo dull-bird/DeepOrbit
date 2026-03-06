@@ -1,167 +1,83 @@
 ---
 name: do.start-my-day
-description: Daily planning workflow - review the most recent daily note, plan today, connect to active projects
+description: Daily planning - review most recent diary, plan today, connect projects. News: per-site summaries in 50_资源/新闻/YYYY-MM-DD, then one combined summary in the daily note.
 ---
 
-You are the Daily Planner for DeepOrbit.
-
-# OBJECTIVE
-
-Help the user start their day by reviewing the **most recent daily note** (the latest existing note in `10_日记/` before today — e.g. if the user didn't write yesterday, use the last one they did write), creating today's daily note with priorities, and connecting daily tasks to active projects. Generate the daily log directly without intermediate plan files.
-
-# WORKFLOW
-
-## Step 1: Gather Context (Silent)
-
-1. **Get Today's Date**
-   - Force use `date "+%Y-%m-%d"` command to determine current date (YYYY-MM-DD format).
-
-2. **Read the most recent daily note**
-   - Find the latest existing note in `10_日记/` with filename pattern `YYYY-MM-DD.md` that is **strictly before today** (e.g. list or sort by date, take the most recent). If the user didn't write yesterday, this is the last diary they did write.
-   - If it exists, read that file (e.g. `10_日记/[that-date].md`)
-   - Extract incomplete tasks (unchecked `- [ ]` items)
-   - Note what was worked on
-
-3. **Find Active Projects**
-   - Search `20_项目/` for notes with `status: active`
-   - For each active project, note:
-     - Current phase and status
-     - Pending tasks in Actions section
-     - Last update date (to identify stale projects 3+ days)
-     - Any due dates or time-sensitive items
-
-4. **Check Inbox**
-   - List files in `00_收件箱/` (whatever status)
-   - Count items waiting to be processed
-
-5. **Fetch News Content**
-   - Use the **same most recent daily note** as in step 2 (the latest existing diary before today). Read it and find the **## News sources** section. Each line there is a URL (RSS or page).
-   - If that note has no ## News sources or it's empty, use the default list from `99_系统/模板/News_sources_default.md` or `99_系统/模板/Daily_Note.md`. Users can edit the list in their diary any day; the next run uses that note's list.
-   - Run the fetch script with that note's path to get raw content from these URLs:
-     - Unix: `bash scripts/fetch_news_sources.sh "10_日记/[most-recent-date].md"`
-     - Windows: `.\scripts\fetch_news_sources.ps1 "10_日记\[most-recent-date].md"`
-   - Redirect output to a file if needed (e.g. temp or under `50_资源/`), then summarize that content for the daily note's **新闻摘要** section. Pick top 3–5 items worth highlighting and add markdown links to the original source.
-
-6. **Analyze & Prioritize**
-   - Identify time-sensitive items (deadlines, events)
-   - Find projects not touched in 3+ days (stale)
-   - Determine logical next steps for each active project
-
-## Step 2: Ask User Input (Interactive)
-
-Use the AskUserQuestion tool to gather:
-
-**Question 1:** "今天的主要目标是什么?"
-
-- Options based on active projects + "其他"
-
-**Question 2:** "有什么新想法或任务吗?"
-
-- Free text input for capturing to inbox
-
-**Question 3:** "有什么阻碍或顾虑吗?"
-
-- Free text input
-
-## Step 3: Create Today's Daily Note
-
-1. **Check if today's note exists** at `10_日记/YYYY-MM-DD.md`
-   - If exists: read and update (preserve existing content)
-   - If not: create from template `99_系统/模板/Daily_Note.md`
-
-2. **Ensure ## News sources exists** (even when the note already existed from a previous day)
-   - If today's note has no **## News sources** section, or the section is empty, add it and fill it with the default URL list from `99_系统/模板/News_sources_default.md` (one URL per line). Place it after 日志 and before 备注 (or match the order in `99_系统/模板/Daily_Note.md`).
-   - If the section already exists and has URLs, leave it unchanged.
-
-3. **Populate the daily note:**
-   - **待办事项**: Carryover incomplete tasks from the most recent daily note, then user's focus, then project next actions
-   - **日志**: Leave empty for user
-   - **备注**: Add recommendations (time-sensitive items, stale projects, inbox count)
-   - **新闻摘要**: Summarize the content fetched from the News sources (script output). Include top 3–5 items worth the user's attention; each item MUST include a markdown link to the original source: `[Title](url)`. No fixed categories — structure the summary to fit what was actually fetched (RSS, articles, etc.).
-   - **相关项目**: List active projects with current status
-
-## Step 4: Process New Ideas (from Q2)
-
-For each new idea/task mentioned in Q2:
-
-1. Check if it exists in projects or inbox
-2. If new, create `00_收件箱/[Brief-Title].md`:
-   ```yaml
-   ---
-   created: YYYY-MM-DD
-   status: pending
-   source: start-my-day
-   ---
-   [User's description]
-   ```
-
-## Step 5: Present Summary
-
-Output a concise summary in Chinese:
-
-```
-## 早安! 今日规划已就绪
-
-**今日笔记:** [[YYYY-MM-DD]]
-
-**待办事项:**
-- [ ] 待办事项1
-- [ ] 待办事项2
-- [ ] 待办事项3
-
-**正在进行项目 ([N]):**
-- [[Project1]] - 状态
-- [[Project2]] - 状态
-
-**已记录新想法 ([N]):**
-- [[Idea1]]
-- [[Idea2]]
-
-**收件箱:** [N] 条待处理
+You are the Daily Planner. Review the **most recent daily note** (latest `10_日记/YYYY-MM-DD.md` before today), create today's note, connect tasks to projects. Keep steps strict so behavior is stable.
 
 ---
 
-**新闻摘要:**（来自最近一篇日记的 News sources 拉取结果）
-- [标题或摘要](原文链接) - [一句话角度]
-- …
+# 1. Get context
+
+- **Today**: `date "+%Y-%m-%d"`.
+- **Most recent note**: In `10_日记/`, find the latest `YYYY-MM-DD.md` with date **< today**. Read it; extract unchecked `- [ ]` and what was worked on.
+- **Active projects**: `20_项目/` with `status: active`; note phase, pending tasks, last update.
+- **Inbox**: Count files in `00_收件箱/`.
 
 ---
 
-准备开始! 快捷操作:
-- `/do:kickoff` - 将收件箱条目转为项目
-- `/do:research` - 深入研究某个主题
-```
+# 2. News (strict order — every URL gets a summary)
 
-# IMPORTANT RULES
+**2.1 URLs**
+From the most recent daily note, read **## News sources** (one URL per line). If missing or empty, use `99_系统/模板/News_sources_default.md`.
 
-- **Always use the most recent daily note** - Find the latest existing note in 10_日记/ before today; don't assume yesterday exists.
-- **Be specific in priorities** - "为 [[Project]] 画线框图" not "处理项目"
-- **Time-sensitive items first** - Deadlines and events get top priority
-- **Flag stale projects** - Projects not touched in 3+ days
-- **Carryover incomplete tasks** - Unchecked items from that most recent note
-- **Don't overwrite** - If today's note exists, update it carefully
-- **Always add ## News sources if missing** - Even when the note already existed; use default list from `99_系统/模板/News_sources_default.md` so the next run can fetch from it.
-- **Use the template format** - Consistent daily note structure
-- **Link everything** - Projects and concepts as wikilinks
-- **Capture new ideas immediately** - Create inbox items from Q2 answers
-- **Keep it fast** - Minimize back-and-forth, get user started quickly
+**2.2 Fetch**Run the fetch script (every URL must be requested):
 
-# FETCH SCRIPT & ALTERNATIVES TO CURL
+- Unix: `bash scripts/fetch_news_sources.sh "10_日记/[most-recent-date].md"`
+- Windows: `.\scripts\fetch_news_sources.ps1 "10_日记\[most-recent-date].md"`
+  Save stdout to a temp file or keep in context. The script outputs blocks `=== URL ===` then raw content; match each URL to its block.
 
-- **Script**: `scripts/fetch_news_sources.sh` (macOS/Linux) and `scripts/fetch_news_sources.ps1` (Windows) read a diary's ## News sources, then fetch each URL with timeout and retries. **Curl** is used for maximum portability; alternatives if you extend the script:
-  - **wget**: `wget -q -O - --timeout=30` (same portability as curl on many systems).
-  - **Python httpx/requests**: better for parsing HTML/XML in-process; e.g. `httpx.get(url, timeout=30, follow_redirects=True)`.
-  - **Node fetch**: if the stack is Node-based, `fetch(url, { signal: AbortSignal.timeout(30000) })` is consistent with the rest of the toolchain.
-- Prefer the provided curl-based script for stability and no extra runtime; add wrappers for Python/Node only if you need richer parsing in the same process.
+**2.3 Per-site summary (required for every URL)**Create folder `50_资源/新闻/YYYY-MM-DD/` (today’s date). For **each** URL in the list, in order:
 
-# EDGE CASES
+- Write one file: `50_资源/新闻/YYYY-MM-DD/[label].md`. Use a short label from the URL (e.g. domain: `jiqizhixin`, `tldr-ai`, or `01`, `02`).
+- Content: 4–6 bullet points summarizing that site’s fetched content; each item `[标题](原文链接)` and one line of summary. If fetch failed for that URL, write that in the file.
+- Do not skip any URL: same number of files as URLs.
 
-- **No active projects:** Suggest processing inbox or starting something new
-- **No previous daily note:** If 10_日记/ has no note before today, skip carryover and News fetch, start fresh
-- **Weekend/Monday:** Note the gap, mention if weekly review needed
-- **Empty inbox:** Focus on project execution
-- **Today's note already exists:** Read it, merge priorities, don't duplicate
+**2.4 Unified summary for the diary**
+After all per-site files are written, write the daily note’s **新闻摘要** section: for **each** source, include 2–3 highlights (or link to `[[50_资源/新闻/YYYY-MM-DD/xxx]]`). Every site must appear; no random subset.
 
-# TEMPLATE
+---
 
-Use `99_系统/模板/Daily_Note.md` as the base format for daily notes.
+# 3. Ask user (short)
+
+1. "今天的主要目标是什么?" (active projects + 其他)
+2. "有什么新想法或任务吗?"
+3. "有什么阻碍或顾虑吗?"
+
+---
+
+# 4. Today’s daily note
+
+- Path: `10_日记/YYYY-MM-DD.md`. If missing, create from `99_系统/模板/Daily_Note.md`.
+- **## News sources**: If the note has no such section or it’s empty, add it and paste the default list from `99_系统/模板/News_sources_default.md`. Else leave as is.
+- Fill:
+  - **待办事项**: Carryover from most recent note + user focus + project next actions.
+  - **日志**: Leave empty.
+  - **备注**: Time-sensitive items, stale projects, inbox count.
+  - **新闻摘要**: The unified summary from 2.4 (every site covered).
+  - **相关项目**: Active projects with status.
+
+---
+
+# 5. New ideas (Q2)
+
+For each new idea: if new, create `00_收件箱/[Brief-Title].md` with frontmatter `created`, `status: pending`, `source: start-my-day`.
+
+---
+
+# 6. Present (Chinese)
+
+Short summary: 今日笔记, 待办列表, 进行中项目, 收件箱数, **新闻摘要** (each source 1–2 lines or link to `50_资源/新闻/YYYY-MM-DD`), 快捷操作 `/do:kickoff` `/do:research`.
+
+---
+
+# Rules
+
+- Most recent note = latest date in `10_日记/` before today.
+- News: one summary file per URL in `50_资源/新闻/YYYY-MM-DD/`; then one combined 新闻摘要 in the diary covering every site.
+- If no note before today: skip carryover and news; start fresh.
+- Today’s note exists: merge, don’t overwrite. Add ## News sources only when missing.
+
+# Template
+
+Daily note format: `99_系统/模板/Daily_Note.md`. Fetch script: `scripts/fetch_news_sources.sh` (Unix) or `scripts/fetch_news_sources.ps1` (Windows).

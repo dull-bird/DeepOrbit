@@ -29,10 +29,10 @@ Write-Host "Copied prompt to: $DestFile"
 # 3. Create folder structure per DeepOrbitPrompt.md "Structure" section
 $vaultDirs = @("00_收件箱", "10_日记", "20_项目", "30_研究", "40_知识库", "50_资源", "60_笔记", "90_计划", "99_系统")
 foreach ($d in $vaultDirs) { New-Item -ItemType Directory -Path (Join-Path $DestDir $d) -Force | Out-Null }
-@("50_资源\Newsletters", "50_资源\产品发布", "99_系统\模板", "99_系统\提示词", "99_系统\归档") | ForEach-Object {
+@("50_资源\Newsletters", "50_资源\产品发布", "50_资源\新闻", "99_系统\模板", "99_系统\提示词", "99_系统\归档") | ForEach-Object {
   New-Item -ItemType Directory -Path (Join-Path $DestDir $_) -Force | Out-Null
 }
-Write-Host "Created vault folders: 00_收件箱 .. 99_系统, 50_资源/Newsletters, 50_资源/产品发布, 99_系统/模板, 99_系统/提示词, 99_系统/归档"
+Write-Host "Created vault folders: 00_收件箱 .. 99_系统, 50_资源/Newsletters, 50_资源/产品发布, 50_资源/新闻, 99_系统/模板, 99_系统/提示词, 99_系统/归档"
 
 # 4. Copy plugin 99_系统 contents into DEST\99_系统 (even if 99_系统 already exists — overlay)
 $PluginRoot = Split-Path -Parent $Source
