@@ -8,7 +8,7 @@ Use the do.init workflow. Run the init script for the current OS; pass the user'
 
 2. On macOS/Linux (Bash): run scripts/init_deeporbit_prompt.sh [TARGET], or from extension folder: bash "$HOME/.gemini/extensions/deeporbit/scripts/init_deeporbit_prompt.sh" [TARGET]. Optional: install jq to merge existing .gemini/settings.json.
 
-3. The script copies the plugin's DeepOrbitPrompt.md to TARGET/DeepOrbitPrompt.md, creates TARGET/.gemini/ if needed, and writes or merges TARGET/.gemini/settings.json so context.fileName includes DeepOrbitPrompt.md.
+3. The script copies the plugin's DeepOrbitPrompt.md to TARGET/DeepOrbitPrompt.md, creates the vault folder structure from the Structure section (00_收件箱 through 99_系统, 50_资源/Newsletters, 50_资源/产品发布, 99_系统/模板·提示词·归档), then creates TARGET/.gemini/ and writes or merges settings.json so context.fileName includes DeepOrbitPrompt.md.
 
 4. Remind the user to run /memory refresh in Gemini CLI to load the prompt.
 """

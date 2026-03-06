@@ -25,7 +25,14 @@ mkdir -p "$DEST"
 cp "$SOURCE" "$DEST/DeepOrbitPrompt.md"
 echo "Copied prompt to: $DEST/DeepOrbitPrompt.md"
 
-# 3. Inject DEST/.gemini/settings.json (project-level); create dir if needed
+# 3. Create folder structure per DeepOrbitPrompt.md "Structure" section
+VAULT_DIRS="00_收件箱 10_日记 20_项目 30_研究 40_知识库 50_资源 60_笔记 90_计划 99_系统"
+for d in $VAULT_DIRS; do mkdir -p "$DEST/$d"; done
+mkdir -p "$DEST/50_资源/Newsletters" "$DEST/50_资源/产品发布"
+mkdir -p "$DEST/99_系统/模板" "$DEST/99_系统/提示词" "$DEST/99_系统/归档"
+echo "Created vault folders: $VAULT_DIRS, 50_资源/Newsletters, 50_资源/产品发布, 99_系统/模板, 99_系统/提示词, 99_系统/归档"
+
+# 4. Inject DEST/.gemini/settings.json (project-level); create dir if needed
 GEMINI_DIR="$DEST/.gemini"
 GEMINI_SETTINGS="$GEMINI_DIR/settings.json"
 mkdir -p "$GEMINI_DIR"
@@ -54,4 +61,4 @@ else
   fi
 fi
 
-echo 'Done. Run "/memory refresh" in Gemini CLI to load DeepOrbitPrompt.md.'
+echo "Done. Run \"/memory refresh\" in Gemini CLI to load DeepOrbitPrompt.md."
