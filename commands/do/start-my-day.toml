@@ -1,7 +1,7 @@
 # Start My Day
 
-description = "Morning planning: review yesterday, plan today, link to projects; runs do:ai-newsletters and do:ai-products when needed"
+description = "Morning planning: review yesterday, plan today, link to projects"
 prompt = """
-Use the do.start-my-day skill. Run the daily planning workflow: review yesterday, plan today, connect to active projects. Invoke do:ai-newsletters and do:ai-products for digest content when needed.
+Use the do.start-my-day skill. Run the daily planning workflow: review yesterday, plan today, connect to active projects. Collect and summary news.
 User input: {{args}}
 """

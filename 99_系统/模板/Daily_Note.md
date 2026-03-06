@@ -17,8 +17,6 @@ type: daily
 
 ## 新闻摘要
 
-（由 /do:start-my-day 或 /do:ai-newsletters、/do:ai-products 填充）
-
 ## 相关项目
 
 ## News sources
