@@ -33,11 +33,13 @@ Help the user start their day by reviewing yesterday's progress, creating today'
    - List files in `00_收件箱/` (whatever status)
    - Count items waiting to be processed
 
-5. **Fetch AI Content** (run in parallel)
-   - MUST run `/do:ai-newsletters` command to get today's AI newsletter digest
-   - MUST run `/do:ai-products` command to get today's AI product launches
-   - Both skills will return condensed summaries for /do:start-my-day context
-   - Store top 5 content opportunities and top 5 product launches
+5. **Fetch News Content**
+   - Read **yesterday's** daily note `10_日记/[yesterday].md` and find the **## News sources** section. Each line there is a URL (RSS or page).
+   - If yesterday's note has no ## News sources or it's empty, use the default list from `99_系统/模板/News_sources_default.md` or `99_系统/模板/Daily_Note.md`. Users can edit the list in their diary any day; the next day start-my-day uses that list.
+   - Run the fetch script to get raw content from these URLs:
+     - Unix: `bash scripts/fetch_news_sources.sh "10_日记/[yesterday].md"` (or from repo root: `bash path/to/scripts/fetch_news_sources.sh "10_日记/[yesterday].md"`)
+     - Windows: `.\scripts\fetch_news_sources.ps1 "10_日记\[yesterday].md"`
+   - Redirect output to a file if needed (e.g. temp or under `50_资源/`), then summarize that content for the daily note's **新闻摘要** section. Pick top 3–5 items worth highlighting and add markdown links to the original source.
 
 6. **Analyze & Prioritize**
    - Identify time-sensitive items (deadlines, events)
@@ -66,15 +68,15 @@ Use the AskUserQuestion tool to gather:
    - If exists: read and update (preserve existing content)
    - If not: create from template `99_系统/模板/Daily_Note.md`
 
-2. **Populate the daily note:**
+2. **Ensure ## News sources exists** (even when the note already existed from a previous day)
+   - If today's note has no **## News sources** section, or the section is empty, add it and fill it with the default URL list from `99_系统/模板/News_sources_default.md` (one URL per line). Place it after 日志 and before 备注 (or match the order in `99_系统/模板/Daily_Note.md`).
+   - If the section already exists and has URLs, leave it unchanged.
+
+3. **Populate the daily note:**
    - **待办事项**: Carryover incomplete tasks from yesterday, then user's focus, then project next actions
    - **日志**: Leave empty for user
    - **备注**: Add recommendations (time-sensitive items, stale projects, inbox count)
-   - **AI 摘要**: Add summary section with top content from newsletters and product launches
-     - Include top 3-5 content opportunities from AI newsletters
-     - Include top 3-5 product launch opportunities
-     - Each item MUST include a markdown link to the original source: `[Title](url)`
-     - Add clear links to full digests in respective folders: `[[50_资源/Newsletters/YYYY-MM-DD-Digest]]` and `[[50_资源/产品发布/YYYY-MM-DD-Digest]]`
+   - **新闻摘要**: Summarize the content fetched from the News sources (script output). Include top 3–5 items worth the user's attention; each item MUST include a markdown link to the original source: `[Title](url)`. No fixed categories — structure the summary to fit what was actually fetched (RSS, articles, etc.).
    - **相关项目**: List active projects with current status
 
 ## Step 4: Process New Ideas (from Q2)
@@ -118,19 +120,9 @@ Output a concise summary in Chinese:
 
 ---
 
-**AI 摘要:**
-
-*AI 新闻:*
-- [标题](原文链接) - [角度]
-- [标题](原文链接) - [角度]
-- [标题](原文链接) - [角度]
-→ 完整摘要: [[50_资源/Newsletters/YYYY-MM-DD-Digest|今日Newsletter摘要]]
-
-*产品发布:*
-- [产品](原文链接) - [角度] - [指标]
-- [产品](原文链接) - [角度] - [指标]
-- [产品](原文链接) - [角度] - [指标]
-→ 完整摘要: [[50_资源/产品发布/YYYY-MM-DD-Digest|今日产品发布摘要]]
+**AI 摘要:**（来自昨日日记 News sources 拉取结果）
+- [标题或摘要](原文链接) - [一句话角度]
+- …
 
 ---
 
@@ -147,10 +139,19 @@ Output a concise summary in Chinese:
 - **Flag stale projects** - Projects not touched in 3+ days
 - **Carryover incomplete tasks** - Unchecked items from yesterday
 - **Don't overwrite** - If today's note exists, update it carefully
+- **Always add ## News sources if missing** - Even when the note already existed; use default list from `99_系统/模板/News_sources_default.md` so the next run can fetch from it.
 - **Use the template format** - Consistent daily note structure
 - **Link everything** - Projects and concepts as wikilinks
 - **Capture new ideas immediately** - Create inbox items from Q2 answers
 - **Keep it fast** - Minimize back-and-forth, get user started quickly
+
+# FETCH SCRIPT & ALTERNATIVES TO CURL
+
+- **Script**: `scripts/fetch_news_sources.sh` (macOS/Linux) and `scripts/fetch_news_sources.ps1` (Windows) read a diary's ## News sources, then fetch each URL with timeout and retries. **Curl** is used for maximum portability; alternatives if you extend the script:
+  - **wget**: `wget -q -O - --timeout=30` (same portability as curl on many systems).
+  - **Python httpx/requests**: better for parsing HTML/XML in-process; e.g. `httpx.get(url, timeout=30, follow_redirects=True)`.
+  - **Node fetch**: if the stack is Node-based, `fetch(url, { signal: AbortSignal.timeout(30000) })` is consistent with the rest of the toolchain.
+- Prefer the provided curl-based script for stability and no extra runtime; add wrappers for Python/Node only if you need richer parsing in the same process.
 
 # EDGE CASES
 

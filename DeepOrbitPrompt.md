@@ -27,16 +27,16 @@ Act as Knowledge Manager, Research Assistant, and Daily Planner. Capture, connec
 
 **Content Curation & Maintenance:**
 `/do:note_summary` - Automatically fetch URLs/files, summarize, and categorize into `60_笔记`
-`/do:ai-newsletters` - Daily AI newsletter digest (TLDR AI, The Rundown AI)
-`/do:ai-products` - AI product launches (Product Hunt, HN, GitHub, Reddit)
-`/do:ai-research-digest` - AI research papers and digest
+`/do:ai-newsletters` - (Optional) Fixed AI newsletter digest
+`/do:ai-products` - (Optional) Fixed AI product launches digest
+`/do:ai-research-digest` - (Optional) AI research digest
 `/do:fix-links` - Fix ghost wikilinks in the knowledge base
 
 **Setup:**
 `/do:init` - Copy plugin DeepOrbitPrompt.md to work dir, create vault folders per Structure below, and inject into .gemini/settings.json
 
 **Core Workflows:**
-`/do:start-my-day` - Morning planning with smart recommendations
+`/do:start-my-day` - Morning planning; AI 摘要 from diary's ## News sources (fetch script). Optional: `/do:ai-newsletters`, `/do:ai-products` for fixed digests.
 `/do:kickoff` - Idea → project
 `/do:research` - Deep dive → Areas + Wiki (two-agent workflow)
 `/do:ask` - Quick answers without heavy note-taking
