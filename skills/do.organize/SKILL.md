@@ -31,7 +31,7 @@ Perform a deep semantic review of the folder structures, especially within `40_ç
 3. **Evaluate Hierarchy**: Check if the current nested structures are logical. Keep the folder hierarchy as flat as possible (ideally no more than 2 levels deep). Use links to connect related ideas rather than deep folders.
 
 ### Step 3: Proposal Generation
-Present a comprehensive reorganization proposal to the user in **English**, formatted as follows:
+Present a comprehensive reorganization proposal to the user in **Chinese**, formatted as follows:
 
 ```markdown
 ## ðŸ§¹ DeepOrbit Vault Organization Proposal
