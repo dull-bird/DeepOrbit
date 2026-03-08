@@ -25,12 +25,20 @@ Before completing today's plan, you must run a quick **Knowledge Recap** for the
 
 ---
 
-# 3. News (strict order — every URL gets a summary)
+# 3. Ask user (interactive panel)
 
-**3.1 URLs**
+1. "今天的主要目标是什么?" (active projects + 其他)
+2. "有什么新想法或任务吗?"
+3. "有什么阻碍或顾虑吗?"
+
+---
+
+# 4. News (strict order — every URL gets a summary)
+
+**4.1 URLs**
 From the most recent daily note, read **## News sources** (one URL per line). If missing or empty, use `99_系统/模板/News_sources_default.md`.
 
-**3.2 Fetch (Force Script)**
+**4.2 Fetch (Force Script)**
 Create folder `50_资源/新闻/YYYY-MM-DD/raw/` (today's date).
 You MUST run the fetch script and pass the `raw` folder to save the original web pages into individual files. **Do NOT use `web_fetch` or search tools. Only use the script.**
 
@@ -42,7 +50,7 @@ Use the `glob` tool or `find` command to locate `fetch_news_sources.sh` (or `.ps
 - Windows: `powershell <PATH_TO_SCRIPT>\fetch_news_sources.ps1 "10_日记\[most-recent-date].md" "50_资源/新闻/YYYY-MM-DD/raw"`
 The script will output the mapping of URLs to the saved raw files.
 
-**3.3 Per-site summary (STRICT SEQUENTIAL LOOP REQUIRED)**
+**4.3 Per-site summary (STRICT SEQUENTIAL LOOP REQUIRED)**
 Create folder `50_资源/新闻/YYYY-MM-DD/` (today’s date). You MUST process the URLs using a strict sequential loop. Do NOT read or process multiple raw files simultaneously.
 
 For **each** URL, you must complete this exact cycle BEFORE moving to the next URL:
@@ -54,16 +62,8 @@ For **each** URL, you must complete this exact cycle BEFORE moving to the next U
 
 You must completely finish steps 1-5 and save the file for the first URL, and only then proceed to step 1 for the second URL. Repeat this until all URLs are processed. Do not skip any URL.
 
-**3.4 Unified summary for the diary**
+**4.4 Unified summary for the diary**
 After all per-site files are written, write the daily note’s **新闻摘要** section: for **each** source, include 2–3 highlights (or link to `[[50_资源/新闻/YYYY-MM-DD/xxx]]`). Every site must appear; no random subset. Ensure links here also point to specific articles where applicable.
-
----
-
-# 4. Ask user (short)
-
-1. "今天的主要目标是什么?" (active projects + 其他)
-2. "有什么新想法或任务吗?"
-3. "有什么阻碍或顾虑吗?"
 
 ---
 
