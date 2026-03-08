@@ -21,20 +21,32 @@ You are the Daily Planner. Review the **most recent daily note** (latest `10_日
 **2.1 URLs**
 From the most recent daily note, read **## News sources** (one URL per line). If missing or empty, use `99_系统/模板/News_sources_default.md`.
 
-**2.2 Fetch**Run the fetch script (every URL must be requested):
+**2.2 Fetch (Force Script)**
+Create folder `50_资源/新闻/YYYY-MM-DD/raw/` (today's date).
+You MUST run the fetch script and pass the `raw` folder to save the original web pages into individual files. **Do NOT use `web_fetch` or search tools. Only use the script.**
 
-- Unix: `bash scripts/fetch_news_sources.sh "10_日记/[most-recent-date].md"`
-- Windows: `.\scripts\fetch_news_sources.ps1 "10_日记\[most-recent-date].md"`
-  Save stdout to a temp file or keep in context. The script outputs blocks `=== URL ===` then raw content; match each URL to its block.
+**CRITICAL: Locate the script first!**
+Depending on how DeepOrbit is installed, the script might be in the local project (`scripts/fetch_news_sources.sh`) OR in the Gemini extension folder (e.g., `~/.gemini/extensions/deeporbit/scripts/fetch_news_sources.sh`). 
+Use the `glob` tool or `find` command to locate `fetch_news_sources.sh` (or `.ps1` for Windows) before executing it.
 
-**2.3 Per-site summary (required for every URL)**Create folder `50_资源/新闻/YYYY-MM-DD/` (today’s date). For **each** URL in the list, in order:
+- Unix: `bash <PATH_TO_SCRIPT>/fetch_news_sources.sh "10_日记/[most-recent-date].md" "50_资源/新闻/YYYY-MM-DD/raw"`
+- Windows: `powershell <PATH_TO_SCRIPT>\fetch_news_sources.ps1 "10_日记\[most-recent-date].md" "50_资源/新闻/YYYY-MM-DD/raw"`
+The script will output the mapping of URLs to the saved raw files.
 
-- Write one file: `50_资源/新闻/YYYY-MM-DD/[label].md`. Use a short label from the URL (e.g. domain: `jiqizhixin`, `tldr-ai`, or `01`, `02`).
-- Content: 4–6 bullet points summarizing that site’s fetched content; each item `[标题](原文链接)` and one line of summary. If fetch failed for that URL, write that in the file.
-- Do not skip any URL: same number of files as URLs.
+**2.3 Per-site summary (STRICT SEQUENTIAL LOOP REQUIRED)**
+Create folder `50_资源/新闻/YYYY-MM-DD/` (today’s date). You MUST process the URLs using a strict sequential loop. Do NOT read or process multiple raw files simultaneously.
+
+For **each** URL, you must complete this exact cycle BEFORE moving to the next URL:
+1. **READ**: Use the `read_file` tool to read *only* the single corresponding raw file from the `raw/` folder.
+2. **VERIFY (Anti-Hallucination)**: Evaluate the raw file content. If it contains errors ("fetch failed", "Access Denied", Cloudflare blocks) or lacks recognizable article data, your summary MUST be EXACTLY: "获取失败或内容无效". **DO NOT hallucinate, guess, or use external knowledge.**
+3. **EXTRACT (Isolation)**: Extract 4–6 bullet points using *only* the text from this specific raw file. Do not mix in news from other files.
+4. **FORMAT**: Format each point as `[具体文章标题](具体文章的URL链接)` + one line of summary. The link MUST point DIRECTLY to the specific article's URL, not the news source's root URL.
+5. **WRITE**: Write the summary to `50_资源/新闻/YYYY-MM-DD/[label].md` (use a short domain label, e.g., `jiqizhixin`).
+
+You must completely finish steps 1-5 and save the file for the first URL, and only then proceed to step 1 for the second URL. Repeat this until all URLs are processed. Do not skip any URL.
 
 **2.4 Unified summary for the diary**
-After all per-site files are written, write the daily note’s **新闻摘要** section: for **each** source, include 2–3 highlights (or link to `[[50_资源/新闻/YYYY-MM-DD/xxx]]`). Every site must appear; no random subset.
+After all per-site files are written, write the daily note’s **新闻摘要** section: for **each** source, include 2–3 highlights (or link to `[[50_资源/新闻/YYYY-MM-DD/xxx]]`). Every site must appear; no random subset. Ensure links here also point to specific articles where applicable.
 
 ---
 
@@ -54,7 +66,7 @@ After all per-site files are written, write the daily note’s **新闻摘要** 
   - **待办事项**: Carryover from most recent note + user focus + project next actions.
   - **日志**: Leave empty.
   - **备注**: Time-sensitive items, stale projects, inbox count.
-  - **新闻摘要**: The unified summary from 2.4 (every site covered).
+  - **新闻摘要**: The unified summary from 2.4 (every site covered, links point to specific articles).
   - **相关项目**: Active projects with status.
 
 ---
@@ -67,7 +79,7 @@ For each new idea: if new, create `00_收件箱/[Brief-Title].md` with frontmatt
 
 # 6. Present (Chinese)
 
-Short summary: 今日笔记, 待办列表, 进行中项目, 收件箱数, **新闻摘要** (each source 1–2 lines or link to `50_资源/新闻/YYYY-MM-DD`), 快捷操作 `/do:kickoff` `/do:research`.
+Short summary: 今日笔记, 待办列表, 进行中项目, 收件箱数, **新闻摘要** (each source 1–2 lines with specific article links or link to `50_资源/新闻/YYYY-MM-DD`), 快捷操作 `/do:kickoff` `/do:research`.
 
 ---
 
