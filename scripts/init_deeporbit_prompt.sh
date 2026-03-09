@@ -50,8 +50,15 @@ DIR_SYSTEM="99_System"
 
 VAULT_DIRS="$DIR_INBOX $DIR_DIARY $DIR_PROJECTS $DIR_RESEARCH $DIR_WIKI $DIR_RESOURCES $DIR_NOTES $DIR_PLANS $DIR_SYSTEM"
 for d in $VAULT_DIRS; do mkdir -p "$DEST/$d"; done
-mkdir -p "$DEST/$DIR_RESOURCES/Newsletters" "$DEST/$DIR_RESOURCES/产品发布" "$DEST/$DIR_RESOURCES/新闻"
-mkdir -p "$DEST/$DIR_SYSTEM/模板" "$DEST/$DIR_SYSTEM/提示词" "$DEST/$DIR_SYSTEM/归档"
+
+# Rename existing localized folders to English equivalents if they exist
+[ -d "$DEST/$DIR_RESOURCES/产品发布" ] && mv "$DEST/$DIR_RESOURCES/产品发布" "$DEST/$DIR_RESOURCES/Product_Launches"
+[ -d "$DEST/$DIR_RESOURCES/新闻" ] && mv "$DEST/$DIR_RESOURCES/新闻" "$DEST/$DIR_RESOURCES/News"
+[ -d "$DEST/$DIR_SYSTEM/提示词" ] && mv "$DEST/$DIR_SYSTEM/提示词" "$DEST/$DIR_SYSTEM/Prompts"
+[ -d "$DEST/$DIR_SYSTEM/归档" ] && mv "$DEST/$DIR_SYSTEM/归档" "$DEST/$DIR_SYSTEM/Archive"
+
+mkdir -p "$DEST/$DIR_RESOURCES/Newsletters" "$DEST/$DIR_RESOURCES/Product_Launches" "$DEST/$DIR_RESOURCES/News"
+mkdir -p "$DEST/$DIR_SYSTEM/Templates" "$DEST/$DIR_SYSTEM/Prompts" "$DEST/$DIR_SYSTEM/Archive"
 echo "Created vault folders based on configuration."
 
 # 4. Copy plugin system contents into DEST/$DIR_SYSTEM (even if it already exists — overlay)

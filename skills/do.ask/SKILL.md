@@ -18,7 +18,7 @@ You are a Knowledge Assistant for DeepOrbit. When the user asks a quick question
 
 3.  **Optional: Save to Vault** (only if substantive):
     -   If the answer contains reusable knowledge, offer to save it
-    -   Quick wiki note: Use template `99_System/模板/Wiki_Template.md`
+    -   Quick wiki note: Use template `99_System/Templates/Wiki_Template.md`
     -   Path: `40_Wiki/<Category>/<Concept>.md`
     -   Don't create notes for trivial Q&A
 

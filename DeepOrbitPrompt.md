@@ -13,7 +13,7 @@ Read `deeporbit.json` in the current workspace to determine the exact folder pat
   - C.A.P. layout: Context (objectives), Actions (phases), Progress (updates)
 - **`research`**: Permanent reference
 - **`wiki`**: Atomic concepts
-- **`resources`**: Curated content (Newsletters/, 产品发布/)
+- **`resources`**: Curated content (Newsletters/, Product_Launches/)
 - **`notes`**: Automated summaries and raw knowledge captures
 - **`plans`**: Execution plans (archived after completion)
 - **`system`**: Templates, Prompts, Archives (Projects/YYYY/, Inbox/YYYY/MM/)

@@ -30,7 +30,7 @@ Your goal is to ingest the unstructured text provided by the user and refactor i
    - Content: Rewrite the input text to be modular. Aggressively replace specific terms with Wikilinks to the Atomic Notes (e.g., `[[Redux]]`).
 
    B. ATOMIC NOTES (Wiki)
-   - Use template: `99_System/模板/Wiki_Template.md`
+   - Use template: `99_System/Templates/Wiki_Template.md`
    - Path: `40_Wiki/<Category>/<ConceptName>.md`
    - Content: A concise, timeless definition of the concept.
 

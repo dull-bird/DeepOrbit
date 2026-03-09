@@ -52,7 +52,27 @@ $DirSystem = "99_System"
 
 $vaultDirs = @($DirInbox, $DirDiary, $DirProjects, $DirResearch, $DirWiki, $DirResources, $DirNotes, $DirPlans, $DirSystem)
 foreach ($d in $vaultDirs) { New-Item -ItemType Directory -Path (Join-Path $DestDir $d) -Force | Out-Null }
-@("$DirResources\Newsletters", "$DirResources\产品发布", "$DirResources\新闻", "$DirSystem\模板", "$DirSystem\提示词", "$DirSystem\归档") | ForEach-Object {
+
+# Rename existing localized folders to English equivalents if they exist
+$renameMap = @{
+  "$DirResources\产品发布" = "$DirResources\Product_Launches"
+  "$DirResources\新闻" = "$DirResources\News"
+  "$DirSystem\提示词" = "$DirSystem\Prompts"
+  "$DirSystem\归档" = "$DirSystem\Archive"
+}
+
+foreach ($oldName in $renameMap.Keys) {
+  $oldPath = Join-Path $DestDir $oldName
+  $newName = $renameMap[$oldName]
+  $newPath = Join-Path $DestDir $newName
+  if (Test-Path $oldPath) {
+    # If the new path already exists for some reason, we might want to move contents or just let it fail.
+    # We will use Rename-Item. Rename-Item expects just the new name, not the full path.
+    Rename-Item -Path $oldPath -NewName (Split-Path $newPath -Leaf) -Force
+  }
+}
+
+@("$DirResources\Newsletters", "$DirResources\Product_Launches", "$DirResources\News", "$DirSystem\Templates", "$DirSystem\Prompts", "$DirSystem\Archive") | ForEach-Object {
   New-Item -ItemType Directory -Path (Join-Path $DestDir $_) -Force | Out-Null
 }
 Write-Host "Created vault folders."

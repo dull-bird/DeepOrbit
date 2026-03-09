@@ -1,4 +1,4 @@
-# Newsletter 摘要模板
+# Newsletter 摘要Templates
 
 ## Frontmatter
 
