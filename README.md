@@ -16,7 +16,7 @@ DeepOrbit turns your [Obsidian](https://obsidian.md/) vault into an AI-powered r
 ## How It Works
 
 ```mermaid
-flowchart LR
+flowchart TD
     A["🧠 You"] -->|ideas, URLs, PDFs| B["⚙️ DeepOrbit Agent"]
     B -->|selects skill| C["🧩 Skill Pack"]
     C -->|writes notes| D["📂 Obsidian Vault"]
@@ -179,7 +179,7 @@ flowchart TD
 ### 💡 Idea → Project
 
 ```mermaid
-flowchart LR
+flowchart TD
     A["Idea in 00_Inbox"] -->|"/do:kickoff"| B["Planning Agent<br/>creates plan in 90_Plans/"]
     B -->|"User reviews"| C["Execution Agent<br/>creates project in 20_Projects/"]
     C --> D["Inbox item archived to 99_System/Archive/"]
@@ -188,7 +188,7 @@ flowchart LR
 ### 📄 Academic Paper Pipeline
 
 ```mermaid
-flowchart LR
+flowchart TD
     A["arXiv URL or PDF"] --> B{Format?}
     B -->|arXiv| C["/do:arxiv-translator<br/>Download + Translate + Compile"]
     B -->|PDF| D["/do:marker<br/>PDF → Markdown"]
