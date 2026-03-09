@@ -7,7 +7,7 @@ DeepOrbit stands on the shoulders of giants. Some of the amazing skills included
 The following core workflow skills and the overall vault structural philosophy are heavily inspired by and adapted from **[DeepOrbit by MarsWang42](https://github.com/MarsWang42/DeepOrbit)**:
 
 - `kickoff`
-- `start-my-day`
+- `daily`
 - `research`
 - `parse-knowledge`
 - `archive`

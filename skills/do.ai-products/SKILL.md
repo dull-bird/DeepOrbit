@@ -1,6 +1,6 @@
 ---
 name: do.ai-products
-description: Curate AI product launches from Product Hunt, Hacker News, GitHub, and Techmeme. Use when user invokes /do:ai-products or when /do:start-my-day needs product launches.
+description: Curate AI product launches from Product Hunt, Hacker News, GitHub, and Techmeme. Use when user invokes /do:ai-products or when /do:daily needs product launches.
 ---
 # AI Product Discovery
 
@@ -48,7 +48,7 @@ Fetch, deduplicate, and rank AI product launches from multiple sources.
 
 **Manual invocation**: Full digest with all sections. Make sure all `.md` files are saved.
 
-**From /do:start-my-day**: Display full digest with all sections. Make sure all `.md` files are saved. Then return a condensed list:
+**From /do:daily**: Display full digest with all sections. Make sure all `.md` files are saved. Then return a condensed list:
 ```
 **产品发布 (5):**
 - [产品名] - [内容角度] - [关键指标]

@@ -82,7 +82,7 @@ DeepOrbit offers a powerful suite of over 20 pre-configured AI Agent Skills loca
 
 ### ⚙️ Core Workflows (Project Management)
 - **`/do:kickoff`**: Instantly convert an inbox idea into a structured, active Project folder.
-- **`/do:start-my-day`` / `/do:daily`**: Guided morning planning workflows to review diaries, fetch news, and align tasks.
+- **`/do:daily`` / `/do:daily`**: Guided morning planning workflows to review diaries, fetch news, and align tasks.
 - **`/do:research`**: Deep dive into any topic with a two-agent architecture outputting structured Wiki entries.
 - **`/do:parse-knowledge`**: Consolidates unstructured text blobs into your vault's framework.
 - **`/do:brainstorm` / `/do:ask`**: Collaborate with your AI assistant on ideas or ask quick questions without heavy note-taking.

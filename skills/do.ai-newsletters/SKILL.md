@@ -1,6 +1,6 @@
 ---
 name: do.ai-newsletters
-description: Curate AI newsletter content with smart deduplication and ranking. Use when user invokes /do:ai-newsletters or when /do:start-my-day needs newsletter content.
+description: Curate AI newsletter content with smart deduplication and ranking. Use when user invokes /do:ai-newsletters or when /do:daily needs newsletter content.
 ---
 
 # AI Newsletter Curation
@@ -38,7 +38,7 @@ Fetch, deduplicate, and rank AI newsletter content into a daily digest.
 
 **Manual invocation**: Display full digest with all sections. Make sure all `.md` files are saved.
 
-**From /do:start-my-day**: Display full digest with all sections. Make sure all `.md` files are saved. Then return a condensed list:
+**From /do:daily**: Display full digest with all sections. Make sure all `.md` files are saved. Then return a condensed list:
 
 ```
 **AI 新闻 (5):**

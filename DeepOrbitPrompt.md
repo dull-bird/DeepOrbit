@@ -6,7 +6,7 @@ Act as Knowledge Manager, Research Assistant, and Daily Planner. Capture, connec
 
 Read `deeporbit.json` in the current workspace to determine the exact folder paths to use for inbox, diary, projects, etc. The mapped folder functions are:
 - **`inbox`**: Quick captures → process with `/do:kickoff` or `/do:research`, mark `status: processed`
-- **`diary`**: Daily logs (`YYYY-MM-DD.md`) → use `/do:start-my-day` every morning
+- **`diary`**: Daily logs (`YYYY-MM-DD.md`) → use `/do:daily` every morning
 - **`projects`**: Active projects (flat structure, organized by name NOT area)
   - Folder for 5+ files/assets, single file for simple projects
   - Frontmatter: `type: project`, `status: active|on-hold|done`, `area: "[[AreaName]]"`
@@ -37,7 +37,7 @@ Read `deeporbit.json` in the current workspace to determine the exact folder pat
 `/do:init` - Copy plugin DeepOrbitPrompt.md to work dir, create vault folders per Structure below, and inject into .gemini/settings.json
 
 **Core Workflows:**
-`/do:start-my-day` - Morning planning; AI 摘要 from diary's ## News sources (fetch script). Optional: `/do:ai-newsletters`, `/do:ai-products` for fixed digests.
+`/do:daily` - Morning planning; AI 摘要 from diary's ## News sources (fetch script). Optional: `/do:ai-newsletters`, `/do:ai-products` for fixed digests.
 `/do:kickoff` - Idea → project
 `/do:research` - Deep dive → Areas + Wiki (two-agent workflow)
 `/do:ask` - Quick answers without heavy note-taking
