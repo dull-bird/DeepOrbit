@@ -26,7 +26,7 @@ $DestFile = Join-Path $DestDir "DeepOrbitPrompt.md"
 Copy-Item -Path $Source -Destination $DestFile -Force
 Write-Host "Copied prompt to: $DestFile"
 
-# 2.5 Copy deeporbit.json
+# 2.5 Copy deeporbit.json context file
 $ConfigSource = $null
 if (Test-Path (Join-Path $RepoRoot "deeporbit.json")) { $ConfigSource = Join-Path $RepoRoot "deeporbit.json" }
 if (-not $ConfigSource -and (Test-Path (Join-Path $ExtensionDir "deeporbit.json"))) { $ConfigSource = Join-Path $ExtensionDir "deeporbit.json" }
@@ -35,40 +35,37 @@ if ($ConfigSource) {
   $DestConfig = Join-Path $DestDir "deeporbit.json"
   Copy-Item -Path $ConfigSource -Destination $DestConfig -Force
   Write-Host "Copied configuration to: $DestConfig"
-  $configJson = Get-Content -Path $DestConfig -Raw -Encoding UTF8 | ConvertFrom-Json
 } else {
-  Write-Warning "deeporbit.json not found in $RepoRoot or $ExtensionDir. Using fallback defaults."
-  $configJson = [PSCustomObject]@{
-    folder_mapping = [PSCustomObject]@{
-      inbox = "00_收件箱"
-      diary = "10_日记"
-      projects = "20_项目"
-      research = "30_研究"
-      wiki = "40_知识库"
-      resources = "50_资源"
-      notes = "60_笔记"
-      plans = "90_计划"
-      system = "99_系统"
-    }
-  }
+  New-Item -ItemType File -Path (Join-Path $DestDir "deeporbit.json") -Force | Out-Null
 }
 
-# 3. Create folder structure per deeporbit.json "folder_mapping"
-$m = $configJson.folder_mapping
-$vaultDirs = @($m.inbox, $m.diary, $m.projects, $m.research, $m.wiki, $m.resources, $m.notes, $m.plans, $m.system)
+# 3. Create folder structure
+$DirInbox = "00_Inbox"
+$DirDiary = "10_Diary"
+$DirProjects = "20_Projects"
+$DirResearch = "30_Research"
+$DirWiki = "40_Wiki"
+$DirResources = "50_Resources"
+$DirNotes = "60_Notes"
+$DirPlans = "90_Plans"
+$DirSystem = "99_System"
+
+$vaultDirs = @($DirInbox, $DirDiary, $DirProjects, $DirResearch, $DirWiki, $DirResources, $DirNotes, $DirPlans, $DirSystem)
 foreach ($d in $vaultDirs) { New-Item -ItemType Directory -Path (Join-Path $DestDir $d) -Force | Out-Null }
-@("$($m.resources)\Newsletters", "$($m.resources)\产品发布", "$($m.resources)\新闻", "$($m.system)\模板", "$($m.system)\提示词", "$($m.system)\归档") | ForEach-Object {
+@("$DirResources\Newsletters", "$DirResources\产品发布", "$DirResources\新闻", "$DirSystem\模板", "$DirSystem\提示词", "$DirSystem\归档") | ForEach-Object {
   New-Item -ItemType Directory -Path (Join-Path $DestDir $_) -Force | Out-Null
 }
-Write-Host "Created vault folders based on configuration."
+Write-Host "Created vault folders."
 
-# 4. Copy plugin 99_系统 contents into DEST\system_folder (even if it already exists — overlay)
+# 4. Copy plugin system contents into DEST\system_folder (even if it already exists — overlay)
 $PluginRoot = Split-Path -Parent $Source
-$Sys99Source = Join-Path $PluginRoot "99_系统"
-if (Test-Path $Sys99Source) {
-  $Sys99Dest = Join-Path $DestDir $m.system
-  Get-ChildItem -Path $Sys99Source -Force | Copy-Item -Destination $Sys99Dest -Recurse -Force
-  Write-Host "Copied $Sys99Source contents (templates, etc.) from plugin into $Sys99Dest"
+$PluginSysName = "99_System"
+
+$SysSource = Join-Path $PluginRoot $PluginSysName
+if (Test-Path $SysSource) {
+  $SysDest = Join-Path $DestDir $DirSystem
+  Get-ChildItem -Path $SysSource -Force | Copy-Item -Destination $SysDest -Recurse -Force
+  Write-Host "Copied $SysSource contents (templates, etc.) from plugin into $SysDest"
 }
 
 # 5. Inject DEST\.gemini\settings.json (project-level); create dir if needed

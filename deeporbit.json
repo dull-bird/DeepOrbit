@@ -1,14 +1,3 @@
 {
-  "language": "en",
-  "folder_mapping": {
-    "inbox": "00_Inbox",
-    "diary": "10_Diary",
-    "projects": "20_Projects",
-    "research": "30_Research",
-    "wiki": "40_Wiki",
-    "resources": "50_Resources",
-    "notes": "60_Notes",
-    "plans": "90_Plans",
-    "system": "99_System"
-  }
+  "language": "zh-CN"
 }

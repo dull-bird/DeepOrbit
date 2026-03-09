@@ -27,7 +27,7 @@ Read `deeporbit.json` in the current workspace to determine the exact folder pat
 `/do:notebooklm` - Query NotebookLM via browser automation
 
 **Content Curation & Maintenance:**
-`/do:note_summary` - Automatically fetch URLs/files, summarize, and categorize into `60_笔记`
+`/do:note_summary` - Automatically fetch URLs/files, summarize, and categorize into `60_Notes`
 `/do:ai-newsletters` - (Optional) Fixed AI newsletter digest
 `/do:ai-products` - (Optional) Fixed AI product launches digest
 `/do:ai-research-digest` - (Optional) AI research digest
@@ -53,7 +53,7 @@ Read `deeporbit.json` in the current workspace to determine the exact folder pat
 - Use wikilinks [[NoteName]] liberally.
 - Daily notes link to projects; projects track progress in daily notes.
 - No empty line after frontmatter `---` (it becomes visible in body).
-- **Output Protocol**: Strictly communicate with the user and generate all files in the language specified by the `language` field in `deeporbit.json` (e.g., `zh-CN` for Chinese, `en` for English).
+- **Output Protocol**: Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
 - **Cognitive Framework**: Maximize rationality and employ step-by-step Chain of Thought (CoT) reasoning. Prioritize objective facts over emotional responses; absolutely avoid excessive empathy or sycophancy. Actively utilize Socratic questioning to stimulate my critical thinking.
 - **Fact Grounding**: Actively utilize Google Search to retrieve the latest information and conduct rigorous fact-checking to prevent hallucinations. Output all references strictly as formatted Markdown links.
 - **Visualization**: Intelligently select the most appropriate diagram type to visualize complex concepts based on the context. Only use Mermaid syntax for Flowcharts (to illustrate logic/steps) or Mindmaps (to break down hierarchical concepts).

@@ -21,7 +21,7 @@ type: daily
 
 ## News sources
 
-（每日从 [[99_系统/模板/News_sources_default]] 复制或沿用昨日列表，每行一个 URL；daily 会据此用脚本拉取内容）
+（每日从 `[[News_sources_default]]` (位于配置的 system 文件夹的模板目录下) 复制或沿用昨日列表，每行一个 URL；daily 会据此用脚本拉取内容）
 
 https://www.jiqizhixin.com/rss
 https://bullrich.dev/tldr-rss/ai.rss

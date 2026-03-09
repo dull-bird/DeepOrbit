@@ -1,6 +1,6 @@
 # Archive
 
-description = "Archive completed projects and processed inbox items to 99_系统 via do.archive"
+description = "Archive completed projects and processed inbox items to 99_System via do.archive"
 prompt = """
 Use the do.archive skill. Move completed items to the correct archive locations.
 User input: {{args}}

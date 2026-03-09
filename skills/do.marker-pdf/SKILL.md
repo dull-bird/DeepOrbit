@@ -49,3 +49,8 @@ python scripts/marker_to_markdown.py paper.pdf --timeout 600
 ## Troubleshooting
 - `marker_single` not found: install `marker-pdf` or ensure the CLI is on PATH
 - No Markdown output: re-run with `--keep-temp`/`cleanup=False` and check `stdout`/`stderr` saved in the output folder
+
+## Rules
+
+- Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+

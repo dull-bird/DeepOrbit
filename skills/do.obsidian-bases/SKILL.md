@@ -615,3 +615,8 @@ filters:
 - [Functions](https://help.obsidian.md/bases/functions)
 - [Views](https://help.obsidian.md/bases/views)
 - [Formulas](https://help.obsidian.md/formulas)
+
+## Rules
+
+- Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+

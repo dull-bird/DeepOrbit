@@ -14,13 +14,13 @@ Your goal is to ingest the unstructured text provided by the user and refactor i
 1. ANALYZE
    - Identify the primary "Area" (e.g., SoftwareEngineering).
    - Create a slug for the main Topic (e.g., `ReactStatePatterns`).
-   - Extract "Atomic Concepts" that deserve their own definition in `[wiki_folder]` (e.g., `Redux`, `ContextAPI`).
+   - Extract "Atomic Concepts" that deserve their own definition in `40_Wiki` (e.g., `Redux`, `ContextAPI`).
 
 2. GENERATE FILES
    You must generate the content for the files. Use strict YAML frontmatter.
 
    A. THE MAIN NOTE
-   - Path: `[research_folder]/<Area>/<Topic>/<Topic>.md`
+   - Path: `30_Research/<Area>/<Topic>/<Topic>.md`
    - ## Frontmatter:
      created: <CURRENT_DATE>
      type: reference
@@ -30,18 +30,18 @@ Your goal is to ingest the unstructured text provided by the user and refactor i
    - Content: Rewrite the input text to be modular. Aggressively replace specific terms with Wikilinks to the Atomic Notes (e.g., `[[Redux]]`).
 
    B. ATOMIC NOTES (Wiki)
-   - Use template: `[system_folder]/模板/Wiki_Template.md`
-   - Path: `[wiki_folder]/<Category>/<ConceptName>.md`
+   - Use template: `99_System/模板/Wiki_Template.md`
+   - Path: `40_Wiki/<Category>/<ConceptName>.md`
    - Content: A concise, timeless definition of the concept.
 
 # OUTPUT FORMAT
 
-When done, report back in Chinese:
+When done, report back with the following structure:
 
 ```
 ## 知识整理完成
 
-**主笔记:** [[Topic]] 位于 [research_folder]/<Area>/
+**主笔记:** [[Topic]] 位于 30_Research/<Area>/
 
 **已创建知识库条目:**
 - [[Concept1]] - 简要描述
@@ -51,3 +51,8 @@ When done, report back in Chinese:
 - 主笔记链接到 N 个知识库概念
 - 建立了 M 个概念间的交叉引用
 ```
+
+## Rules
+
+- Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+

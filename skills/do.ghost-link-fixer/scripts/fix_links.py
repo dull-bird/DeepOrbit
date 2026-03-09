@@ -4,8 +4,8 @@ from datetime import datetime
 
 # 配置
 VAULT_ROOT = os.getcwd()
-KB_PATH = os.path.join(VAULT_ROOT, "[wiki_folder]")
-TEMPLATE_PATH = os.path.join(VAULT_ROOT, "[system_folder]", "模板", "Wiki_Template.md")
+KB_PATH = os.path.join(VAULT_ROOT, "40_Wiki")
+TEMPLATE_PATH = os.path.join(VAULT_ROOT, "99_System", "模板", "Wiki_Template.md")
 
 def get_all_md_files():
     md_files = []

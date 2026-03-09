@@ -102,15 +102,15 @@ DeepOrbit offers a powerful suite of over 20 pre-configured AI Agent Skills loca
    ```bash
    git clone https://github.com/dull-bird/DeepOrbit.git
    ```
-3. **Global Configuration**:
-   - Locate `deeporbit.json` in the project root. This file controls your core preferences:
-     - `language`: Sets the AI's default language (e.g., `zh-CN`, `en`).
-     - `folder_mapping`: Defines what Obsidian folders correspond to (e.g., inbox, diary, projects, wiki). All AI skills dynamically read from these locations.
-4. **Init prompt in a vault**:
+3. **Init prompt in a vault**:
    In your Obsidian vault (or any workspace), run `/do:init` using the scripts found in `scripts/`.
    - Windows: `scripts\init_deeporbit_prompt.ps1`
    - Linux/macOS: `scripts/init_deeporbit_prompt.sh`
-   This script reads `deeporbit.json`, copies `DeepOrbitPrompt.md` to your workspace, sets up all necessary Obsidian folders, and injects context into `.gemini/settings.json`.
+   This script copies `DeepOrbitPrompt.md` and a configuration file `deeporbit.json` to your workspace, sets up all necessary Obsidian folders, and injects context into `.gemini/settings.json`.
+
+4. **Global Configuration (Language Preference)**:
+   - Within your initialized workspace, locate `deeporbit.json`. 
+   - You can modify the `"language"` value (e.g., `"zh-CN"`, `"en"`). The DeepOrbit AI will read this file and generate all Markdown interactions and file contents in your chosen language. *Note: For maximum system stability, the physical Obsidian folder paths (like `10_Diary`) will always deliberately remain in English.*
 
 5. **Load Skills**:
    In your CLI configuration file (`AGENTS.md`), point the skill locations to the cloned `skills` directory. Commands are invoked as `/do:<command_name>`.

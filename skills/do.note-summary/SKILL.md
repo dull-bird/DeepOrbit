@@ -1,136 +1,136 @@
 ---
 name: do.note_summary
-description: 自动识别网页URL、本地文件或内容名称，强制获取全文后进行结构化总结，识别分类，并规范归档到[notes_folder]。
+description: Automatically identifies web URLs, local files, or content names, strictly fetches the full text, then performs structured summarization, categorizes, and archives it according to standard practices into 60_Notes.
 ---
 
 # Note Summary Skill
 
-## 目标 (Objective)
+## Objective
 
-当用户调用 `/do:note_summary <URL或文件路径或内容名称>` 命令时，能够自动提取目标内容的**完整核心信息**，进行结构化总结，识别分类，并严格按照双链规范归档至 DeepOrbit 系统的 `[notes_folder]` 文件夹中。
+When a user invokes the `/do:note_summary <URL or File Path or Content Name>` command, the system should automatically extract the **complete core information** of the target content, perform structured summarization, identify its category, and strictly archive it according to double-linking standards into the `60_Notes` folder of the DeepOrbit system.
 
-## 工作流 (Workflow)
+## Workflow
 
-### 1. 强制全文获取与解析 (Strict Content Fetching)
+### 1. Strict Content Fetching
 
-前置原则：绝对禁止仅凭网页摘要、标题或元数据进行内容总结。必须获取底层最原始的内容载体（PDF全文、完整字幕文件或原始文本）。
+**Prerequisite Principle:** It is absolutely forbidden to summarize content based solely on web abstracts, titles, or metadata. The system must obtain the underlying, most original content carrier (full PDF, complete subtitle file, or raw text).
 
-1. 目标类型：URL 链接
-   拦截与校验：解析 URL 结构。
-   如果是论文，执行 "2." 中的论文相关步骤
-   如果是音视频，执行 "3." 中的音视频相关步骤
+1.  **Target Type: URL Link**
+    Interception and Validation: Parse the URL structure.
+    If it's a research paper, execute the paper-related steps in "2."
+    If it's an audio/video, execute the audio/video-related steps in "3."
 
-2. 目标类型：论文名称 / 主题
-   第一步：确权与映射：调用 Google 搜索进行事实核查，明确 Title 到 Document ID/URL 的唯一映射关系。
-   第二步：ArXiv 溯源法则：优先访问 /abs/ 页面核实论文元数据，随后由系统手动构造并跳转至 /pdf/ 下载页，禁止直接盲猜 PDF 链接。
-   第三步：质量校验（计算机视觉类特控）：获取 PDF 后检查文件体积。若属于 CV 类论文且体积 < 1MB，触发异常警报，强制重新校验链接有效性。
-   异常处理：若经过两次深度重试仍只获取到摘要文本，必须在最终输出的最顶部强制插入以下加粗警告：
-   ⚠️ 警告：未找到全文，当前总结仅基于摘要生成。
+2.  **Target Type: Paper Title / Topic**
+    **Step 1: Rights Verification & Mapping:** Call Google Search for fact-checking to establish a unique mapping relationship from Title to Document ID/URL.
+    **Step 2: ArXiv Tracing Rule:** Prioritize visiting the `/abs/` page to verify paper metadata, then the system manually constructs and navigates to the `/pdf/` download page. Blindly guessing PDF links is prohibited.
+    **Step 3: Quality Check (Computer Vision Specific Control):** After obtaining the PDF, check the file size. If it's a CV paper and the size is < 1MB, trigger an anomaly alert and force re-validation of link validity.
+    **Error Handling:** If, after two deep retries, only an abstract text is obtained, the following bold warning must be forcibly inserted at the very top of the final output:
+    ⚠️ **Warning: Full text not found. This summary is based solely on the abstract.**
 
-3. 目标类型：音视频主题 / 名称
-   第一步：链接验证：使用搜索或浏览器控制工具定位目标 URL，核对元数据以确认主题无误。
-   第二步：阶梯式内容提取（按优先级向下穿透）：
-   优先级 1 (最优解)：调用 yt-dlp skill，参考 subtitles 部分，直接抽取原始中/英/其他存在的语言文字幕文件 (.rst / .txt)。若成功，流程终止；若失败，进入优先级 2。
-   优先级 2 (浏览器介入)：接管浏览器控制权，通过 vCaptions 插件直接点击下载按钮，并导出原始 .rst / .txt 文件。若失败，进入优先级 3。
-   优先级 3 (底层回退)：调用 download_audio 下载原始音频流。如果音频时间超过半小时，按每半小时一chunk进行分块，使用transcribe_audio分别转文本再合并。否则直接 transcribe_audio 进行语音转文本。
-   异常处理：若遍历上述三层逻辑仍无法提取音频或字幕文件，报错并且停止。
+3.  **Target Type: Audio/Video Topic / Name**
+    **Step 1: Link Validation:** Use search or browser control tools to locate the target URL, cross-referencing metadata to confirm the topic is correct.
+    **Step 2: Tiered Content Extraction (Penetrate Down by Priority):**
+    **Priority 1 (Optimal Solution):** Call the `yt-dlp skill`, referring to the subtitles section, to directly extract original Chinese/English/other available language subtitle files (`.rst` / `.txt`). If successful, the process terminates; if it fails, proceed to Priority 2.
+    **Priority 2 (Browser Intervention):** Take over browser control, directly click the download button via the `vCaptions` plugin, and export the original `.rst` / `.txt` file. If it fails, proceed to Priority 3.
+    **Priority 3 (Low-level Fallback):** Call `download_audio` to download the raw audio stream. If the audio duration exceeds half an hour, chunk it into half-hour segments, use `transcribe_audio` for each chunk, then merge the texts. Otherwise, directly use `transcribe_audio` for speech-to-text conversion.
+    **Error Handling:** If, after traversing the above three logical layers, audio or subtitle files still cannot be extracted, report an error and stop.
 
-4. 目标类型：本地文件 / 目录路径
-   执行逻辑：检测目标路径属性。若为单一文件，直接调用 read_file；若为文件夹，递归遍历目录下所有支持的文件，并将其在内存中拼接为单一数据流后统一读取。
+4.  **Target Type: Local File / Directory Path**
+    **Execution Logic:** Detect the target path's attributes. If it's a single file, directly call `read_file`; if it's a folder, recursively traverse all supported files within the directory, concatenate them into a single data stream in memory, and then read them uniformly.
 
-### 2. 智能提取与分类
+### 2. Intelligent Extraction and Categorization
 
-- 标题识别：自动从网页 `<title>`、内容首行或文件名中提取合适的主标题。
-- 分类判断 (Category)：基于内容自动识别类别，例如：
-  - `论文` (学术、研究报告)
-  - `播客` (访谈对话、长篇音频稿)
-  - `视频` (YouTube 摘要、纪录片解说)
-  - `文章` (博客、新闻、技术教程)
+-   **Title Recognition:** Automatically extract a suitable main title from the web page `<title>`, the first line of content, or the filename.
+-   **Category Judgment (Category):** Automatically identify the category based on content, for example:
+    -   `论文` (Academic, Research Report)
+    -   `播客` (Interview Dialogue, Long-form Audio Transcript)
+    -   `视频` (YouTube Summary, Documentary Narration)
+    -   `文章` (Blog, News, Technical Tutorial)
 
-### 3. 文件归档与结构化
+### 3. File Archiving and Structuring
 
-- 存放位置：所有生成的总结笔记必须放置在 `[notes_folder]/<Category>/<主标题>/` 目录下。
-- 命名规范：总结文件本身必须命名为 `<主标题>_summary.md`。
-- 原文处理：如果目标是本地文件，请将其移动或复制到与 `<主标题>_summary.md` 同级的位置。在总结笔记中通过 `source` 属性建立双链。
-- ⚠️ 注意：如果下载了视频或者播客的原始音频文件，需要将 **完整字幕文件**（不经删减的srt或txt等）作为source，不需要保留音频文件，因为m4a文件太大了。
-  - 举例：论文《Attention Is All You Need》，归档结构必须为：
-    - `[notes_folder]/论文/Attention Is All You Need/Attention Is All You Need_summary.md`
-    - `[notes_folder]/论文/Attention Is All You Need/Attention Is All You Need.pdf`
+-   **Storage Location:** All generated summary notes must be placed in the `60_Notes/<Category>/<主标题>/` directory.
+-   **Naming Convention:** The summary file itself must be named `<主标题>_summary.md`.
+-   **Original Content Handling:** If the target is a local file, move or copy it to the same level as `<主标题>_summary.md`. Establish a double link in the summary note via the `source` property.
+-   ⚠️ **Note:** If the original audio file of a video or podcast is downloaded, the **complete subtitle file** (unabridged srt or txt, etc.) should be used as the `source`. The audio file does not need to be retained because `.m4a` files are too large.
+    -   **Example:** For the paper "Attention Is All You Need", the archiving structure must be:
+        -   `60_Notes/论文/Attention Is All You Need/Attention Is All You Need_summary.md`
+        -   `60_Notes/论文/Attention Is All You Need/Attention Is All You Need.pdf`
 
-### 4. 输出模板与知识关联 (Template & Linking)
+### 4. Output Template & Linking
 
-#### 思考要求：
+#### Thinking Requirements:
 
-- 请首先使用第一性原理拆解知识。找到内容中最原始的物理定律，基本公理或事实，一步步逻辑推演。尝试推理出新的路径。
-- 请尽可能使用你的理性，分步骤进行长链思考。请不要过分共情或者阿谀奉承，牢记事实高于情感。用苏格拉底式的提问激发我的思考。
-- 需要尽可能确保总结真实可靠，添加必要的出处，如播客字幕的时间戳，以及论文的 section/段落 等。
-- 请记住：根据上下文智能选择并输出 Mermaid 图表（使用 ```mermaid 代码块），仅限以下两种：
-  1. 流程图 (Flowchart)：适合逻辑流转、步骤判断。声明：`flowchart TD` (优先) 或 `flowchart LR`。
-  2. 思维导图 (Mindmap)：适合层级发散、概念拆解。声明：`mindmap`。
-     ⚠️ 高危易错：带条件连线必须包含双管道符，格式严格为 `A -->|条件| B`。层级结构仅能通过纯空格缩进实现。绝对禁止使用 `- ` 或 `* ` 等列表符号。
-     🚨 全局语法红线：代码块内绝对禁止使用任何全角标点符号（如：，。！（））。所有括号、标点及逻辑符号必须为英文半角格式！
+-   Please first decompose knowledge using first principles. Find the most original physical laws, basic axioms, or facts within the content, and logically deduce step by step. Try to infer new paths.
+-   Please use your rationality as much as possible, thinking in long chains step by step. Do not over-empathize or flatter; remember that facts are above emotions. Use Socratic questioning to stimulate my thinking.
+-   It is necessary to ensure the summary is as truthful and reliable as possible, adding necessary sources, such as timestamps for podcast subtitles, and section/paragraph numbers for papers.
+-   Please remember: intelligently select and output Mermaid diagrams based on context (using ```mermaid code blocks), limited to the following two types:
+    1.  **Flowchart:** Suitable for logical flow, step-by-step decisions. Declare: `flowchart TD` (preferred) or `flowchart LR`.
+    2.  **Mindmap:** Suitable for hierarchical expansion, concept decomposition. Declare: `mindmap`.
+        ⚠️ **High-risk error:** Conditional connections must include double pipe symbols, strictly formatted as `A -->|Condition| B`. Hierarchical structure can only be achieved through pure space indentation. Absolutely forbidden to use list symbols like `- ` or `* `.
+        🚨 **Global Syntax Redline:** Absolutely no full-width punctuation marks (e.g., ，。！（）) are allowed within code blocks. All parentheses, punctuation, and logical symbols must be in English half-width format!
 
-#### 格式模板：
+#### Format Template:
 
-严格按照以下 Markdown 模板输出总结。必须在总结中识别核心概念，主动使用 `[[概念名]]` 的形式关联 `[wiki_folder]`。
+Strictly output the summary according to the following Markdown template. Core concepts must be identified in the summary, and `[[Concept Name]]` form should be actively used to link to `40_Wiki`.
 
 ```markdown
 ---
 type: note
-title: "<自动提取的标题>"
-category: "<分类>"
+title: "<Automatically Extracted Title>"
+category: "<Category>"
 date: YYYY-MM-DD
-source: "[[<原文件名.ext>]]"
+source: "[[<Original Filename.ext>]]"
 tags:
-  - <标签1>
+  - <Tag1>
 ---
 
-# <自动提取的标题> 总结
+# <Automatically Extracted Title> Summary
 
-> 核心摘要：用 1-2 句话概括这篇内容最核心的（被第一性原理拆解过的）价值或主旨。
+> Core Abstract: Summarize the most core (decomposed by first principles) value or main idea of this content in 1-2 sentences.
 
-## 1. 核心观点 (Key Insights)
+## 1. Key Insights
 
-- <观点一>：简明扼要的解释。
-- <观点二>：简明扼要的解释。
+- <Insight One>: Concise explanation.
+- <Insight Two>: Concise explanation.
 
-## 2. 详细结构 / 精彩讨论
+## 2. Detailed Structure / Key Discussions
 
-### <小标题 A>
+### <Subheading A>
 
-- <内容要点 + 出处>
-- <mermaid 图表>
+- <Key Content Point + Source>
+- <Mermaid Diagram>
 
-### <小标题 B>
+### <Subheading B>
 
-- <内容要点 + 出处>
+- <Key Content Point + Source>
 
-## 3. 苏格拉底式提问
+## 3. Socratic Questions
 
-(在此处提出 1-2 个直击本质的反思性问题)
+(Pose 1-2 reflective questions that get to the essence here)
 
-## 4. 关联概念 (知识库链接)
+## 4. Related Concepts (Knowledge Base Links)
 
-- [[相关概念1]]：为什么与该内容相关。
+- [[Related Concept 1]]: Why it is related to this content.
 ```
 
-### 5. 论文的特殊处理 (严格引文双链规范)
+### 5. Special Handling for Papers (Strict Citation Double-Linking Standard)
 
-对于论文，必须使用 `/pdf` 或搜索工具发现其引用关系。如果相关文章存在于 `[notes_folder]` 中，必须使用**带有具体目录路径的精确双链**。
+For papers, `/pdf` or search tools must be used to discover their citation relationships. If related articles exist in `60_Notes`, **precise double links with specific directory paths** must be used.
 
-🚨 **语法红线**：禁止仅使用 `[[论文名]]`。所有的论文引用双链必须严格按照 `[[<论文名称>_summary|<论文名称>]]` 的格式输出。
+🚨 **Syntax Redline:** Do not use `[[Paper Name]]` alone. All paper citation double links must strictly follow the format `[[<Paper Name>_summary|<Paper Name>]]`.
 
-**输出示例：**
-**引用的文献 (References):**
+**Output Example:**
+**References:**
 
 - [[Attention Is All You Need_summary|Attention Is All You Need]]
 - [[MoGe-2_summary|MoGe-2]]
 
-**被引用的文献 (Cited By):**
+**Cited By:**
 
-- DepthAnything-v2 （仅列出标题）
+- DepthAnything-v2 (Title only)
 
-### 系统逻辑拆解图 (Mermaid)
+### System Logic Breakdown Diagram (Mermaid)
 
 ```mermaid
 flowchart TD

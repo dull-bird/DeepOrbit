@@ -3,7 +3,7 @@ name: do.translate-pdf
 description: |
   Translate PDF documents to any language while preserving original structure, layout, and styling (colors, backgrounds, positions).
   Use when user wants to: (1) translate a PDF to another language, (2) convert PDF from one language to another, (3) create translated version of PDF document.
-  Triggers: "translate PDF", "PDF翻译", "把PDF翻译成", "translate this PDF to Chinese/English/Japanese", "翻译成中文/英文"
+  Triggers: "translate PDF", "PDF translation", "translate PDF to", "translate this PDF to Chinese/English/Japanese", "translate to Chinese/English"
 ---
 
 # PDF Translation
@@ -57,3 +57,8 @@ Append language suffix: `filename_EN.pdf`, `filename_ZH.pdf`, `filename_JA.pdf`
 - Keep proper nouns, abbreviations, technical terms unchanged when appropriate
 - CJK fonts auto-scale to 90% for better fit
 - Use transparent fill to preserve original background colors
+
+## Rules
+
+- Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+

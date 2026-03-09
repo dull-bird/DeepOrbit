@@ -17,32 +17,32 @@ Fetch, deduplicate, and rank AI product launches from multiple sources.
 
 ## Workflow
 
-1. **Check cache**: Look for `[resources_folder]/产品发布/YYYY-MM/YYYY-MM-DD-摘要.md`. If exists with today's date, return cached.
+1.  **Check cache**: Look for `50_Resources/Product Launches/YYYY-MM/YYYY-MM-DD-Digest.md`. If exists with today's date, return cached.
 
-2. **Fetch sources**: Use shell command `curl` on each. Extract product name, URL, description, and engagement metrics (votes/points/stars).
+2.  **Fetch sources**: Use shell command `curl` on each. Extract product name, URL, description, and engagement metrics (votes/points/stars).
 
-3. **Filter**: Keep only AI-related products (keywords: AI, ML, LLM, GPT, Claude, automation, agent, model).
+3.  **Filter**: Keep only AI-related products (keywords: AI, ML, LLM, GPT, Claude, automation, agent, model).
 
-4. **Deduplicate**: Same product across sources = merge. Keep best description, combine metrics, track all sources.
+4.  **Deduplicate**: Same product across sources = merge. Keep best description, combine metrics, track all sources.
 
-5. **Rank by**:
-   - AI relevance
-   - Engagement (normalize: PH votes/500, HN points/100, GH stars/1000)
-   - Content potential (tutorial-friendly, review-worthy, open source bonus)
-   - Recency and novelty
+5.  **Rank by**:
+    - AI relevance
+    - Engagement (normalize: PH votes/500, HN points/100, GH stars/1000)
+    - Content potential (tutorial-friendly, review-worthy, open source bonus)
+    - Recency and novelty
 
-6. **Generate digest**: See [TEMPLATE.md](TEMPLATE.md). Sections:
-   - 精选推荐 (3-5) with content angles
-   - LLM与AI模型
-   - 开发者工具
-   - 生产力与自动化
-   - 开源亮点
+6.  **Generate digest**: See [TEMPLATE.md](TEMPLATE.md). Sections:
+    - Featured Recommendations (3-5) with content angles
+    - LLM and AI Models
+    - Developer Tools
+    - Productivity and Automation
+    - Open Source Highlights
 
-7. **Save files**:
-   - `[resources_folder]/产品发布/YYYY-MM/YYYY-MM-DD-摘要.md` (make sure existence!)
-   - `[resources_folder]/产品发布/YYYY-MM/原始数据/YYYY-MM-DD_ProductHunt-Raw.md`
-   - `[resources_folder]/产品发布/YYYY-MM/原始数据/YYYY-MM-DD_HackerNews-Raw.md`
-   - `[resources_folder]/产品发布/YYYY-MM/原始数据/YYYY-MM-DD_GitHub-Raw.md`
+7.  **Save files**:
+    - `50_Resources/Product Launches/YYYY-MM/YYYY-MM-DD-Digest.md` (ensure existence!)
+    - `50_Resources/Product Launches/YYYY-MM/Raw Data/YYYY-MM-DD_ProductHunt-Raw.md`
+    - `50_Resources/Product Launches/YYYY-MM/Raw Data/YYYY-MM-DD_HackerNews-Raw.md`
+    - `50_Resources/Product Launches/YYYY-MM/Raw Data/YYYY-MM-DD_GitHub-Raw.md`
 
 ## Output Format
 
@@ -50,22 +50,27 @@ Fetch, deduplicate, and rank AI product launches from multiple sources.
 
 **From /do:daily**: Display full digest with all sections. Make sure all `.md` files are saved. Then return a condensed list:
 ```
-**产品发布 (5):**
-- [产品名] - [内容角度] - [关键指标]
+**Product Launches (5):**
+- [Product Name] - [Content Angle] - [Key Metrics]
 ...
-完整摘要: [[YYYY-MM-DD-摘要]]
+Full Digest: [[YYYY-MM-DD-Digest]]
 ```
 
 ## Error Handling
 
 - Source down: Continue with others, note in digest
 - <2 sources available: Fall back to yesterday's archive
-- Empty results: Create minimal digest noting "今日无新AI产品"
+- Empty results: Create minimal digest noting "No new AI products today"
 
 ## Content Angle Logic
 
-- High engagement + tutorial-friendly: "教程机会"
-- Novel + early stage: "抢先报道优势"
-- Open source + complex: "深度分析"
-- SaaS + practical: "工具评测"
-- Similar to existing: "对比 vs [竞品]"
+- High engagement + tutorial-friendly: "Tutorial Opportunity"
+- Novel + early stage: "Early Bird Advantage"
+- Open source + complex: "In-depth Analysis"
+- SaaS + practical: "Tool Review"
+- Similar to existing: "Comparison vs [Competitor]"
+
+## Rules
+
+- Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+

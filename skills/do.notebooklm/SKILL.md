@@ -267,3 +267,8 @@ Synthesize and respond to user
   - `usage_patterns.md` - Best practices and workflow examples
 - `.venv/` - Isolated Python environment (auto-created on first run)
 - `.gitignore` - Protects sensitive data from being committed
+
+## Rules
+
+- Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+

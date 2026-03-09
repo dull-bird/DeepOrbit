@@ -617,3 +617,8 @@ Internal notes:
 - [Embed files](https://help.obsidian.md/embeds)
 - [Callouts](https://help.obsidian.md/callouts)
 - [Properties](https://help.obsidian.md/properties)
+
+## Rules
+
+- Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+

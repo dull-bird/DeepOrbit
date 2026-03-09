@@ -15,24 +15,24 @@ Fetch, deduplicate, and rank AI newsletter content into a daily digest.
 
 ## Workflow
 
-1. **Fetch feeds**: Use shell command `curl` on both RSS URLs. Extract title, link, pubDate, description for each item. **DO NOT** use Google Search or other search engines to find news if the fetch fails.
-2. **Deduplicate**: Merge items with similar titles (80%+ word overlap). Keep longer description, track both sources. **Priority**: Keep Google/Microsoft/Karpathy/机器之心 as primary sources; append media views as secondary references.
-3. **Rank items** by:
-   - AI relevance (LLM, GPT, Claude, agents, ML keywords)
-   - Recency (newer = higher)
-   - Novelty (check recent archives, penalize repeats)
+1.  **Fetch feeds**: Use shell command `curl` on both RSS URLs. Extract title, link, pubDate, description for each item. **DO NOT** use Google Search or other search engines to find news if the fetch fails.
+2.  **Deduplicate**: Merge items with similar titles (80%+ word overlap). Keep longer description, track both sources. **Priority**: Keep Google/Microsoft/Karpathy/机器之心 as primary sources; append media views as secondary references.
+3.  **Rank items** by:
+    - AI relevance (LLM, GPT, Claude, agents, ML keywords)
+    - Recency (newer = higher)
+    - Novelty (check recent archives, penalize repeats)
 
-4. **Generate digest**: See [TEMPLATE.md](TEMPLATE.md) for format. Include:
-   - 精选推荐 (3-5 highest scoring) with content creation angles
-   - AI动态 section
-   - 生产力工具 section
-   - Stats footer
+4.  **Generate digest**: See [TEMPLATE.md](TEMPLATE.md) for format. Include:
+    - Featured Recommendations (3-5 highest scoring) with content creation angles
+    - AI Trends section
+    - Productivity Tools section
+    - Stats footer
 
-5. **Save files**:
-   - `[resources_folder]/Newsletters/YYYY-MM/YYYY-MM-DD-摘要.md` (curated, make sure existence!)
-   - `[resources_folder]/Newsletters/YYYY-MM/原始数据/YYYY-MM-DD_机器之心-Raw.md`
-   - `[resources_folder]/Newsletters/YYYY-MM/原始数据/YYYY-MM-DD_TLDR-AI-Raw.md`
-   - `[resources_folder]/Newsletters/YYYY-MM/原始数据/YYYY-MM-DD_Rundown-AI-Raw.md`
+5.  **Save files**:
+    - `50_Resources/Newsletters/YYYY-MM/YYYY-MM-DD-Summary.md` (curated, ensure existence!)
+    - `50_Resources/Newsletters/YYYY-MM/Raw Data/YYYY-MM-DD_机器之心-Raw.md`
+    - `50_Resources/Newsletters/YYYY-MM/Raw Data/YYYY-MM-DD_TLDR-AI-Raw.md`
+    - `50_Resources/Newsletters/YYYY-MM/Raw Data/YYYY-MM-DD_Rundown-AI-Raw.md`
 
 ## Output Format
 
@@ -41,14 +41,19 @@ Fetch, deduplicate, and rank AI newsletter content into a daily digest.
 **From /do:daily**: Display full digest with all sections. Make sure all `.md` files are saved. Then return a condensed list:
 
 ```
-**AI 新闻 (5):**
-- [标题] - [角度]
+**AI News (5):**
+- [Title] - [Angle]
 ...
-完整摘要: [[YYYY-MM-DD-摘要]]
+Full Digest: [[YYYY-MM-DD-Summary]]
 ```
 
 ## Error Handling
 
 - One feed down: Continue with other, note in digest
 - Both down: Use yesterday's archive with warning
-- Empty feeds: Create minimal digest noting "今日无新内容"
+- Empty feeds: Create minimal digest noting "No new content today"
+
+## Rules
+
+- Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+

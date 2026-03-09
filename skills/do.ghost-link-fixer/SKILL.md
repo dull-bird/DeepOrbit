@@ -1,31 +1,36 @@
 ---
 name: do.fix-links
-description: 自动扫描 [wiki_folder] 中的维基链接，识别缺失的笔记文件并自动补全。包含：1. 自动创建缺失文件；2. 深度内容填充（Wiki+第一性原理）；3. 智能自动分类。
+description: Automatically scans wiki links in 40_Wiki, identifies missing note files, and automatically completes them. Includes: 1. Automatic creation of missing files; 2. Deep content filling (Wiki + First Principles); 3. Intelligent automatic classification.
 ---
 
 # Ghost Link Fixer & Filler (Pro)
 
-## 概述
+## Overview
 
-此技能确保 DeepOrbit 知识库始终保持连贯、深度且组织有序。它不仅填补空白，更通过深度拆解提供洞见。
+This skill ensures the DeepOrbit knowledge base remains coherent, in-depth, and well-organized. It not only fills gaps but also provides insights through deep decomposition.
 
-## 工作流
+## Workflow
 
-1. **识别与创建**: 运行 `scripts/fix_links.py` 识别缺失链接并生成占位文件（位于 `[wiki_folder]/未分类/`）。
-2. **深度填充 (Deep Filling)**:
-   - 获取新创建的条目列表。
-   - 调用 `google_web_search` 搜索核心定义、背景及底层逻辑。
-   - **内容生成规范**:
-     - **风格**: 维基百科式（客观、结构化、高信噪比）。
-     - **深度**: 必须包含 **“第一性原理拆解”** (First Principles) 章节，挖掘概念的本质假设、核心矛盾或物理/数学根基。
-     - **结构**: 定义 -> 第一性原理/底层逻辑 -> 核心要点 -> 应用/示例 -> 相关概念。
-   - **执行移动与写入**: 使用 `write_file` 填充内容，并将其移动到目标子目录下（智能分类）。
+1.  **Identify & Create**: Run `scripts/fix_links.py` to identify missing links and generate placeholder files (located in `40_Wiki/未分类/`).
+2.  **深度填充 (Deep Filling)**:
+    -   Obtain a list of newly created entries.
+    -   Call `google_web_search` to search for core definitions, background, and underlying logic.
+    -   **Content Generation Guidelines**:
+        -   **Style**: Wikipedia-style (objective, structured, high signal-to-noise ratio).
+        -   **Depth**: Must include a **"First Principles Decomposition"** (First Principles) section, unearthing the concept's essential assumptions, core contradictions, or physical/mathematical foundations.
+        -   **Structure**: Definition -> First Principles/Underlying Logic -> Key Points -> Applications/Examples -> Related Concepts.
+    -   **Execute Move & Write**: Use `write_file` to populate content and move it to the target subdirectory (intelligent classification).
 
-## 使用方法
+## Usage
 
-直接在命令行输入 `/do:fix-links`。
+Enter `/do:fix-links` directly in the command line.
 
-## 注意事项
+## Notes
 
-- 填充内容时，务必保留 `area` 和 `tags` 等 Frontmatter。
-- 第一性原理拆解应避免陈词滥调，追求独特的洞察。
+-   When filling content, be sure to preserve Frontmatter such as `area` and `tags`.
+-   First Principles decomposition should avoid clichés and pursue unique insights.
+
+## Rules
+
+- Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+

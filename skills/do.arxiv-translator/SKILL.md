@@ -55,3 +55,8 @@ Before starting, verify that all required system tools are installed.
     - Linux: `Noto Sans CJK SC`.
 - **Preserve Template**: Use `xeCJK` to minimize style interference.
 - **Heredocs**: Use single-quoted heredocs in shells to handle backslashes correctly.
+
+## Rules
+
+- Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+
