@@ -29,10 +29,10 @@ Fetch, deduplicate, and rank AI newsletter content into a daily digest.
    - Stats footer
 
 5. **Save files**:
-   - `50_资源/Newsletters/YYYY-MM/YYYY-MM-DD-摘要.md` (curated, make sure existence!)
-   - `50_资源/Newsletters/YYYY-MM/原始数据/YYYY-MM-DD_机器之心-Raw.md`
-   - `50_资源/Newsletters/YYYY-MM/原始数据/YYYY-MM-DD_TLDR-AI-Raw.md`
-   - `50_资源/Newsletters/YYYY-MM/原始数据/YYYY-MM-DD_Rundown-AI-Raw.md`
+   - `[resources_folder]/Newsletters/YYYY-MM/YYYY-MM-DD-摘要.md` (curated, make sure existence!)
+   - `[resources_folder]/Newsletters/YYYY-MM/原始数据/YYYY-MM-DD_机器之心-Raw.md`
+   - `[resources_folder]/Newsletters/YYYY-MM/原始数据/YYYY-MM-DD_TLDR-AI-Raw.md`
+   - `[resources_folder]/Newsletters/YYYY-MM/原始数据/YYYY-MM-DD_Rundown-AI-Raw.md`
 
 ## Output Format
 

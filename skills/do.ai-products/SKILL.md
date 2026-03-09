@@ -17,7 +17,7 @@ Fetch, deduplicate, and rank AI product launches from multiple sources.
 
 ## Workflow
 
-1. **Check cache**: Look for `50_资源/产品发布/YYYY-MM/YYYY-MM-DD-摘要.md`. If exists with today's date, return cached.
+1. **Check cache**: Look for `[resources_folder]/产品发布/YYYY-MM/YYYY-MM-DD-摘要.md`. If exists with today's date, return cached.
 
 2. **Fetch sources**: Use shell command `curl` on each. Extract product name, URL, description, and engagement metrics (votes/points/stars).
 
@@ -39,10 +39,10 @@ Fetch, deduplicate, and rank AI product launches from multiple sources.
    - 开源亮点
 
 7. **Save files**:
-   - `50_资源/产品发布/YYYY-MM/YYYY-MM-DD-摘要.md` (make sure existence!)
-   - `50_资源/产品发布/YYYY-MM/原始数据/YYYY-MM-DD_ProductHunt-Raw.md`
-   - `50_资源/产品发布/YYYY-MM/原始数据/YYYY-MM-DD_HackerNews-Raw.md`
-   - `50_资源/产品发布/YYYY-MM/原始数据/YYYY-MM-DD_GitHub-Raw.md`
+   - `[resources_folder]/产品发布/YYYY-MM/YYYY-MM-DD-摘要.md` (make sure existence!)
+   - `[resources_folder]/产品发布/YYYY-MM/原始数据/YYYY-MM-DD_ProductHunt-Raw.md`
+   - `[resources_folder]/产品发布/YYYY-MM/原始数据/YYYY-MM-DD_HackerNews-Raw.md`
+   - `[resources_folder]/产品发布/YYYY-MM/原始数据/YYYY-MM-DD_GitHub-Raw.md`
 
 ## Output Format
 

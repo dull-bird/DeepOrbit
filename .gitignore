@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Gemini CLI
+.gemini/
+
+# Skill specific overrides & data
+skills/notebooklm/data/
+skills/*/data/
+
+# Local configuration overrides (optional if users want their own)
+# deeporbit.json # Keep default deeporbit.json tracked, but users can modify it locally
+
+# Test or Temp folders
+tmp_test/
+*.tmp
+*.bak

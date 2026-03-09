@@ -25,11 +25,11 @@ This skill uses **two separate agents** to keep context fresh and focused:
 
 The user can provide input in three ways:
 
-1. **File path**: A path to an inbox note (e.g., `/do:kickoff 00_收件箱/MyIdea.md`) - read the file contents
+1. **File path**: A path to an inbox note (e.g., `/do:kickoff [inbox_folder]/MyIdea.md`) - read the file contents
 2. **Inline text**: A short description of a project idea (e.g., `/do:kickoff Build a habit tracker app`)
-3. **No input**: If nothing provided, list files from `00_收件箱/` and ask the user to select one
+3. **No input**: If nothing provided, list files from `[inbox_folder]/` and ask the user to select one
 
-**Language Rule**: Match the language of the user's input (or inbox file content) for all responses and generated files.
+**Language Rule**: Read `deeporbit.json` from the workspace root to determine the interaction language and exactly which folder paths to use. Use the language specified in the config for all responses and generated files. (e.g. `zh-CN` for Chinese).
 
 # Phase 1: Launch Planning Agent
 
@@ -41,9 +41,9 @@ description: "Plan project kickoff"
 prompt: "Create a project kickoff plan for: [user's idea/inbox note]
 
 Follow these steps:
-1. Gather Context: Search 20_项目 and 10_日记 for existing notes related to this idea
+1. Gather Context: Search [projects_folder] and [diary_folder] for existing notes related to this idea
 2. Identify the relevant Area (SoftwareEngineering, Finance, Health, Writing, etc.)
-3. Create the plan file at 90_计划/Plan_YYYY-MM-DD_Kickoff_<ProjectName>.md using this format:
+3. Create the plan file at [plans_folder]/Plan_YYYY-MM-DD_Kickoff_<ProjectName>.md using this format:
 
 # 启动计划: [项目名称]
 
@@ -54,7 +54,7 @@ Follow these steps:
 [一句话总结项目目标]
 
 ## 项目结构
-- 领域: [来自 30_研究 的相关领域]
+- 领域: [来自 [research_folder] 的相关领域]
 - 类型: [project]
 - 预估规模: [小型: 单文件 | 中型: 少量文件的文件夹 | 大型: 多文件的文件夹]
 
@@ -102,23 +102,23 @@ Once the user confirms the plan, spawn a fresh execution agent with clean contex
 ```
 subagent_type: "general-purpose"
 description: "Execute project kickoff"
-prompt: "Execute the project kickoff plan located at: 90_计划/Plan_YYYY-MM-DD_Kickoff_<ProjectName>.md
+prompt: "Execute the project kickoff plan located at: [plans_folder]/Plan_YYYY-MM-DD_Kickoff_<ProjectName>.md
 
 Instructions:
 1. Read the plan file
 2. Note any user modifications or answered clarification questions
 3. Create the project note:
-   - For small projects: Create 20_项目/<ProjectName>.md
-   - For medium/large projects: Create 20_项目/<ProjectName>/<ProjectName>.md
+   - For small projects: Create [projects_folder]/<ProjectName>.md
+   - For medium/large projects: Create [projects_folder]/<ProjectName>/<ProjectName>.md
 4. Use the C.A.P. structure for the project note:
    - **背景**: Objectives, background, why it matters
    - **行动**: Phases/milestones with tasks
    - **进展**: Empty section for future updates
-5. Link the project in today's daily note at 10_日记/YYYY-MM-DD.md
-6. Archive the plan: move to 90_计划/归档/
-7. If this kickoff originated from an inbox item (00_收件箱/):
+5. Link the project in today's daily note at [diary_folder]/YYYY-MM-DD.md
+6. Archive the plan: move to [plans_folder]/归档/
+7. If this kickoff originated from an inbox item ([inbox_folder]/):
    - Update the inbox file's frontmatter: set status: processed, add archived: YYYY-MM-DD
-   - Move the file to 99_系统/归档/收件箱/YYYY/MM/ (use the current date for year/month)
+   - Move the file to [system_folder]/归档/收件箱/YYYY/MM/ (use the current date for year/month)
    - Create the YYYY/MM directories if they don't exist
 
 ## Obsidian Formatting Rules (CRITICAL)
@@ -148,7 +148,7 @@ General:
 When done, report back in Chinese with:
 ## 项目创建完成
 
-**项目笔记:** [[ProjectName]] 位于 20_项目/
+**项目笔记:** [[ProjectName]] 位于 [projects_folder]/
 **项目结构:** [结构说明]
 **收件箱归档:** [归档路径] (如适用)
 

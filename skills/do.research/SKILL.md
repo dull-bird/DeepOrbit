@@ -40,11 +40,11 @@ prompt: "Create a research plan for: [user's topic]
 
 Follow these steps:
 1. Identify Context:
-   - Check if this relates to an active project in 20_项目/
+   - Check if this relates to an active project in [projects_folder]/
    - Determine the relevant Area (SoftwareEngineering, Finance, Health, etc.)
-   - Search 30_研究/ and 40_知识库/ to avoid duplication
-2. Identify Persona: Scan 99_系统/提示词/ for the most relevant expertise
-3. Create the plan file at 90_计划/Plan_YYYY-MM-DD_Research_<Topic>.md using this format:
+   - Search [research_folder]/ and [wiki_folder]/ to avoid duplication
+2. Identify Persona: Scan [system_folder]/提示词/ for the most relevant expertise
+3. Create the plan file at [plans_folder]/Plan_YYYY-MM-DD_Research_<Topic>.md using this format:
 
 # 研究计划: [主题]
 
@@ -65,9 +65,9 @@ Follow these steps:
 [ ] 查找常见陷阱和最佳实践
 
 ## 输出结构
-- 主笔记: 30_研究/<领域>/<主题>/<主题>.md
-- 原子概念: 40_知识库/<分类>/<概念名称>.md
-- 示例/资源: 30_研究/<领域>/<主题>/examples/（如需要）
+- 主笔记: [research_folder]/<领域>/<主题>/<主题>.md
+- 原子概念: [wiki_folder]/<分类>/<概念名称>.md
+- 示例/资源: [research_folder]/<领域>/<主题>/examples/（如需要）
 
 ## 澄清问题（可选）
 *如果你有答案，请在下方填写。如果留空，我将按标准假设继续。*
@@ -85,7 +85,7 @@ Follow these steps:
 "
 ```
 
-After the planning agent returns, check the plan file path is `90_计划/Plan_YYYY-MM-DD_Research_<Topic>.md`. Then notify the user:
+After the planning agent returns, check the plan file path is `[plans_folder]/Plan_YYYY-MM-DD_Research_<Topic>.md`. Then notify the user:
 "我已在 `[plan file path]` 创建了研究计划。请查看并按需修改，确认后继续执行。"
 
 # Phase 2: Launch Execution Agent (After User Confirmation)
@@ -95,7 +95,7 @@ Once the user confirms the plan, spawn a fresh execution agent with clean contex
 ```
 subagent_type: "general-purpose"
 description: "Execute research plan"
-prompt: "Execute the research plan located at: 90_计划/Plan_YYYY-MM-DD_Research_<Topic>.md
+prompt: "Execute the research plan located at: [plans_folder]/Plan_YYYY-MM-DD_Research_<Topic>.md
 
 Instructions:
 1. Read the plan file and note any user modifications or answers
@@ -107,7 +107,7 @@ Instructions:
    - Identify atomic concepts to extract
 
 3. Create the Main Research Note:
-   - Path: 30_研究/<Area>/<Topic>/<Topic>.md
+   - Path: [research_folder]/<Area>/<Topic>/<Topic>.md
    - Sections to include:
      - 概述 (high-level explanation)
      - 核心概念 (with wikilinks to atomic notes)
@@ -119,7 +119,7 @@ Instructions:
      - 参考资源 (must have valid external links to docs, articles)
 
 4. Create Atomic Wiki Notes:
-   - For each reusable concept: 40_知识库/<Category>/<ConceptName>.md
+   - For each reusable concept: [wiki_folder]/<Category>/<ConceptName>.md
    - Keep concise (1-3 paragraphs)
    - Include '相关概念' section with related links (make sure the link is full and valid)
    - the references should have valid links
@@ -128,13 +128,13 @@ Instructions:
    - <Topic>_Map.canvas to visualize concept relationships
 
 6. Create Examples (if applicable):
-   - Save code examples in 30_研究/<Area>/<Topic>/examples/
+   - Save code examples in [research_folder]/<Area>/<Topic>/examples/
 
 7. Link & Track:
-   - Append to today's Daily Note: 10_日记/YYYY-MM-DD.md
+   - Append to today's Daily Note: [diary_folder]/YYYY-MM-DD.md
    - If related to a project, add link in project's Progress section
 
-8. Archive: Move plan to 90_计划/归档/
+8. Archive: Move plan to [plans_folder]/归档/
 
 ## Obsidian Formatting Rules (CRITICAL)
 
@@ -154,8 +154,8 @@ status: complete
 ---
 
 Wiki Notes:
-- Use template: 99_系统/模板/Wiki_Template.md
-- Path: 40_知识库/<Category>/<ConceptName>.md
+- Use template: [system_folder]/模板/Wiki_Template.md
+- Path: [wiki_folder]/<Category>/<ConceptName>.md
 - Keep notes atomic and focused on a single concept
 
 Related Links:
@@ -167,7 +167,7 @@ When done, report back with:
 ## 研究总结: [Topic]
 
 **已创建:**
-- 主笔记: [[Topic]] 位于 30_研究/<Area>/
+- 主笔记: [[Topic]] 位于 [research_folder]/<Area>/
 - 知识库概念: [[Concept1]], [[Concept2]], 等
 - 示例: [count] 个文件位于 examples/ (如有)
 

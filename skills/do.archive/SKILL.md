@@ -14,10 +14,10 @@ Help the user archive completed projects and processed inbox items, maintaining 
 ## Step 1: Identify Items to Archive
 
 1. **Search for completed projects:**
-   - Find all files in `20_项目/` with `status: done`
+   - Find all files in `[projects_folder]/` with `status: done`
 
 2. **Search for processed inbox items:**
-   - Find all files in `00_收件箱/` with `status: processed` in frontmatter
+   - Find all files in `[inbox_folder]/` with `status: processed` in frontmatter
    - Or files with `[[ProjectName]]` link indicating they've been converted
 
 3. **Present findings in Chinese:**
@@ -51,12 +51,12 @@ For each project to be archived:
 2. **Move to archives:**
 
    **For Projects:**
-   - **Single file:** Move to `99_系统/归档/项目/YYYY/ProjectName.md`
-   - **Folder:** Move to `99_系统/归档/项目/YYYY/ProjectName/`
+   - **Single file:** Move to `[system_folder]/归档/项目/YYYY/ProjectName.md`
+   - **Folder:** Move to `[system_folder]/归档/项目/YYYY/ProjectName/`
    - Organize by year based on completion date
 
    **For Inbox Items:**
-   - Move to `99_系统/归档/收件箱/YYYY/MM/filename.md`
+   - Move to `[system_folder]/归档/收件箱/YYYY/MM/filename.md`
    - Organize by year and month of processing
    - Preserves chronological capture history
 
@@ -69,7 +69,7 @@ For each project to be archived:
    - Note: Existing wikilinks will still work from new location
 
 5. **Clean up:**
-   - Check for orphaned assets in `50_资源/`
+   - Check for orphaned assets in `[resources_folder]/`
    - Ask user if any should be cleaned up
 
 ## Step 3: Summary Report
@@ -79,11 +79,11 @@ Present completion summary in Chinese:
 ```
 ## 归档完成
 
-**已归档 [N] 个项目至 `99_系统/归档/项目/YYYY/`:**
+**已归档 [N] 个项目至 `[system_folder]/归档/项目/YYYY/`:**
 - [[Project1]] → 归档/项目/2026/Project1/
 - [[Project2]] → 归档/项目/2026/Project2.md
 
-**已归档 [N] 个收件箱条目至 `99_系统/归档/收件箱/YYYY/MM/`:**
+**已归档 [N] 个收件箱条目至 `[system_folder]/归档/收件箱/YYYY/MM/`:**
 - idea-note.md → 归档/收件箱/2026/01/
 - quick-capture.md → 归档/收件箱/2026/01/
 
@@ -118,7 +118,7 @@ Present completion summary in Chinese:
 # ARCHIVE STRUCTURE
 
 ```
-99_系统/归档/
+[system_folder]/归档/
 ├── 项目/
 │   ├── 2026/
 │   │   ├── ProjectName/
@@ -176,7 +176,7 @@ Present completion summary in Chinese:
 - Build my personal OS with obsidian and Claude Code.md - 已转为 [[Personal_OS_Setup]]
 
 是否归档这些项目?
-(将移动至 99_系统/归档/，wikilinks 仍然有效)
+(将移动至 [system_folder]/归档/，wikilinks 仍然有效)
 
 选项:
 1. 全部归档 (2个项目 + 1个收件箱)

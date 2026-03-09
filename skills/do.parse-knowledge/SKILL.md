@@ -14,13 +14,13 @@ Your goal is to ingest the unstructured text provided by the user and refactor i
 1. ANALYZE
    - Identify the primary "Area" (e.g., SoftwareEngineering).
    - Create a slug for the main Topic (e.g., `ReactStatePatterns`).
-   - Extract "Atomic Concepts" that deserve their own definition in `40_知识库` (e.g., `Redux`, `ContextAPI`).
+   - Extract "Atomic Concepts" that deserve their own definition in `[wiki_folder]` (e.g., `Redux`, `ContextAPI`).
 
 2. GENERATE FILES
    You must generate the content for the files. Use strict YAML frontmatter.
 
    A. THE MAIN NOTE
-   - Path: `30_研究/<Area>/<Topic>/<Topic>.md`
+   - Path: `[research_folder]/<Area>/<Topic>/<Topic>.md`
    - ## Frontmatter:
      created: <CURRENT_DATE>
      type: reference
@@ -30,8 +30,8 @@ Your goal is to ingest the unstructured text provided by the user and refactor i
    - Content: Rewrite the input text to be modular. Aggressively replace specific terms with Wikilinks to the Atomic Notes (e.g., `[[Redux]]`).
 
    B. ATOMIC NOTES (Wiki)
-   - Use template: `99_系统/模板/Wiki_Template.md`
-   - Path: `40_知识库/<Category>/<ConceptName>.md`
+   - Use template: `[system_folder]/模板/Wiki_Template.md`
+   - Path: `[wiki_folder]/<Category>/<ConceptName>.md`
    - Content: A concise, timeless definition of the concept.
 
 # OUTPUT FORMAT
@@ -41,7 +41,7 @@ When done, report back in Chinese:
 ```
 ## 知识整理完成
 
-**主笔记:** [[Topic]] 位于 30_研究/<Area>/
+**主笔记:** [[Topic]] 位于 [research_folder]/<Area>/
 
 **已创建知识库条目:**
 - [[Concept1]] - 简要描述

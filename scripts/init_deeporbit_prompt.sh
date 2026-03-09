@@ -25,19 +25,55 @@ mkdir -p "$DEST"
 cp "$SOURCE" "$DEST/DeepOrbitPrompt.md"
 echo "Copied prompt to: $DEST/DeepOrbitPrompt.md"
 
-# 3. Create folder structure per DeepOrbitPrompt.md "Structure" section
-VAULT_DIRS="00_收件箱 10_日记 20_项目 30_研究 40_知识库 50_资源 60_笔记 90_计划 99_系统"
-for d in $VAULT_DIRS; do mkdir -p "$DEST/$d"; done
-mkdir -p "$DEST/50_资源/Newsletters" "$DEST/50_资源/产品发布" "$DEST/50_资源/新闻"
-mkdir -p "$DEST/99_系统/模板" "$DEST/99_系统/提示词" "$DEST/99_系统/归档"
-echo "Created vault folders: $VAULT_DIRS, 50_资源/Newsletters, 50_资源/产品发布, 50_资源/新闻, 99_系统/模板, 99_系统/提示词, 99_系统/归档"
+# 2.5 Copy deeporbit.json
+CONFIG_SOURCE=""
+[[ -f "$REPO_ROOT/deeporbit.json" ]] && CONFIG_SOURCE="$REPO_ROOT/deeporbit.json"
+[[ -z "$CONFIG_SOURCE" && -f "$EXTENSION_DIR/deeporbit.json" ]] && CONFIG_SOURCE="$EXTENSION_DIR/deeporbit.json"
 
-# 4. Copy plugin 99_系统 contents into DEST/99_系统 (even if 99_系统 already exists — overlay)
+if [[ -n "$CONFIG_SOURCE" ]]; then
+  cp "$CONFIG_SOURCE" "$DEST/deeporbit.json"
+  echo "Copied configuration to: $DEST/deeporbit.json"
+else
+  echo "Warning: deeporbit.json not found. Using fallback defaults."
+  echo '{"folder_mapping":{"inbox":"00_收件箱","diary":"10_日记","projects":"20_项目","research":"30_研究","wiki":"40_知识库","resources":"50_资源","notes":"60_笔记","plans":"90_计划","system":"99_系统"}}' > "$DEST/deeporbit.json"
+fi
+
+# 3. Create folder structure per deeporbit.json
+if command -v jq &>/dev/null; then
+  DIR_INBOX=$(jq -r '.folder_mapping.inbox' "$DEST/deeporbit.json")
+  DIR_DIARY=$(jq -r '.folder_mapping.diary' "$DEST/deeporbit.json")
+  DIR_PROJECTS=$(jq -r '.folder_mapping.projects' "$DEST/deeporbit.json")
+  DIR_RESEARCH=$(jq -r '.folder_mapping.research' "$DEST/deeporbit.json")
+  DIR_WIKI=$(jq -r '.folder_mapping.wiki' "$DEST/deeporbit.json")
+  DIR_RESOURCES=$(jq -r '.folder_mapping.resources' "$DEST/deeporbit.json")
+  DIR_NOTES=$(jq -r '.folder_mapping.notes' "$DEST/deeporbit.json")
+  DIR_PLANS=$(jq -r '.folder_mapping.plans' "$DEST/deeporbit.json")
+  DIR_SYSTEM=$(jq -r '.folder_mapping.system' "$DEST/deeporbit.json")
+else
+  # Hardcoded fallback if jq is missing
+  DIR_INBOX="00_收件箱"
+  DIR_DIARY="10_日记"
+  DIR_PROJECTS="20_项目"
+  DIR_RESEARCH="30_研究"
+  DIR_WIKI="40_知识库"
+  DIR_RESOURCES="50_资源"
+  DIR_NOTES="60_笔记"
+  DIR_PLANS="90_计划"
+  DIR_SYSTEM="99_系统"
+fi
+
+VAULT_DIRS="$DIR_INBOX $DIR_DIARY $DIR_PROJECTS $DIR_RESEARCH $DIR_WIKI $DIR_RESOURCES $DIR_NOTES $DIR_PLANS $DIR_SYSTEM"
+for d in $VAULT_DIRS; do mkdir -p "$DEST/$d"; done
+mkdir -p "$DEST/$DIR_RESOURCES/Newsletters" "$DEST/$DIR_RESOURCES/产品发布" "$DEST/$DIR_RESOURCES/新闻"
+mkdir -p "$DEST/$DIR_SYSTEM/模板" "$DEST/$DIR_SYSTEM/提示词" "$DEST/$DIR_SYSTEM/归档"
+echo "Created vault folders based on configuration."
+
+# 4. Copy plugin 99_系统 contents into DEST/$DIR_SYSTEM (even if it already exists — overlay)
 PLUGIN_ROOT="$(dirname "$SOURCE")"
 if [[ -d "$PLUGIN_ROOT/99_系统" ]]; then
-  mkdir -p "$DEST/99_系统"
-  cp -r "$PLUGIN_ROOT/99_系统/"* "$DEST/99_系统/" 2>/dev/null || true
-  echo "Copied 99_系统 contents (templates, etc.) from plugin into $DEST/99_系统"
+  mkdir -p "$DEST/$DIR_SYSTEM"
+  cp -r "$PLUGIN_ROOT/99_系统/"* "$DEST/$DIR_SYSTEM/" 2>/dev/null || true
+  echo "Copied 99_系统 contents (templates, etc.) from plugin into $DEST/$DIR_SYSTEM"
 fi
 
 # 5. Inject DEST/.gemini/settings.json (project-level); create dir if needed

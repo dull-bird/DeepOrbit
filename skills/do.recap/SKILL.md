@@ -10,7 +10,7 @@ description: Automatically summarize all newly added or modified Markdown files 
 When the user invokes `/do:recap <time range / natural language description>`, you need to:
 1. Parse the time range provided by the user (e.g., "this week", "past three days", "last month", etc.).
 2. In the specified knowledge base root directory, find all **newly created or modified Markdown (`.md`) files** within that time period.
-3. Strictly follow the directory filtering conditions: **Only include directories starting with `00` to `90`. Forcibly exclude `99_系统` and any other irrelevant or system-generated hidden directories (such as `.git`, `.obsidian`, `.gemini`, etc.)**.
+3. Strictly follow the directory filtering conditions: **Only include directories starting with `00` to `90`. Forcibly exclude `[system_folder]` and any other irrelevant or system-generated hidden directories (such as `.git`, `.obsidian`, `.gemini`, etc.)**.
 4. Read the latest content of these filtered files.
 5. Generate a structured periodic recap report analyzing the user's core focuses, achieved results, and cross-domain knowledge threads.
 
@@ -22,13 +22,13 @@ When the user invokes `/do:recap <time range / natural language description>`, y
 - Use your command-line tools (such as `fd` combined with system time, or use file search related tools directly) to initiate a search starting from the user's workspace directory as the root.
 - **Strict Filtering Rules (CRITICAL)**:
   - Must match relative paths for directories starting with `00` to `90`. If the file is not under these directories, ignore it.
-  - Absolutely exclude any path containing `99_系统`.
+  - Absolutely exclude any path containing `[system_folder]`.
   - Exclude all non-`.md` files.
 
 ### 2. Content Reading & Analysis
 
 - Iterate through and read the content of all files matching the conditions. If there is an extremely large number of files, or if a single file is very long, please extract the core content or the first few hundred lines to grasp the main idea of the article.
-- Extract the core theme, category (based on the directory it resides in, such as `10_日记`, `20_项目`, `40_知识库`, etc.), and main conclusions of each note.
+- Extract the core theme, category (based on the directory it resides in, such as `[diary_folder]`, `[projects_folder]`, `[wiki_folder]`, etc.), and main conclusions of each note.
 
 ### 3. Generate Summary Report
 
@@ -78,4 +78,4 @@ Categorize by directory structure or project, and list the newly added/modified 
 
 ## 4. Report Output
 
-You can display this generated analysis report to the user, or save it directly to a folder such as `10_日记` or a corresponding Periodic Review folder based on the user's instructions.
+You can display this generated analysis report to the user, or save it directly to a folder such as `[diary_folder]` or a corresponding Periodic Review folder based on the user's instructions.
