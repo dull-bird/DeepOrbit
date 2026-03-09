@@ -21,14 +21,43 @@ While traditional PKM systems focus on manual knowledge entry and linking, **Dee
 DeepOrbit acts as an engine that takes raw inputs (URLs, Papers, PDFs, Ideas) and processes them through specialized AI Skill Packs, finally structuring the output directly into your Obsidian local vault.
 
 ### 1. Ingestion & Processing
+
+```mermaid
+graph TD
+    A[Raw Inputs: arXiv, PDFs, URLs, Ideas] --> B[DeepOrbit Agent Engine]
+    B --> C[Specialized Skill Packs]
+    C --> D[Target Obsidian Folder]
+```
+
 - **Inputs**: arXiv links, local/remote PDFs, web URLs, newsletters, or raw ideas from your Inbox.
 - **Agent Engine**: A suite of specialized agents handles different types of inputs. Depending on the source, the engine translates, OCRs, summarizes, or structures the data.
 - **Storage**: The processed information is saved into designated folders in your Obsidian Vault (e.g., `projects_folder`, `notes_folder`, `resources_folder`) based on your global language configurations in `deeporbit.json`.
 
 ### 2. Academic & Research Workflows
+
+```mermaid
+graph TD
+    A[arXiv URL / PDF File] --> B[Format Router]
+    B -->|arXiv| C["/do:arxiv-translator"]
+    B -->|PDF| D["/do:marker-pdf"]
+    C --> E[Translate & Compile xeLaTeX]
+    D --> F[OCR & Math Preservation]
+    E --> G[Save to Vault]
+    F --> G
+```
+
 - **arXiv & PDF Translation**: Tools like `arxiv-translator` download LaTeX sources, translate to your target language (e.g., Chinese/English), and compile fully formatted PDFs. `marker-pdf` converts PDFs into structured Markdown while preserving complex math formulas.
 
 ### 3. Knowledge Maintenance loops
+
+```mermaid
+graph TD
+    A[Scan Obsidian Vault] --> B{Found Dead Links?}
+    B -->|Yes| C["/do:ghost-link-fixer"]
+    C --> D[LLM 1st Principle Reasoning]
+    D --> E[Generate & Save Wiki Note]
+```
+
 - **Ghost Link Fixer**: Scans your vault for dead wikilinks and automatically queries the LLM to write high-quality foundational notes to fill the knowledge gaps.
 - **Content Pipelines**: Scheduled processes fetch news, deduplicate articles, rank them, and summarize them into curated daily digests.
 
