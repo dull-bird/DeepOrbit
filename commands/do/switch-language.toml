@@ -1,0 +1,12 @@
+# Switch Language
+
+description = "Switch the DeepOrbit global language configuration between English (en) and Chinese (zh-cn)"
+prompt = """
+Use the do.switch-language workflow to change the global language and folder configuration.
+
+1. Ensure the user provides a language argument, either `zh-cn` or `en` (e.g. `/do:switch-language en`). If they didn't, ask them which one they want.
+2. The user may provide a target directory via `{{args}}`. If not, use the current working directory.
+3. Run the python script `scripts/switch_language.py <language> "<target_directory>"` using the local python environment.
+4. If running from an extension folder, ensure the script path is relative to the extension root (e.g. `python ~/.gemini/extensions/deeporbit/scripts/switch_language.py <language> "<target_directory>"`).
+5. Read the output to confirm success, and remind the user that existing physical folders in their vault must be renamed manually to match the new configuration.
+"""
