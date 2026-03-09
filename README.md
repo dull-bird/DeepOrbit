@@ -2,121 +2,204 @@
 
 ![DeepOrbit Banner](deeporbit.png)
 
-> Not just Personal Knowledge Management. A fully automated, Agent-driven Digital Research Assistant.
+> **Not just Personal Knowledge Management — a fully automated, Agent-driven Digital Research Assistant.**
 
-DeepOrbit is a highly customized, agent-driven Personal Knowledge Management (PKM) and Research Assistant system designed specifically to work within **Obsidian**. 
+DeepOrbit turns your [Obsidian](https://obsidian.md/) vault into an AI-powered research engine. It uses specialized agent skills (via Gemini CLI / Claude Code) to automate deep research, paper translation, content curation, and vault maintenance — so you can focus on thinking, not filing.
 
 > [!IMPORTANT]
-> **Obsidian Requirement**
-> This repository relies entirely on [Obsidian](https://obsidian.md/) as the underlying note-taking tool. The system architecture, folder mechanisms, and wiki-link structures expect a local Obsidian Vault. You MUST install Obsidian for DeepOrbit to function effectively.
+> **Obsidian is required.** DeepOrbit's folder structure, wikilink system, and templates all depend on a local Obsidian vault.
 
-🙏 **Acknowledgments**: DeepOrbit is deeply inspired by and built upon the core philosophy and foundational workflows of [OrbitOS by MarsWang42](https://github.com/MarsWang42/OrbitOS). We extend our sincere gratitude for their innovative approach to vault structure and agent-driven workflows.
-
-While traditional PKM systems focus on manual knowledge entry and linking, **DeepOrbit** is supercharged with specialized AI agents (via Gemini CLI / Claude Code) that automate deep research, literature translation, content curation, and structural maintenance.
+🙏 **Acknowledgments**: DeepOrbit is deeply inspired by [OrbitOS by MarsWang42](https://github.com/MarsWang42/OrbitOS). We extend our sincere gratitude for their innovative approach to vault structure and agent-driven workflows.
 
 ---
 
-## 🗺️ Architecture & Workflows Overview
+## How It Works
 
-DeepOrbit acts as an engine that takes raw inputs (URLs, Papers, PDFs, Ideas) and processes them through specialized AI Skill Packs, finally structuring the output directly into your Obsidian local vault.
+```mermaid
+flowchart LR
+    A["🧠 You"] -->|ideas, URLs, PDFs| B["⚙️ DeepOrbit Agent"]
+    B -->|selects skill| C["🧩 Skill Pack"]
+    C -->|writes notes| D["📂 Obsidian Vault"]
+    D -->|wikilinks| A
+```
 
-### 1. Ingestion & Processing
+You give DeepOrbit raw inputs — an arXiv link, a PDF, a quick idea, a URL. The Agent Engine routes your request to the right **Skill**, which processes, translates, summarizes, or structures the content and saves it directly into your Obsidian vault with proper metadata and wikilinks.
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+| Tool | Required? | Note |
+|------|-----------|------|
+| [Obsidian](https://obsidian.md/) | ✅ Yes | Vault management |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli) or [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | ✅ Yes | Agent runtime |
+| `xelatex` | Optional | For `/do:arxiv-translator` |
+| `marker-pdf` | Optional | For `/do:marker` |
+| `playwright` | Optional | For `/do:notebooklm` |
+
+### Setup (3 steps)
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/dull-bird/DeepOrbit.git
+
+# 2. Run init in your Obsidian vault
+# Windows (PowerShell):
+& "$env:USERPROFILE\.gemini\extensions\deeporbit\scripts\init_deeporbit_prompt.ps1" "C:\path\to\your\vault"
+
+# macOS/Linux (Bash):
+bash ~/.gemini/extensions/deeporbit/scripts/init_deeporbit_prompt.sh ~/path/to/your/vault
+
+# 3. Reload in Gemini CLI
+/memory refresh
+```
+
+The init script will:
+- Copy `DeepOrbitPrompt.md` and `deeporbit.json` into your vault
+- Create all vault folders (see structure below)
+- Inject `DeepOrbitPrompt.md` into `.gemini/settings.json`
+
+### Language Configuration
+
+Edit `deeporbit.json` in your vault root to set the AI's interaction language:
+
+```json
+{ "language": "zh-CN" }
+```
+
+> **Note:** Folder paths always stay in English for stability. Only the AI's responses and generated note content follow this setting.
+
+---
+
+## Vault Structure
 
 ```mermaid
 graph TD
-    A[Raw Inputs: arXiv, PDFs, URLs, Ideas] --> B[DeepOrbit Agent Engine]
-    B --> C[Specialized Skill Packs]
-    C --> D[Target Obsidian Folder]
+    V["📦 Your Obsidian Vault"] --> A["00_Inbox<br/><i>Quick captures</i>"]
+    V --> B["10_Diary<br/><i>Daily logs</i>"]
+    V --> C["20_Projects<br/><i>Active projects</i>"]
+    V --> D["30_Research<br/><i>Deep dives</i>"]
+    V --> E["40_Wiki<br/><i>Atomic concepts</i>"]
+    V --> F["50_Resources<br/><i>Newsletters, Product Launches, News</i>"]
+    V --> G["60_Notes<br/><i>Summaries & captures</i>"]
+    V --> H["90_Plans<br/><i>Execution plans</i>"]
+    V --> I["99_System<br/><i>Templates, Prompts, Archive</i>"]
+
+    style V fill:#1a1a2e,stroke:#16213e,color:#e0e0e0
+    style A fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style B fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style C fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style D fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style E fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style F fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style G fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style H fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style I fill:#0f3460,stroke:#16213e,color:#e0e0e0
 ```
 
-- **Inputs**: arXiv links, local/remote PDFs, web URLs, newsletters, or raw ideas from your Inbox.
-- **Agent Engine**: A suite of specialized agents handles different types of inputs. Depending on the source, the engine translates, OCRs, summarizes, or structures the data.
-- **Storage**: The processed information is saved into designated folders in your Obsidian Vault (e.g., `projects_folder`, `notes_folder`, `resources_folder`) based on your global language configurations in `deeporbit.json`.
+---
 
-### 2. Academic & Research Workflows
+## Skills Overview
+
+DeepOrbit ships with **21 pre-configured AI skills**. Invoke them with `/do:<skill-name>`.
 
 ```mermaid
-graph TD
-    A[arXiv URL / PDF File] --> B[Format Router]
-    B -->|arXiv| C["/do:arxiv-translator"]
-    B -->|PDF| D["/do:marker-pdf"]
-    C --> E[Translate & Compile xeLaTeX]
-    D --> F[OCR & Math Preservation]
-    E --> G[Save to Vault]
-    F --> G
+mindmap
+  root((DeepOrbit Skills))
+    🧠 Daily & Planning
+      /do:daily
+      /do:kickoff
+      /do:brainstorm
+      /do:ask
+    🔬 Research & Knowledge
+      /do:research
+      /do:parse-knowledge
+      /do:note-summary
+      /do:recap
+    📰 Content Curation
+      /do:ai-newsletters
+      /do:ai-products
+      /do:ai-research-digest
+    📚 Academic Tools
+      /do:arxiv-translator
+      /do:marker
+      /do:translate-pdf
+      /do:notebooklm
+    🔧 Vault Maintenance
+      /do:fix-links
+      /do:archive
+      /do:organize
+    ⚙️ Obsidian Integration
+      do.obsidian-markdown
+      do.obsidian-bases
+      do.json-canvas
 ```
 
-- **arXiv & PDF Translation**: Tools like `arxiv-translator` download LaTeX sources, translate to your target language (e.g., Chinese/English), and compile fully formatted PDFs. `marker-pdf` converts PDFs into structured Markdown while preserving complex math formulas.
+### Skills Quick Reference
 
-### 3. Knowledge Maintenance loops
+| Command | What it does |
+|---------|-------------|
+| `/do:daily` | Morning planning: recap yesterday, fetch news, create today's note |
+| `/do:kickoff` | Convert an inbox idea into a structured project (two-agent workflow) |
+| `/do:research` | Deep dive into a topic → Research notes + Wiki entries (two-agent workflow) |
+| `/do:ask` | Quick Q&A without heavy note-taking |
+| `/do:brainstorm` | Interactive Socratic brainstorming partner |
+| `/do:note-summary` | Fetch a URL/file → structured summary in `60_Notes` |
+| `/do:parse-knowledge` | Turn unstructured text into vault-ready Research + Wiki notes |
+| `/do:recap` | Periodic recap report of vault activity over a time range |
+| `/do:arxiv-translator` | Download arXiv paper → translate LaTeX → compile PDF |
+| `/do:marker` | PDF → Markdown (preserves math formulas) |
+| `/do:translate-pdf` | Translate PDF preserving layout, colors, and styling |
+| `/do:notebooklm` | Query Google NotebookLM for source-grounded answers |
+| `/do:ai-newsletters` | Daily AI newsletter digest (RSS-based) |
+| `/do:ai-products` | AI product launches digest (Product Hunt, HN, GitHub, Techmeme) |
+| `/do:ai-research-digest` | AI research digest from Synced/机器之心 |
+| `/do:fix-links` | Scan vault for dead wikilinks → auto-generate Wiki notes |
+| `/do:archive` | Archive completed projects and processed inbox items |
+| `/do:organize` | Deep vault reorganization: fix taxonomy, orphans, metadata |
+
+---
+
+## Core Workflow Examples
+
+### 🌅 Morning Routine
 
 ```mermaid
-graph TD
-    A[Scan Obsidian Vault] --> B{Found Dead Links?}
-    B -->|Yes| C["/do:ghost-link-fixer"]
-    C --> D[LLM 1st Principle Reasoning]
-    D --> E[Generate & Save Wiki Note]
+flowchart TD
+    A["Run /do:daily"] --> B["Review yesterday's diary"]
+    B --> C["Knowledge Recap: what changed in 24h?"]
+    C --> D["Set today's goals"]
+    D --> E["Fetch news from ## News sources"]
+    E --> F["Generate summaries in 50_Resources/Newsletters/"]
+    F --> G["Create today's diary: 10_Diary/YYYY-MM-DD.md"]
 ```
 
-- **Ghost Link Fixer**: Scans your vault for dead wikilinks and automatically queries the LLM to write high-quality foundational notes to fill the knowledge gaps.
-- **Content Pipelines**: Scheduled processes fetch news, deduplicate articles, rank them, and summarize them into curated daily digests.
+### 💡 Idea → Project
+
+```mermaid
+flowchart LR
+    A["Idea in 00_Inbox"] -->|"/do:kickoff"| B["Planning Agent<br/>creates plan in 90_Plans/"]
+    B -->|"User reviews"| C["Execution Agent<br/>creates project in 20_Projects/"]
+    C --> D["Inbox item archived to 99_System/Archive/"]
+```
+
+### 📄 Academic Paper Pipeline
+
+```mermaid
+flowchart LR
+    A["arXiv URL or PDF"] --> B{Format?}
+    B -->|arXiv| C["/do:arxiv-translator<br/>Download + Translate + Compile"]
+    B -->|PDF| D["/do:marker<br/>PDF → Markdown"]
+    B -->|Any PDF| E["/do:translate-pdf<br/>Translate preserving layout"]
+    C --> F["Translated PDF ready"]
+    D --> G["Markdown in vault"]
+    E --> H["Translated PDF ready"]
+```
 
 ---
 
-## 🚀 Core Features & AI Skill Packs
+## Philosophy
 
-DeepOrbit offers a powerful suite of over 20 pre-configured AI Agent Skills located in the `skills/` directory.
-
-### 🧠 Academic & Research Pack
-- **`/do:arxiv-translator`**: Fetches arXiv LaTeX sources, translates papers preserving math, and compiles to PDF using `xelatex`.
-- **`/do:marker-pdf`**: High-fidelity PDF to Markdown conversion (powered by `marker`), tuned for complex math.
-- **`/do:translate-pdf`**: Translates PDF documents while preserving the original layout, structure, colors, and styling.
-- **`/do:notebooklm`**: Queries Google NotebookLM via browser automation for grounded, hallucination-free answers.
-
-### 🕸️ Knowledge Maintenance & Curation
-- **`/do:note-summary`**: Fetches full text from URLs or local files and summarizes into your notes.
-- **`/do:ghost-link-fixer`**: Scans your vault for empty wikilinks and auto-generates first-principle Wiki notes.
-- **`/do:ai-research-digest` / `/do:ai-newsletters` / `/do:ai-products`**: Automated pipelines to fetch, summarize, and deduplicate daily AI news and products.
-- **`/do:archive`**: Clears out completed or old projects/inbox items by archiving them safely.
-- **`/do:organize` / `/do:recap`**: Summarizes vault activities and organizes notes logically.
-
-### ⚙️ Core Workflows (Project Management)
-- **`/do:kickoff`**: Instantly convert an inbox idea into a structured, active Project folder.
-- **`/do:daily`` / `/do:daily`**: Guided morning planning workflows to review diaries, fetch news, and align tasks.
-- **`/do:research`**: Deep dive into any topic with a two-agent architecture outputting structured Wiki entries.
-- **`/do:parse-knowledge`**: Consolidates unstructured text blobs into your vault's framework.
-- **`/do:brainstorm` / `/do:ask`**: Collaborate with your AI assistant on ideas or ask quick questions without heavy note-taking.
-
-### 🔧 Obsidian Technical Integrations
-- **`do.obsidian-markdown` / `do.obsidian-bases` / `do.json-canvas`**: specialized agents to interface natively with Obsidian features like Canvas, Markdown formatting specs, and Data structures.
-
----
-
-## 🛠️ Installation & Setup
-
-1. **Prerequisites**: 
-   - [Obsidian](https://obsidian.md/) (CRITICAL for vault management).
-   - Gemini CLI or Claude Code.
-   - Additional local tools for specific skills (e.g., `xelatex` for `arxiv-translator`, `playwright` for `notebooklm`, `marker` for `marker-pdf`).
-2. **Clone the repository**:
-   ```bash
-   git clone https://github.com/dull-bird/DeepOrbit.git
-   ```
-3. **Init prompt in a vault**:
-   In your Obsidian vault (or any workspace), run `/do:init` using the scripts found in `scripts/`.
-   - Windows: `scripts\init_deeporbit_prompt.ps1`
-   - Linux/macOS: `scripts/init_deeporbit_prompt.sh`
-   This script copies `DeepOrbitPrompt.md` and a configuration file `deeporbit.json` to your workspace, sets up all necessary Obsidian folders, and injects context into `.gemini/settings.json`.
-
-4. **Global Configuration (Language Preference)**:
-   - Within your initialized workspace, locate `deeporbit.json`. 
-   - You can modify the `"language"` value (e.g., `"zh-CN"`, `"en"`). The DeepOrbit AI will read this file and generate all Markdown interactions and file contents in your chosen language. *Note: For maximum system stability, the physical Obsidian folder paths (like `10_Diary`) will always deliberately remain in English.*
-
-5. **Load Skills**:
-   In your CLI configuration file (`AGENTS.md`), point the skill locations to the cloned `skills` directory. Commands are invoked as `/do:<command_name>`.
-
----
-
-## 🌌 Philosophy
-
-Everything orbits around you. Keep your knowledge in motion, but let the AI agents do the heavy lifting of parsing, translating, summarizing, and maintaining the structural integrity of your ideas.
+> Everything orbits around you. Keep your knowledge in motion, but let the AI agents do the heavy lifting of parsing, translating, summarizing, and maintaining the structural integrity of your ideas.
