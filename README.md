@@ -2,7 +2,9 @@
 
 ![DeepOrbit Banner](deeporbit.png)
 
-> **Not just Personal Knowledge Management — a fully automated, Agent-driven Digital Research Assistant.**
+> **An AI-agent system that bridges LLMs with Obsidian to automate deep research and personal knowledge management.**
+
+[**中文文档**](README_CN.md)
 
 DeepOrbit turns your [Obsidian](https://obsidian.md/) vault into an AI-powered research engine. It uses specialized agent skills (via Gemini CLI / Claude Code) to automate deep research, paper translation, content curation, and vault maintenance — so you can focus on thinking, not filing.
 
@@ -36,7 +38,6 @@ You give DeepOrbit raw inputs — an arXiv link, a PDF, a quick idea, a URL. The
 | [Obsidian](https://obsidian.md/) | ✅ Yes | Vault management |
 | [Gemini CLI](https://github.com/google-gemini/gemini-cli) or [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | ✅ Yes | Agent runtime |
 | `xelatex` | Optional | For `/do:arxiv-translator` |
-| `marker-pdf` | Optional | For `/do:marker` |
 | `playwright` | Optional | For `/do:notebooklm` |
 
 ### Setup (3 steps)
@@ -124,8 +125,6 @@ mindmap
       /do:ai-research-digest
     📚 Academic Tools
       /do:arxiv-translator
-      /do:marker
-      /do:translate-pdf
       /do:notebooklm
     🔧 Vault Maintenance
       /do:fix-links
@@ -150,8 +149,6 @@ mindmap
 | `/do:parse-knowledge` | Turn unstructured text into vault-ready Research + Wiki notes |
 | `/do:recap` | Periodic recap report of vault activity over a time range |
 | `/do:arxiv-translator` | Download arXiv paper → translate LaTeX → compile PDF |
-| `/do:marker` | PDF → Markdown (preserves math formulas) |
-| `/do:translate-pdf` | Translate PDF preserving layout, colors, and styling |
 | `/do:notebooklm` | Query Google NotebookLM for source-grounded answers |
 | `/do:ai-newsletters` | Daily AI newsletter digest (RSS-based) |
 | `/do:ai-products` | AI product launches digest (Product Hunt, HN, GitHub, Techmeme) |
@@ -189,13 +186,11 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["arXiv URL or PDF"] --> B{Format?}
-    B -->|arXiv| C["/do:arxiv-translator<br/>Download + Translate + Compile"]
-    B -->|PDF| D["/do:marker<br/>PDF → Markdown"]
-    B -->|Any PDF| E["/do:translate-pdf<br/>Translate preserving layout"]
-    C --> F["Translated PDF ready"]
-    D --> G["Markdown in vault"]
-    E --> H["Translated PDF ready"]
+    A["arXiv URL"] --> B["/do:arxiv-translator"]
+    B --> C["Download LaTeX source"]
+    C --> D["Translate to target language"]
+    D --> E["Compile with xelatex"]
+    E --> F["Translated PDF ready"]
 ```
 
 ---
