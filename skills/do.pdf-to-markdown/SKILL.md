@@ -12,6 +12,7 @@ Convert PDF documents into structured Markdown while ensuring **zero paragraph l
 ## 🚫 CRITICAL ANTI-PATTERNS (DO NOT DO THIS)
 - **DO NOT** write or run Python scripts (e.g., `PyMuPDF`, `fitz.get_text()`, `pdfplumber`) to blindly extract text. Python text extraction destroys LaTeX math formulas, breaks tables, and ruins multi-column layouts.
 - **DO NOT** try to convert the entire document in one single turn.
+- **DO NOT** translate the PDF text. You must strictly perform format conversion only and keep the original language.
 - **YOU MUST** use your native multimodal vision capabilities by calling the `read_file` tool directly on the PDF. This passes the PDF to you visually, allowing you to correctly perceive and transcribe LaTeX math, tables, and complex layouts.
 
 ## Prerequisites
@@ -166,4 +167,4 @@ tags: [pdf-conversion]
 
 ## Rules
 
-- Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+- **DO NOT** try to read `deeporbit.json` for language settings. The output Markdown must preserve the original language of the PDF verbatim. **The Obsidian folder paths themselves will ALWAYS remain in English.**
