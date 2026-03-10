@@ -2,6 +2,14 @@ import pdfplumber
 import sys
 import os
 
+def is_two_column_layout(page, words):
+    """检测页面是否为双栏排版"""
+    center_x = page.width / 2
+    gutter_width = page.width * 0.05
+    # 统计横跨中线的文字块比例
+    crossing_words = [w for w in words if w['x0'] < (center_x - gutter_width/2) and w['x1'] > (center_x + gutter_width/2)]
+    return len(crossing_words) < (len(words) * 0.03) # 只有不到 3% 的文字横跨中线，视为双栏
+
 def extract_pdf_images(pdf_path):
     output_dir = pdf_path.replace('.pdf', '_assets')
     os.makedirs(output_dir, exist_ok=True)
@@ -14,87 +22,79 @@ def extract_pdf_images(pdf_path):
             img_count = 0
             
             for page_num, page in enumerate(pdf.pages):
-                # 1. 提取原生嵌入图像 (Photographs/Scans)
+                words = page.extract_words()
+                if not words: continue
+                
+                is_2col = is_two_column_layout(page, words)
+                center_x = page.width / 2
+                
+                # 1. 提取原生嵌入图像
                 for img_idx, img in enumerate(page.images):
                     try:
-                        # 转换坐标系统：pdfplumber 的 images 坐标与 crop 期望的坐标可能有所不同
-                        # 确保不超出边界
-                        x0 = max(0, img["x0"])
-                        top = max(0, page.height - img["y1"])
-                        x1 = min(page.width, img["x1"])
-                        bottom = min(page.height, page.height - img["y0"])
-                        
-                        # 过滤无效边界
-                        if x0 >= x1 or top >= bottom:
-                            continue
-                            
-                        bbox = (x0, top, x1, bottom)
-                        cropped_page = page.crop(bbox)
-                        pil_img = cropped_page.to_image(resolution=300).original
+                        x0, y0, x1, y1 = img["x0"], page.height - img["y1"], img["x1"], page.height - img["y0"]
+                        if x0 >= x1 or y0 >= y1: continue
                         img_path = os.path.join(output_dir, f"page{page_num+1}_img{img_idx+1}.png")
-                        pil_img.save(img_path)
+                        page.crop((max(0, x0), max(0, y0), min(page.width, x1), min(page.height, y1))).to_image(resolution=300).save(img_path)
                         print(f"- Extracted Raw Image: {img_path}")
                         img_count += 1
-                    except Exception as e:
-                        print(f"  [Warning] Failed to extract raw image on page {page_num+1}: {e}")
+                    except: pass
 
-                # 2. 启发式提取矢量图表 (Figures/Charts)
-                # 寻找 'Figure' 或 'Fig.' 开头的文字块作为锚点
-                words = page.extract_words()
-                figure_anchors = []
+                # 2. 智能提取图表 (Figures)
+                figure_anchors = [w for w in words if w['text'].lower().startswith(('figure', 'fig.'))]
                 
-                for i, word in enumerate(words):
-                    text = word['text']
-                    if text.startswith('Figure') or text.startswith('Fig.'):
-                        figure_anchors.append(word)
-
                 if figure_anchors:
-                    print(f"  Found {len(figure_anchors)} potential figure captions on page {page_num+1}")
+                    print(f"  Page {page_num+1}: Found {len(figure_anchors)} figure captions. Layout: {'2-Col' if is_2col else '1-Col'}")
                     
                     for idx, anchor in enumerate(figure_anchors):
-                        # 智能判断单双栏 (以页面中线为界)
-                        is_left_column = anchor['x0'] < page.width / 2
-                        is_right_column = anchor['x0'] > page.width / 2
+                        caption_top = anchor['top']
                         
-                        # 判断排版系双栏还是单栏：如果页面很宽(>500)通常是双栏，否则视为单栏
-                        is_two_column_format = page.width > 500
+                        # A. 向上寻找图形元素范围 (向上追溯约 400 pts)
+                        search_limit = max(0, caption_top - 400)
+                        # 寻找此范围内的图形对象
+                        nearby_objs = [obj for obj in page.images + page.rects 
+                                      if obj['bottom'] < caption_top and obj['top'] > search_limit]
                         
-                        # 确定 X 轴边界
-                        if is_two_column_format and is_left_column:
-                            x0, x1 = 0, page.width / 2
-                        elif is_two_column_format and is_right_column:
-                            x0, x1 = page.width / 2, page.width
+                        # B. 寻找顶部正文边界 (寻找上方最近的、不属于此图表的文字块)
+                        objs_top = min([obj['top'] for obj in nearby_objs]) if nearby_objs else search_limit
+                        words_above = [w for w in words if w['bottom'] < caption_top and w['bottom'] > search_limit - 50]
+                        # 过滤掉可能是图表内标注的短文字 (简单启发式：离 Caption 很近且很短)
+                        body_text_above = [w for w in words_above if w['bottom'] < objs_top - 10]
+                        final_top = max([w['bottom'] for w in body_text_above]) if body_text_above else search_limit
+                        
+                        # C. 判定宽度类型 (Span-column check)
+                        # 检查 Caption 或图形对象是否跨越中线
+                        is_span = anchor['x1'] > center_x + 20 and anchor['x0'] < center_x - 20
+                        if nearby_objs:
+                            objs_x0 = min(o['x0'] for o in nearby_objs)
+                            objs_x1 = max(o['x1'] for o in nearby_objs)
+                            if objs_x0 < center_x - 20 and objs_x1 > center_x + 20:
+                                is_span = True
+                        
+                        # 检查侧向冲突：在此高度区间，中线另一侧是否有文字
+                        test_y_range = (max(final_top, objs_top), caption_top)
+                        side_words = [w for w in words if w['top'] > test_y_range[0] and w['bottom'] < test_y_range[1]]
+                        has_left_text = any(w['x1'] < center_x - 10 for w in side_words)
+                        has_right_text = any(w['x0'] > center_x + 10 for w in side_words)
+                        
+                        if is_2col and has_left_text and has_right_text:
+                            # 典型的双栏内嵌图
+                            x0 = 0 if anchor['x0'] < center_x else center_x
+                            x1 = center_x if anchor['x0'] < center_x else page.width
                         else:
-                            # 单栏排版，X轴覆盖全宽
+                            # 跨栏图、全宽图或单栏论文图
                             x0, x1 = 0, page.width
 
-                        # 确定 Y 轴边界：向上追溯到页面顶部
-                        # 学术图表通常在页面顶部或者段落之间。为了简单，直接裁剪到页顶。
-                        # （如果同一栏有多个图，则从上一个图的 Caption 底部开始）
-                        bottom_y = anchor['top']
-                        
-                        # 寻找在当前图表上方的最近的一个图表 caption（如果在同一栏）
-                        top_y = 0
-                        for prev_anchor in figure_anchors[:idx]:
-                            # 如果之前的图也在同一栏，并且位置在当前图上方
-                            if abs(prev_anchor['x0'] - anchor['x0']) < 100 and prev_anchor['bottom'] < bottom_y:
-                                top_y = max(top_y, prev_anchor['bottom'])
-                        
-                        # 裁剪区域
+                        # D. 执行裁剪
                         try:
-                            bbox = (max(0, x0 - 10), max(0, top_y), min(page.width, x1 + 10), min(page.height, bottom_y))
+                            bbox = (max(0, x0), max(0, final_top - 5), min(page.width, x1), min(page.height, caption_top))
+                            if bbox[2] - bbox[0] < 50 or bbox[3] - bbox[1] < 50: continue # 过滤太小的区域
                             
-                            # 过滤无效边界
-                            if bbox[0] >= bbox[2] or bbox[1] >= bbox[3]:
-                                continue
-                                
-                            cropped = page.crop(bbox)
                             img_path = os.path.join(output_dir, f"page{page_num+1}_figure{idx+1}_rendered.png")
-                            cropped.to_image(resolution=300).save(img_path)
-                            print(f"- Rendered Figure Box: {img_path}")
+                            page.crop(bbox).to_image(resolution=300).save(img_path)
+                            print(f"- Rendered Figure Box: {img_path} (Span: {is_span})")
                             img_count += 1
                         except Exception as e:
-                            print(f"  [Warning] Failed to crop figure on page {page_num+1}: {e}")
+                            print(f"  [Error] Page {page_num+1} Fig {idx+1}: {e}")
 
             print(f"\nTotal images extracted: {img_count}")
 
@@ -102,7 +102,5 @@ def extract_pdf_images(pdf_path):
         print(f"Error processing PDF: {e}")
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print("Usage: python extract_images_pdfplumber.py <pdf_path>")
-        sys.exit(1)
+    if len(sys.argv) < 2: sys.exit(1)
     extract_pdf_images(sys.argv[1])

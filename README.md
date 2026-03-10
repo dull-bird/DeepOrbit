@@ -104,7 +104,7 @@ graph TD
 
 ## Skills Overview
 
-DeepOrbit ships with **21 pre-configured AI skills**. Invoke them with `/do:<skill-name>`.
+DeepOrbit ships with **23 pre-configured AI skills**. Invoke them with `/do:<skill-name>`.
 
 ```mermaid
 mindmap
@@ -126,6 +126,9 @@ mindmap
     📚 Academic Tools
       /do:arxiv-translator
       /do:notebooklm
+    📄 Document Processing
+      /do:pdf-to-markdown
+      /do:translate-markdown
     🔧 Vault Maintenance
       /do:fix-links
       /do:archive
@@ -150,6 +153,8 @@ mindmap
 | `/do:recap` | Periodic recap report of vault activity over a time range |
 | `/do:arxiv-translator` | Download arXiv paper → translate LaTeX → compile PDF |
 | `/do:notebooklm` | Query Google NotebookLM for source-grounded answers |
+| `/do:pdf-to-markdown` | PDF → Markdown with completeness checklist + image extraction |
+| `/do:translate-markdown` | Translate Markdown to target language, section-by-section with verification |
 | `/do:ai-newsletters` | Daily AI newsletter digest (RSS-based) |
 | `/do:ai-products` | AI product launches digest (Product Hunt, HN, GitHub, Techmeme) |
 | `/do:ai-research-digest` | AI research digest from Synced/机器之心 |

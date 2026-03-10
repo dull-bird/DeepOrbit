@@ -104,7 +104,7 @@ graph TD
 
 ## 技能一览
 
-DeepOrbit 内置 **21 个预配置 AI 技能**，通过 `/do:<技能名>` 调用。
+DeepOrbit 内置 **23 个预配置 AI 技能**，通过 `/do:<技能名>` 调用。
 
 ```mermaid
 mindmap
@@ -126,6 +126,9 @@ mindmap
     📚 学术工具
       /do:arxiv-translator
       /do:notebooklm
+    📄 文档处理
+      /do:pdf-to-markdown
+      /do:translate-markdown
     🔧 知识库维护
       /do:fix-links
       /do:archive
@@ -150,6 +153,8 @@ mindmap
 | `/do:recap` | 指定时间范围的知识库活动周期性回顾报告 |
 | `/do:arxiv-translator` | 下载 arXiv 论文 → 翻译 LaTeX → 编译 PDF |
 | `/do:notebooklm` | 查询 Google NotebookLM 获取基于源文档的回答 |
+| `/do:pdf-to-markdown` | PDF → Markdown, 完整性清单 + 图像提取 |
+| `/do:translate-markdown` | 逐 section 翻译 Markdown, 术语一致性校验 |
 | `/do:ai-newsletters` | 每日 AI 新闻简报摘要（基于 RSS） |
 | `/do:ai-products` | AI 产品发布摘要（Product Hunt、HN、GitHub、Techmeme） |
 | `/do:ai-research-digest` | AI 研究摘要（来自机器之心） |
