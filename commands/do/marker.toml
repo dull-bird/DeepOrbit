@@ -1,7 +1,0 @@
-# Marker (PDF to Markdown)
-
-description = "Convert PDF to Markdown preserving LaTeX and structure via do.marker"
-prompt = """
-Use the do.marker skill. Convert the given PDF to Markdown with marker_single, preserving formulas and layout. Ideal for academic papers.
-User input: {{args}}
-"""

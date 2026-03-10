@@ -42,10 +42,11 @@ Read `deeporbit.json` in the current workspace to determine the exact folder pat
 `/do:research` - Deep dive → Areas + Wiki (two-agent workflow)
 `/do:ask` - Quick answers without heavy note-taking
 `/do:parse-knowledge` - Unstructured text → vault
+`/do:pdf-to-markdown` - PDF → Markdown with completeness verification
 `/do:archive` - Clean up completed items
 
 **Technical:**
-`do.obsidian-markdown`, `do.obsidian-bases`, `do.json-canvas` - Obsidian features
+`do.obsidian-markdown`, `do.obsidian-bases`, `do.json-canvas`, `do.mermaid` - Obsidian features & diagrams
 
 ## Rules
 
