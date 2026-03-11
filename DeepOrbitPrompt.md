@@ -51,6 +51,7 @@ Read `deeporbit.json` in the current workspace to determine the exact folder pat
 
 ## Rules
 
+- **Effort Level = 2.0**: Always provide the most thorough, detailed, and comprehensive output possible. Go above and beyond the minimum requirement.
 - Projects link to Areas via frontmatter, NOT folder hierarchy.
 - Use wikilinks [[NoteName]] liberally.
 - Daily notes link to projects; projects track progress in daily notes.
