@@ -104,16 +104,38 @@ graph TD
 
 ## Skills Overview
 
-DeepOrbit ships with **23 pre-configured AI skills**. Invoke them with `/do:<skill-name>`.
+DeepOrbit ships with **23 pre-configured AI skills**, split into two categories:
+
+### 🌐 Universal Skills (Work Anywhere)
+
+These skills work independently — no Obsidian vault required.
 
 ```mermaid
 mindmap
-  root((DeepOrbit Skills))
+  root((Universal Skills))
+    🧠 Thinking
+      /do:ask
+      /do:brainstorm
+    📚 Academic
+      /do:arxiv-translator
+      /do:notebooklm
+    📄 Document Processing
+      /do:pdf-to-markdown
+      /do:translate-markdown
+    ⚙️ Diagramming
+      do.mermaid
+```
+
+### 📂 Obsidian Skills (Require Vault)
+
+These skills read from or write to the DeepOrbit vault structure.
+
+```mermaid
+mindmap
+  root((Obsidian Skills))
     🧠 Daily & Planning
       /do:daily
       /do:kickoff
-      /do:brainstorm
-      /do:ask
     🔬 Research & Knowledge
       /do:research
       /do:parse-knowledge
@@ -123,12 +145,6 @@ mindmap
       /do:ai-newsletters
       /do:ai-products
       /do:ai-research-digest
-    📚 Academic Tools
-      /do:arxiv-translator
-      /do:notebooklm
-    📄 Document Processing
-      /do:pdf-to-markdown
-      /do:translate-markdown
     🔧 Vault Maintenance
       /do:fix-links
       /do:archive

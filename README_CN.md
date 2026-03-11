@@ -104,16 +104,38 @@ graph TD
 
 ## 技能一览
 
-DeepOrbit 内置 **23 个预配置 AI 技能**，通过 `/do:<技能名>` 调用。
+DeepOrbit 内置 **23 个预配置 AI 技能**，分为两大类：
+
+### 🌐 通用技能(无需 Obsidian)
+
+这些技能独立运作, 不依赖 Obsidian 知识库。
 
 ```mermaid
 mindmap
-  root((DeepOrbit 技能))
+  root((通用技能))
+    🧠 思考
+      /do:ask
+      /do:brainstorm
+    📚 学术
+      /do:arxiv-translator
+      /do:notebooklm
+    📄 文档处理
+      /do:pdf-to-markdown
+      /do:translate-markdown
+    ⚙️ 图表
+      do.mermaid
+```
+
+### 📂 Obsidian 技能(需要知识库)
+
+这些技能依赖 DeepOrbit 知识库的文件夹结构。
+
+```mermaid
+mindmap
+  root((Obsidian 技能))
     🧠 日常与规划
       /do:daily
       /do:kickoff
-      /do:brainstorm
-      /do:ask
     🔬 研究与知识
       /do:research
       /do:parse-knowledge
@@ -123,12 +145,6 @@ mindmap
       /do:ai-newsletters
       /do:ai-products
       /do:ai-research-digest
-    📚 学术工具
-      /do:arxiv-translator
-      /do:notebooklm
-    📄 文档处理
-      /do:pdf-to-markdown
-      /do:translate-markdown
     🔧 知识库维护
       /do:fix-links
       /do:archive
