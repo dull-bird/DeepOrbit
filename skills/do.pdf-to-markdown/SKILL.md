@@ -70,14 +70,21 @@ Note the image count in the manifest — it will be verified in Phase 3.
 
 ---
 
-### Phase 2: Page-by-Page Sequential Conversion
+### Phase 2: Section-by-Section Conversion (via Ralph Loop)
 
-**CRITICAL: Process ONE page range at a time. Use `read_file` with `start_line` / `end_line` (or visually read specific pages). Do NOT attempt to convert the entire document in a single pass.**
+**CRITICAL: Each section is converted in a separate Ralph iteration. Do NOT attempt to convert multiple sections in one agent turn.**
 
-For each section in the manifest:
+**Step 1:** After Phase 1 is done (manifest + images extracted), launch the Ralph loop:
 
-1. **READ** the specific page visually using `read_file`.
-2. **CONVERT** to Markdown manually, preserving:
+```bash
+/ralph:loop "You are running do.pdf-to-markdown Phase 2. The manifest is at '<filename>_manifest.md'. Your job in THIS iteration: 1) Read the manifest. 2) Find the FIRST section still marked '- [ ]'. 3) Read that section's pages from the PDF using read_file. 4) Convert to Markdown and APPEND to '<filename>.md'. 5) Update the manifest: '- [ ]' to '- [x]'. 6) If ALL sections are now [x], run Phase 3 verification and output '<promise>CONVERSION_COMPLETE</promise>'. Otherwise, just finish this turn." --completion-promise "CONVERSION_COMPLETE" --max-iterations 30
+```
+
+**Step 2:** Each Ralph iteration does the following for ONE section:
+
+1. **READ** the manifest → find the first unchecked `[ ]` section.
+2. **READ** that section's pages visually using `read_file`.
+3. **CONVERT** to Markdown, preserving:
    - Heading hierarchy (`#`, `##`, `###`)
    - Paragraph breaks (empty lines between paragraphs)
    - Bold/italic emphasis
@@ -87,14 +94,32 @@ For each section in the manifest:
    - Code blocks → fenced code blocks with language
    - Footnotes → Markdown footnotes `[^1]`
    - Figure references → `![Figure N: caption](<filename>_assets/pageX_imgY.ext)` using extracted images
-3. **APPEND** to the output file `<filename>.md` immediately (do not hold everything in memory).
-4. **CHECK OFF** the section in the manifest: `- [ ]` → `- [x]` by updating `<filename>_manifest.md`.
-5. **VERIFY** the converted section:
+4. **APPEND** to the output file `<filename>.md` immediately.
+5. **CHECK OFF** the section in the manifest: `- [ ]` → `- [x]`.
+6. **VERIFY** the converted section:
    - Does the paragraph count roughly match the source?
-   - Are there any obvious truncations (sentences ending mid-thought)?
+   - Are there any obvious truncations?
    - Are all tables from this page range present?
+7. **End the turn.** Ralph automatically starts the next iteration.
 
-**Only then proceed to the next section.**
+```mermaid
+flowchart TD
+    A["Phase 1 done: manifest + images"] --> B["/ralph:loop"]
+    B --> C["Iteration N: Read manifest"]
+    C --> D{"Find next [ ] section"}
+    D -->|Found| E["read_file: visually read pages"]
+    E --> F["Convert to Markdown"]
+    F --> G["Append to output + check off [x]"]
+    G --> H["Turn ends"]
+    H --> C
+    D -->|All [x]| I["Phase 3: Verification"]
+    I --> J["CONVERSION_COMPLETE"]
+```
+
+> [!IMPORTANT]
+> Set `--max-iterations` to roughly 2× the number of sections. If Ralph stops mid-way, just re-run — it picks up from the first unchecked `[ ]`.
+
+**Only after all sections are `[x]` does the loop proceed to Phase 3.**
 
 ---
 
@@ -164,6 +189,18 @@ tags: [pdf-conversion]
 
 ### Multi-Column Layouts
 - Linearize to single-column, preserving reading order (left column first, then right)
+
+---
+
+## Ralph Loop Reference
+
+| Ralph Feature | How PDF-to-Markdown Uses It |
+|---|---|
+| **Persistent state via files** | Manifest (`_manifest.md`) tracks progress across turns |
+| **Fresh context each turn** | Each chapter gets full context window — no overflow |
+| **Completion promise** | `CONVERSION_COMPLETE` triggers when all `[ ]` become `[x]` |
+| **Max iterations safety** | Prevents infinite loops if a section fails repeatedly |
+| **Self-correction** | Each turn reads current state, can fix issues from previous turns |
 
 ## Rules
 
