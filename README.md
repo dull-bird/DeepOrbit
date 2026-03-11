@@ -164,7 +164,7 @@ mindmap
 | `/do:research` | Deep dive into a topic → Research notes + Wiki entries (two-agent workflow) |
 | `/do:ask` | Quick Q&A without heavy note-taking |
 | `/do:brainstorm` | Interactive Socratic brainstorming partner |
-| `/do:note-summary` | Fetch a URL/file → structured summary in `60_Notes` |
+| `/do:note-summary` | Fetch URL/file/paper → structured summary with three-pass depth control + checklist |
 | `/do:parse-knowledge` | Turn unstructured text into vault-ready Research + Wiki notes |
 | `/do:recap` | Periodic recap report of vault activity over a time range |
 | `/do:arxiv-translator` | Download arXiv paper → translate LaTeX → compile PDF |

@@ -164,7 +164,7 @@ mindmap
 | `/do:research` | 深入研究某个主题 → 生成研究笔记 + Wiki 条目（双 Agent 工作流） |
 | `/do:ask` | 快速问答，无需繁重的笔记流程 |
 | `/do:brainstorm` | 交互式苏格拉底式头脑风暴伙伴 |
-| `/do:note-summary` | 获取 URL/文件 → 结构化摘要存入 `60_Notes` |
+| `/do:note-summary` | 获取 URL/文件/论文 → 三遍阅读法深度控制 + 完整性清单 |
 | `/do:parse-knowledge` | 将非结构化文本转化为知识库就绪的研究笔记 + Wiki 条目 |
 | `/do:recap` | 指定时间范围的知识库活动周期性回顾报告 |
 | `/do:arxiv-translator` | 下载 arXiv 论文 → 翻译 LaTeX → 编译 PDF |
