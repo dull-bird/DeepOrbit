@@ -44,6 +44,7 @@ Read `deeporbit.json` in the current workspace to determine the exact folder pat
 `/do:parse-knowledge` - Unstructured text → vault
 `/do:pdf-to-markdown` - PDF → Markdown with completeness verification
 `/do:translate-markdown` - Translate Markdown to target language with section-level checklist
+`/do:refresh-prompt` - Safely update DeepOrbitPrompt.md with diff comparison + merge options
 `/do:archive` - Clean up completed items
 
 **Technical:**

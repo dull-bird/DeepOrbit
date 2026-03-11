@@ -104,7 +104,7 @@ graph TD
 
 ## Skills Overview
 
-DeepOrbit ships with **23 pre-configured AI skills**, split into two categories:
+DeepOrbit ships with **24 pre-configured AI skills**, split into two categories:
 
 ### 🌐 Universal Skills (Work Anywhere)
 
@@ -149,6 +149,7 @@ mindmap
       /do:fix-links
       /do:archive
       /do:organize
+      /do:refresh-prompt
     ⚙️ Obsidian Integration
       do.obsidian-markdown
       do.obsidian-bases
@@ -176,7 +177,8 @@ mindmap
 | `/do:ai-research-digest` | AI research digest from Synced/机器之心 |
 | `/do:fix-links` | Scan vault for dead wikilinks → auto-generate Wiki notes |
 | `/do:archive` | Archive completed projects and processed inbox items |
-| `/do:organize` | Deep vault reorganization: fix taxonomy, orphans, metadata |
+| `/do:organize` | Deep vault reorganization: root hygiene, taxonomy, orphans, metadata |
+| `/do:refresh-prompt` | Safely update DeepOrbitPrompt.md with diff comparison + merge options |
 
 ---
 

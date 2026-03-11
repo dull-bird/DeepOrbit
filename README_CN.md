@@ -104,7 +104,7 @@ graph TD
 
 ## 技能一览
 
-DeepOrbit 内置 **23 个预配置 AI 技能**，分为两大类：
+DeepOrbit 内置 **24 个预配置 AI 技能**，分为两大类：
 
 ### 🌐 通用技能(无需 Obsidian)
 
@@ -149,6 +149,7 @@ mindmap
       /do:fix-links
       /do:archive
       /do:organize
+      /do:refresh-prompt
     ⚙️ Obsidian 集成
       do.obsidian-markdown
       do.obsidian-bases
@@ -176,7 +177,8 @@ mindmap
 | `/do:ai-research-digest` | AI 研究摘要（来自机器之心） |
 | `/do:fix-links` | 扫描知识库中的失效双链 → 自动生成 Wiki 笔记 |
 | `/do:archive` | 归档已完成的项目和已处理的收件箱条目 |
-| `/do:organize` | 深度知识库重组：修复分类、孤立笔记、元数据 |
+| `/do:organize` | 深度知识库重组: 根目录清理 + 分类修复 + 孤立笔记 + 元数据 |
+| `/do:refresh-prompt` | 安全更新 DeepOrbitPrompt.md, diff 对比 + 合并选项 |
 
 ---
 
