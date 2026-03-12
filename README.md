@@ -38,7 +38,7 @@ You give DeepOrbit raw inputs — an arXiv link, a PDF, a quick idea, a URL. The
 | [Obsidian](https://obsidian.md/) | ✅ Yes | Vault management |
 | [Gemini CLI](https://github.com/google-gemini/gemini-cli) or [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | ✅ Yes | Agent runtime |
 | `xelatex` | Optional | For `/do:arxiv-translator` |
-| `playwright` | Optional | For `/do:notebooklm` |
+| `xelatex` | Optional | For `/do:arxiv-translator` |
 
 ### Setup (3 steps)
 
@@ -53,11 +53,12 @@ git clone https://github.com/dull-bird/DeepOrbit.git
 # macOS/Linux (Bash):
 bash ~/.gemini/extensions/deeporbit/scripts/init_deeporbit_prompt.sh ~/path/to/your/vault
 
-# 3. Reload in Gemini CLI
+# 3. Initialize in Gemini CLI
+/do:init ~/path/to/your/vault
 /memory refresh
 ```
 
-The init script will:
+The init script (or `/do:init` command) will:
 - Copy `DeepOrbitPrompt.md` and `deeporbit.json` into your vault
 - Create all vault folders (see structure below)
 - Inject `DeepOrbitPrompt.md` into `.gemini/settings.json`
@@ -77,7 +78,7 @@ Edit `deeporbit.json` in your vault root to set the AI's interaction language:
 ## Vault Structure
 
 ```mermaid
-graph TD
+flowchart TD
     V["📦 Your Obsidian Vault"] --> A["00_Inbox<br/><i>Quick captures</i>"]
     V --> B["10_Diary<br/><i>Daily logs</i>"]
     V --> C["20_Projects<br/><i>Active projects</i>"]
@@ -145,6 +146,11 @@ mindmap
       /do:ai-newsletters
       /do:ai-products
       /do:ai-research-digest
+    📚 Academic Tools
+      /do:arxiv-translator
+    📄 Document Processing
+      /do:pdf-to-markdown
+      /do:translate-markdown
     🔧 Vault Maintenance
       /do:fix-links
       /do:archive
@@ -169,7 +175,6 @@ mindmap
 | `/do:parse-knowledge` | Turn unstructured text into vault-ready Research + Wiki notes |
 | `/do:recap` | Periodic recap report of vault activity over a time range |
 | `/do:arxiv-translator` | Download arXiv paper → translate LaTeX → compile PDF |
-| `/do:notebooklm` | Query Google NotebookLM for source-grounded answers |
 | `/do:pdf-to-markdown` | PDF → Markdown with completeness checklist + image extraction |
 | `/do:translate-markdown` | Translate Markdown to target language, section-by-section with verification |
 | `/do:ai-newsletters` | Daily AI newsletter digest (RSS-based) |
