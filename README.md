@@ -78,44 +78,44 @@ Edit `deeporbit.json` in your vault root to set the AI's interaction language:
 ## Vault Structure
 
 ```mermaid
-flowchart LR
+flowchart TD
     V["📦 Your Obsidian Vault"]
     
     V --> G1
     V --> G2
     V --> G3
 
-    subgraph G1 ["Captured & Active"]
+    subgraph G1 [Captured & Active]
         direction TD
-        A["00_Inbox<br/><i>Quick captures</i>"]
-        B["10_Diary<br/><i>Daily logs</i>"]
-        C["20_Projects<br/><i>Active projects</i>"]
+        node_A["00_Inbox<br/><i>Quick captures</i>"]
+        node_B["10_Diary<br/><i>Daily logs</i>"]
+        node_C["20_Projects<br/><i>Active projects</i>"]
     end
     
-    subgraph G2 ["Knowledge Base"]
+    subgraph G2 [Knowledge Base]
         direction TD
-        D["30_Research<br/><i>Deep dives</i>"]
-        E["40_Wiki<br/><i>Atomic concepts</i>"]
-        G["60_Notes<br/><i>Summaries & captures</i>"]
+        node_D["30_Research<br/><i>Deep dives</i>"]
+        node_E["40_Wiki<br/><i>Atomic concepts</i>"]
+        node_G["60_Notes<br/><i>Summaries & captures</i>"]
     end
     
-    subgraph G3 ["Resources & Support"]
+    subgraph G3 [Resources & Support]
         direction TD
-        F["50_Resources<br/><i>Newsletters, Product Launches</i>"]
-        H["90_Plans<br/><i>Execution plans</i>"]
-        I["99_System<br/><i>Templates & Prompts</i>"]
+        node_F["50_Resources<br/><i>Newsletters, Product Launches</i>"]
+        node_H["90_Plans<br/><i>Execution plans</i>"]
+        node_I["99_System<br/><i>Templates & Prompts</i>"]
     end
 
     style V fill:#1a1a2e,stroke:#16213e,color:#e0e0e0
-    style A fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style B fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style C fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style D fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style E fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style F fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style G fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style H fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style I fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style node_A fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style node_B fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style node_C fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style node_D fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style node_E fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style node_F fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style node_G fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style node_H fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style node_I fill:#0f3460,stroke:#16213e,color:#e0e0e0
 ```
 
 ---
