@@ -78,7 +78,7 @@ Edit `deeporbit.json` in your vault root to set the AI's interaction language:
 ## Vault Structure
 
 ```mermaid
-flowchart TD
+flowchart LR
     V["📦 Your Obsidian Vault"] --> A["00_Inbox<br/><i>Quick captures</i>"]
     V --> B["10_Diary<br/><i>Daily logs</i>"]
     V --> C["20_Projects<br/><i>Active projects</i>"]
