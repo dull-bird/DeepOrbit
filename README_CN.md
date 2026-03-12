@@ -37,8 +37,8 @@ flowchart TD
 |------|--------|------|
 | [Obsidian](https://obsidian.md/) | ✅ 是 | 知识库管理 |
 | [Gemini CLI](https://github.com/google-gemini/gemini-cli) 或 [Claude Code (有限支持)](https://docs.anthropic.com/en/docs/claude-code) | ✅ 是 | Agent 运行时 |
-| `ralph` | **必需** | 用于 `/do:pdf-to-markdown` 和 `/do:translate-markdown` |
-| `xelatex` | 可选 | 用于 `/do:arxiv-translator` |
+| `ralph` | **推荐** | 用于 `/do:pdf-to-markdown` 和 `/do:translate-markdown` |
+| `xelatex` | **推荐** | 用于 `/do:arxiv-translator` |
 
 ### 三步安装
 

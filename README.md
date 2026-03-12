@@ -37,8 +37,8 @@ You give DeepOrbit raw inputs — an arXiv link, a PDF, a quick idea, a URL. The
 |------|-----------|------|
 | [Obsidian](https://obsidian.md/) | ✅ Yes | Vault management |
 | [Gemini CLI](https://github.com/google-gemini/gemini-cli) or [Claude Code (limited support)](https://docs.anthropic.com/en/docs/claude-code) | ✅ Yes | Agent runtime |
-| `ralph` | **Required** | For `/do:pdf-to-markdown` and `/do:translate-markdown` |
-| `xelatex` | Optional | For `/do:arxiv-translator` |
+| `ralph` | **recommended** | For `/do:pdf-to-markdown` and `/do:translate-markdown` |
+| `xelatex` | **recommended** | For `/do:arxiv-translator` |
 
 ### Setup (3 steps)
 
