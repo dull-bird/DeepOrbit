@@ -158,10 +158,6 @@ mindmap
       /do:parse-knowledge
       /do:note-summary
       /do:recap
-    📰 内容策展
-      /do:ai-newsletters
-      /do:ai-products
-      /do:ai-research-digest
     📚 学术工具
       /do:arxiv-translator
     📄 文档处理
@@ -189,15 +185,9 @@ mindmap
 | `/do:brainstorm` | 交互式苏格拉底式头脑风暴伙伴 |
 | `/do:note-summary` | 自动抓取 URL/文件/论文 → 结构化摘要 + 知识库双链归档 |
 | `/do:parse-knowledge` | 将非结构化文本转化为知识库就绪的研究笔记 + Wiki 条目 |
-| `/do:recap` | 指定时间范围的知识库活动周期性回顾报告 |
 | `/do:arxiv-translator` | 下载 arXiv 论文 → 翻译 LaTeX → 编译 PDF |
 | `/do:pdf-to-markdown` | PDF → Markdown, 完整性清单 + 图像提取 |
 | `/do:translate-markdown` | 逐 section 翻译 Markdown, 术语一致性校验 |
-| `/do:ai-newsletters` | 每日 AI 新闻简报摘要（基于 RSS） |
-| `/do:ai-products` | AI 产品发布摘要（Product Hunt、HN、GitHub、Techmeme） |
-| `/do:ai-research-digest` | AI 研究摘要（来自机器之心） |
-| `/do:fix-links` | 扫描知识库中的失效双链 → 自动生成 Wiki 笔记 |
-| `/do:archive` | 归档已完成的项目和已处理的收件箱条目 |
 | `/do:organize` | 深度知识库重组: 根目录清理 + 分类修复 + 孤立笔记 + 元数据 |
 | `/do:refresh-prompt` | 安全更新 DeepOrbitPrompt.md, diff 对比 + 合并选项 |
 

@@ -28,16 +28,13 @@ Read `deeporbit.json` in the current workspace to determine the exact folder pat
 
 **Content Curation & Maintenance:**
 `/do:note_summary` - Automatically fetch URLs/files, summarize, and categorize into `60_Notes`
-`/do:ai-newsletters` - (Optional) Fixed AI newsletter digest
-`/do:ai-products` - (Optional) Fixed AI product launches digest
-`/do:ai-research-digest` - (Optional) AI research digest
 `/do:fix-links` - Fix ghost wikilinks in the knowledge base
 
 **Setup:**
 `/do:init` - Copy plugin DeepOrbitPrompt.md to work dir, create vault folders per Structure below, and inject into .gemini/settings.json
 
 **Core Workflows:**
-`/do:daily` - Morning planning; AI 摘要 from diary's ## News sources (fetch script). Optional: `/do:ai-newsletters`, `/do:ai-products` for fixed digests.
+`/do:daily` - Morning planning; AI 摘要 from diary's ## News sources (fetch script). 
 `/do:kickoff` - Idea → project
 `/do:research` - Deep dive → Areas + Wiki (two-agent workflow)
 `/do:ask` - Quick answers without heavy note-taking

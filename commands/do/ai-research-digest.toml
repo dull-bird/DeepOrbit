@@ -1,7 +1,0 @@
-# AI Research Digest
-
-description = "Fetch and summarize latest AI research from Synced (机器之心) via do.ai-research-digest"
-prompt = """
-Use the do.ai-research-digest skill. Fetch and intelligently summarize the latest in-depth AI articles.
-User input: {{args}}
-"""

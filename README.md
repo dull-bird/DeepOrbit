@@ -158,11 +158,7 @@ mindmap
       /do:parse-knowledge
       /do:note-summary
       /do:recap
-    📰 Content Curation
-      /do:ai-newsletters
-      /do:ai-products
-      /do:ai-research-digest
-    📚 Academic Tools
+     Academic Tools
       /do:arxiv-translator
     📄 Document Processing
       /do:pdf-to-markdown
@@ -189,15 +185,9 @@ mindmap
 | `/do:brainstorm` | Interactive Socratic brainstorming partner |
 | `/do:note-summary` | Auto-fetch URL/file/paper → structured summary + vault archiving |
 | `/do:parse-knowledge` | Turn unstructured text into vault-ready Research + Wiki notes |
-| `/do:recap` | Periodic recap report of vault activity over a time range |
 | `/do:arxiv-translator` | Download arXiv paper → translate LaTeX → compile PDF |
 | `/do:pdf-to-markdown` | PDF → Markdown with completeness checklist + image extraction |
 | `/do:translate-markdown` | Translate Markdown to target language, section-by-section with verification |
-| `/do:ai-newsletters` | Daily AI newsletter digest (RSS-based) |
-| `/do:ai-products` | AI product launches digest (Product Hunt, HN, GitHub, Techmeme) |
-| `/do:ai-research-digest` | AI research digest from Synced/机器之心 |
-| `/do:fix-links` | Scan vault for dead wikilinks → auto-generate Wiki notes |
-| `/do:archive` | Archive completed projects and processed inbox items |
 | `/do:organize` | Deep vault reorganization: root hygiene, taxonomy, orphans, metadata |
 | `/do:refresh-prompt` | Safely update DeepOrbitPrompt.md with diff comparison + merge options |
 
