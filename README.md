@@ -85,25 +85,25 @@ flowchart TD
     V --> G2
     V --> G3
 
-    subgraph G1 [Captured & Active]
-        direction TD
+    subgraph G1 ["Captured & Active"]
         node_A["00_Inbox<br/><i>Quick captures</i>"]
         node_B["10_Diary<br/><i>Daily logs</i>"]
         node_C["20_Projects<br/><i>Active projects</i>"]
+        node_A ~~~ node_B ~~~ node_C
     end
     
-    subgraph G2 [Knowledge Base]
-        direction TD
+    subgraph G2 ["Knowledge Base"]
         node_D["30_Research<br/><i>Deep dives</i>"]
         node_E["40_Wiki<br/><i>Atomic concepts</i>"]
         node_G["60_Notes<br/><i>Summaries & captures</i>"]
+        node_D ~~~ node_E ~~~ node_G
     end
     
-    subgraph G3 [Resources & Support]
-        direction TD
+    subgraph G3 ["Resources & Support"]
         node_F["50_Resources<br/><i>Newsletters, Product Launches</i>"]
         node_H["90_Plans<br/><i>Execution plans</i>"]
         node_I["99_System<br/><i>Templates & Prompts</i>"]
+        node_F ~~~ node_H ~~~ node_I
     end
 
     style V fill:#1a1a2e,stroke:#16213e,color:#e0e0e0

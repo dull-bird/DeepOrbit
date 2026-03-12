@@ -85,25 +85,25 @@ flowchart TD
     V --> G2
     V --> G3
 
-    subgraph G1 [捕获与活跃]
-        direction TD
+    subgraph G1 ["捕获与活跃"]
         node_A["00_Inbox<br/><i>快速捕获</i>"]
         node_B["10_Diary<br/><i>每日日志</i>"]
         node_C["20_Projects<br/><i>活跃项目</i>"]
+        node_A ~~~ node_B ~~~ node_C
     end
     
-    subgraph G2 [核心知识库]
-        direction TD
+    subgraph G2 ["核心知识库"]
         node_D["30_Research<br/><i>深度研究</i>"]
         node_E["40_Wiki<br/><i>原子概念</i>"]
         node_G["60_Notes<br/><i>摘要与捕获</i>"]
+        node_D ~~~ node_E ~~~ node_G
     end
     
-    subgraph G3 [资源与系统]
-        direction TD
+    subgraph G3 ["资源与系统"]
         node_F["50_Resources<br/><i>简报、产品、新闻</i>"]
         node_H["90_Plans<br/><i>执行计划</i>"]
         node_I["99_System<br/><i>模板、提示词、归档</i>"]
+        node_F ~~~ node_H ~~~ node_I
     end
 
     style V fill:#1a1a2e,stroke:#16213e,color:#e0e0e0
