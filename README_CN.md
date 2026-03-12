@@ -80,42 +80,26 @@ bash ~/.gemini/extensions/deeporbit/scripts/init_deeporbit_prompt.sh ~/你的/�
 ```mermaid
 flowchart TD
     V["📦 你的 Obsidian 知识库"]
-    
-    V --> G1
-    V --> G2
-    V --> G3
-
-    subgraph G1 ["捕获与活跃"]
-        node_A["00_Inbox<br/><i>快速捕获</i>"]
-        node_B["10_Diary<br/><i>每日日志</i>"]
-        node_C["20_Projects<br/><i>活跃项目</i>"]
-        node_A ~~~ node_B ~~~ node_C
-    end
-    
-    subgraph G2 ["核心知识库"]
-        node_D["30_Research<br/><i>深度研究</i>"]
-        node_E["40_Wiki<br/><i>原子概念</i>"]
-        node_G["60_Notes<br/><i>摘要与捕获</i>"]
-        node_D ~~~ node_E ~~~ node_G
-    end
-    
-    subgraph G3 ["资源与系统"]
-        node_F["50_Resources<br/><i>简报、产品、新闻</i>"]
-        node_H["90_Plans<br/><i>执行计划</i>"]
-        node_I["99_System<br/><i>模板、提示词、归档</i>"]
-        node_F ~~~ node_H ~~~ node_I
-    end
+    V --> A["00_Inbox<br/><i>快速捕获</i>"]
+    A --> B["10_Diary<br/><i>每日日志</i>"]
+    B --> C["20_Projects<br/><i>活跃项目</i>"]
+    C --> D["30_Research<br/><i>深度研究</i>"]
+    D --> E["40_Wiki<br/><i>原子概念</i>"]
+    E --> G["60_Notes<br/><i>摘要与捕获</i>"]
+    G --> F["50_Resources<br/><i>简报、产品、新闻</i>"]
+    F --> H["90_Plans<br/><i>执行计划</i>"]
+    H --> I["99_System<br/><i>模板、提示词、归档</i>"]
 
     style V fill:#1a1a2e,stroke:#16213e,color:#e0e0e0
-    style node_A fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style node_B fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style node_C fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style node_D fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style node_E fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style node_F fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style node_G fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style node_H fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style node_I fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style A fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style B fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style C fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style D fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style E fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style F fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style G fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style H fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style I fill:#0f3460,stroke:#16213e,color:#e0e0e0
 ```
 
 ---
