@@ -78,19 +78,29 @@ Edit `deeporbit.json` in your vault root to set the AI's interaction language:
 ## Vault Structure
 
 ```mermaid
-flowchart TD
+flowchart LR
     V["📦 Your Obsidian Vault"]
-    V --> A["00_Inbox<br/><i>Quick captures</i>"]
-    A --> B["10_Diary<br/><i>Daily logs</i>"]
-    B --> C["20_Projects<br/><i>Active projects</i>"]
-    C --> D["30_Research<br/><i>Deep dives</i>"]
-    D --> E["40_Wiki<br/><i>Atomic concepts</i>"]
-    E --> G["60_Notes<br/><i>Summaries & captures</i>"]
-    G --> F["50_Resources<br/><i>Newsletters & Product Launches</i>"]
-    F --> H["90_Plans<br/><i>Execution plans</i>"]
-    H --> I["99_System<br/><i>Templates & Prompts</i>"]
+    
+    V --- G1["Captured & Active"]
+    V --- G2["Knowledge Base"]
+    V --- G3["Resources & System"]
+
+    G1 --- A["00_Inbox<br/><i>Quick captures</i>"]
+    G1 --- B["10_Diary<br/><i>Daily logs</i>"]
+    G1 --- C["20_Projects<br/><i>Active projects</i>"]
+    
+    G2 --- D["30_Research<br/><i>Deep dives</i>"]
+    G2 --- E["40_Wiki<br/><i>Atomic concepts</i>"]
+    G2 --- G["60_Notes<br/><i>Summaries & captures</i>"]
+    
+    G3 --- F["50_Resources<br/><i>Newsletters & Products</i>"]
+    G3 --- H["90_Plans<br/><i>Execution plans</i>"]
+    G3 --- I["99_System<br/><i>Templates & Prompts</i>"]
 
     style V fill:#1a1a2e,stroke:#16213e,color:#e0e0e0
+    style G1 fill:#16213e,stroke:#0f3460,color:#e0e0e0
+    style G2 fill:#16213e,stroke:#0f3460,color:#e0e0e0
+    style G3 fill:#16213e,stroke:#0f3460,color:#e0e0e0
     style A fill:#0f3460,stroke:#16213e,color:#e0e0e0
     style B fill:#0f3460,stroke:#16213e,color:#e0e0e0
     style C fill:#0f3460,stroke:#16213e,color:#e0e0e0

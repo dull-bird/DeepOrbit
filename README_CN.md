@@ -78,19 +78,29 @@ bash ~/.gemini/extensions/deeporbit/scripts/init_deeporbit_prompt.sh ~/你的/�
 ## 知识库结构
 
 ```mermaid
-flowchart TD
+flowchart LR
     V["📦 你的 Obsidian 知识库"]
-    V --> A["00_Inbox<br/><i>快速捕获</i>"]
-    A --> B["10_Diary<br/><i>每日日志</i>"]
-    B --> C["20_Projects<br/><i>活跃项目</i>"]
-    C --> D["30_Research<br/><i>深度研究</i>"]
-    D --> E["40_Wiki<br/><i>原子概念</i>"]
-    E --> G["60_Notes<br/><i>摘要与捕获</i>"]
-    G --> F["50_Resources<br/><i>简报、产品、新闻</i>"]
-    F --> H["90_Plans<br/><i>执行计划</i>"]
-    H --> I["99_System<br/><i>模板、提示词、归档</i>"]
+    
+    V --- G1["捕获与活跃"]
+    V --- G2["核心知识库"]
+    V --- G3["资源与系统"]
+
+    G1 --- A["00_Inbox<br/><i>快速捕获</i>"]
+    G1 --- B["10_Diary<br/><i>每日日志</i>"]
+    G1 --- C["20_Projects<br/><i>活跃项目</i>"]
+    
+    G2 --- D["30_Research<br/><i>深度研究</i>"]
+    G2 --- E["40_Wiki<br/><i>原子概念</i>"]
+    G2 --- G["60_Notes<br/><i>摘要与捕获</i>"]
+    
+    G3 --- F["50_Resources<br/><i>简报、产品、新闻</i>"]
+    G3 --- H["90_Plans<br/><i>执行计划</i>"]
+    G3 --- I["99_System<br/><i>模板、提示词、归档</i>"]
 
     style V fill:#1a1a2e,stroke:#16213e,color:#e0e0e0
+    style G1 fill:#16213e,stroke:#0f3460,color:#e0e0e0
+    style G2 fill:#16213e,stroke:#0f3460,color:#e0e0e0
+    style G3 fill:#16213e,stroke:#0f3460,color:#e0e0e0
     style A fill:#0f3460,stroke:#16213e,color:#e0e0e0
     style B fill:#0f3460,stroke:#16213e,color:#e0e0e0
     style C fill:#0f3460,stroke:#16213e,color:#e0e0e0
