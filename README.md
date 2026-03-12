@@ -36,8 +36,8 @@ You give DeepOrbit raw inputs — an arXiv link, a PDF, a quick idea, a URL. The
 | Tool | Required? | Note |
 |------|-----------|------|
 | [Obsidian](https://obsidian.md/) | ✅ Yes | Vault management |
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli) or [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | ✅ Yes | Agent runtime |
-| `xelatex` | Optional | For `/do:arxiv-translator` |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli) or [Claude Code (limited support)](https://docs.anthropic.com/en/docs/claude-code) | ✅ Yes | Agent runtime |
+| `ralph` | **Required** | For `/do:pdf-to-markdown` and `/do:translate-markdown` |
 | `xelatex` | Optional | For `/do:arxiv-translator` |
 
 ### Setup (3 steps)
@@ -119,7 +119,6 @@ mindmap
       /do:brainstorm
     📚 Academic
       /do:arxiv-translator
-      /do:notebooklm
     📄 Document Processing
       /do:pdf-to-markdown
       /do:translate-markdown
@@ -171,7 +170,7 @@ mindmap
 | `/do:research` | Deep dive into a topic → Research notes + Wiki entries (two-agent workflow) |
 | `/do:ask` | Quick Q&A without heavy note-taking |
 | `/do:brainstorm` | Interactive Socratic brainstorming partner |
-| `/do:note-summary` | Fetch URL/file/paper → structured summary with three-pass depth control + checklist |
+| `/do:note-summary` | Auto-fetch URL/file/paper → structured summary + vault archiving |
 | `/do:parse-knowledge` | Turn unstructured text into vault-ready Research + Wiki notes |
 | `/do:recap` | Periodic recap report of vault activity over a time range |
 | `/do:arxiv-translator` | Download arXiv paper → translate LaTeX → compile PDF |
@@ -219,6 +218,20 @@ flowchart TD
     C --> D["Translate to target language"]
     D --> E["Compile with xelatex"]
     E --> F["Translated PDF ready"]
+```
+
+### 📝 Automated Summary & Archiving
+
+```mermaid
+flowchart TD
+    A["Input: URL / PDF / Paper Title"] --> B["/do:note-summary"]
+    B --> C{Identify Type}
+    C -->|URL| D["web_fetch complete text"]
+    C -->|PDF| E["read_file visual parse"]
+    C -->|Title| F["Search to find source"]
+    D & E & F --> G["First-principles summary"]
+    G --> H["Save to 60_Notes/Category/"]
+    H --> I["Create Wiki backlinks"]
 ```
 
 ---

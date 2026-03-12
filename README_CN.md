@@ -36,8 +36,8 @@ flowchart TD
 | 工具 | 必需？ | 说明 |
 |------|--------|------|
 | [Obsidian](https://obsidian.md/) | ✅ 是 | 知识库管理 |
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli) 或 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | ✅ 是 | Agent 运行时 |
-| `xelatex` | 可选 | 用于 `/do:arxiv-translator` |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli) 或 [Claude Code (有限支持)](https://docs.anthropic.com/en/docs/claude-code) | ✅ 是 | Agent 运行时 |
+| `ralph` | **必需** | 用于 `/do:pdf-to-markdown` 和 `/do:translate-markdown` |
 | `xelatex` | 可选 | 用于 `/do:arxiv-translator` |
 
 ### 三步安装
@@ -119,7 +119,6 @@ mindmap
       /do:brainstorm
     📚 学术
       /do:arxiv-translator
-      /do:notebooklm
     📄 文档处理
       /do:pdf-to-markdown
       /do:translate-markdown
@@ -171,7 +170,7 @@ mindmap
 | `/do:research` | 深入研究某个主题 → 生成研究笔记 + Wiki 条目（双 Agent 工作流） |
 | `/do:ask` | 快速问答，无需繁重的笔记流程 |
 | `/do:brainstorm` | 交互式苏格拉底式头脑风暴伙伴 |
-| `/do:note-summary` | 获取 URL/文件/论文 → 三遍阅读法深度控制 + 完整性清单 |
+| `/do:note-summary` | 自动抓取 URL/文件/论文 → 结构化摘要 + 知识库双链归档 |
 | `/do:parse-knowledge` | 将非结构化文本转化为知识库就绪的研究笔记 + Wiki 条目 |
 | `/do:recap` | 指定时间范围的知识库活动周期性回顾报告 |
 | `/do:arxiv-translator` | 下载 arXiv 论文 → 翻译 LaTeX → 编译 PDF |
@@ -219,6 +218,20 @@ flowchart TD
     C --> D["翻译为目标语言"]
     D --> E["使用 xelatex 编译"]
     E --> F["翻译后的 PDF 就绪"]
+```
+
+### 📝 自动化摘要与归档
+
+```mermaid
+flowchart TD
+    A["输入：URL / PDF / 论文标题"] --> B["/do:note-summary"]
+    B --> C{识别类型}
+    C -->|URL| D["web_fetch 获取原文"]
+    C -->|PDF| E["read_file 视觉解析"]
+    C -->|标题| F["Search 溯源全文"]
+    D & E & F --> G["第一性原理拆解 + 结构化摘要"]
+    G --> H["自动存入 60_Notes/相应分类/"]
+    H --> I["创建 Wiki 双链关联"]
 ```
 
 ---
