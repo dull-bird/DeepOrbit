@@ -187,6 +187,17 @@ mindmap
 
 ---
 
+### 🤖 Multi-Agent Compatibility
+
+DeepOrbit features a highly modular command design that adapts to different AI environments:
+
+*   **Gemini CLI (Antigravity)**: **Native Support**. You can directly use `/do:command` in your terminal to trigger its skill logic defined in the `commands/` folder.
+*   **Claude Code (cc)**: **Semantic Support**. While Claude Code does not natively register TOML-based slash commands, it actively reads `DeepOrbitPrompt.md`. You can simply use natural language (e.g., "run init" or "start research"), and Claude will semantically fulfill the request using the corresponding Skill logic.
+
+---
+
+---
+
 ## Core Workflow Examples
 
 ### 🌅 Morning Routine

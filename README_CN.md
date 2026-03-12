@@ -187,6 +187,17 @@ mindmap
 
 ---
 
+### 🤖 多 AI Agent 兼容说明
+
+DeepOrbit 采用了高度模块化的指令设计，支持多种 AI 交互方式：
+
+*   **Gemini CLI (Antigravity)**: **原生支持**。你可以直接在终端输入 `/do:command` 来触发 `commands/` 文件夹中定义的 TOML 指令。
+*   **Claude Code (cc)**: **语义化支持**。虽然 Claude 暂不支持直接触发 TOML 快捷指令，但它会主动阅读项目中的 `DeepOrbitPrompt.md`。你只需以自然语言下令（如：“帮我执行 init” 或 “开始 research”），Claude 就能精准调用对应的 Skill 逻辑。
+
+---
+
+---
+
 ## 核心工作流示例
 
 ### 🌅 晨间流程
