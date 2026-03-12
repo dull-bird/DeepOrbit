@@ -36,32 +36,31 @@ flowchart TD
 | 工具 | 必需？ | 说明 |
 |------|--------|------|
 | [Obsidian](https://obsidian.md/) | ✅ 是 | 知识库管理 |
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli) 或 [Claude Code (有限支持)](https://docs.anthropic.com/en/docs/claude-code) | ✅ 是 | Agent 运行时 |
-| `ralph` | **推荐** | 用于 `/do:pdf-to-markdown` 和 `/do:translate-markdown` |
-| `xelatex` | **推荐** | 用于 `/do:arxiv-translator` |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli) 或 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | ✅ 是 | Agent 运行时 |
+| [ralph](https://github.com/gemini-cli-extensions/ralph) | **推荐** | 用于 `/do:pdf-to-markdown` 和 `/do:translate-markdown` |
+| `xelatex` | **推荐** | 用于 `/do:arxiv-translator`。<br/>- macOS: `brew install --cask mactex-no-gui`<br/>- Windows: [MiKTeX](https://miktex.org/) 或 [TeX Live](https://www.tug.org/texlive/) |
 
-### 三步安装
+### 安装说明
 
-```bash
-# 1. 克隆仓库
-git clone https://github.com/dull-bird/DeepOrbit.git
+根据你使用的 Agent 工具，选择对应的安装路径：
 
-# 2. 在你的 Obsidian 知识库中运行初始化
-# Windows (PowerShell):
-& "$env:USERPROFILE\.gemini\extensions\deeporbit\scripts\init_deeporbit_prompt.ps1" "C:\你的\知识库\路径"
+#### 方法 A: Gemini CLI (推荐)
+1. **安装扩展**:
+   ```bash
+   gemini extension install dull-bird/DeepOrbit
+   ```
+2. **初始化知识库**: 运行脚本将核心配置注入你的 Obsidian 知识库：
+   - **macOS/Linux**: `bash ~/.gemini/extensions/deeporbit/scripts/init_deeporbit_prompt.sh ~/你的/知识库/路径`
+   - **Windows**: `& "$env:USERPROFILE\.gemini\extensions\deeporbit\scripts\init_deeporbit_prompt.ps1" "C:\你的\知识库\路径"`
+3. **激活**: 运行 `/do:init ~/你的/知识库/路径` 后执行 `/memory refresh`。
 
-# macOS/Linux (Bash):
-bash ~/.gemini/extensions/deeporbit/scripts/init_deeporbit_prompt.sh ~/你的/知识库/路径
-
-# 3. 在 Gemini CLI 中初始化
-/do:init ~/你的/知识库/路径
-/memory refresh
-```
-
-初始化脚本（或 `/do:init` 命令）会自动：
-- 将 `DeepOrbitPrompt.md` 和 `deeporbit.json` 复制到你的知识库
-- 创建所有知识库文件夹（见下方结构）
-- 将 `DeepOrbitPrompt.md` 注入 `.gemini/settings.json`
+#### 方法 B: Claude Code (cc) / Cursor / 其他 Agent
+1. **克隆仓库**:
+   ```bash
+   git clone https://github.com/dull-bird/DeepOrbit.git && cd DeepOrbit
+   ```
+2. **初始化知识库**: 运行仓库内 `scripts/` 下的初始化脚本（命令同上，路径改为 `./scripts/...`）。
+3. **激活**: 由于 DeepOrbit 指令是语义化的，你只需在对话中下令（如“帮我执行 init” 或 “开始 research”），Agent 即可通过你知识库中的 `DeepOrbitPrompt.md` 识别并执行对应技能。
 
 ### 语言配置
 

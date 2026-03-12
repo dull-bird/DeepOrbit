@@ -36,32 +36,31 @@ You give DeepOrbit raw inputs — an arXiv link, a PDF, a quick idea, a URL. The
 | Tool | Required? | Note |
 |------|-----------|------|
 | [Obsidian](https://obsidian.md/) | ✅ Yes | Vault management |
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli) or [Claude Code (limited support)](https://docs.anthropic.com/en/docs/claude-code) | ✅ Yes | Agent runtime |
-| `ralph` | **recommended** | For `/do:pdf-to-markdown` and `/do:translate-markdown` |
-| `xelatex` | **recommended** | For `/do:arxiv-translator` |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli) or [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | ✅ Yes | Agent runtime |
+| [ralph](https://github.com/gemini-cli-extensions/ralph) | **recommended** | For `/do:pdf-to-markdown` and `/do:translate-markdown` |
+| `xelatex` | **recommended** | For `/do:arxiv-translator`.<br/>- macOS: `brew install --cask mactex-no-gui`<br/>- Windows: [MiKTeX](https://miktex.org/) or [TeX Live](https://www.tug.org/texlive/) |
 
-### Setup (3 steps)
+### Setup Instructions
 
-```bash
-# 1. Clone the repository
-git clone https://github.com/dull-bird/DeepOrbit.git
+Choose the installation path based on your Agent tool:
 
-# 2. Run init in your Obsidian vault
-# Windows (PowerShell):
-& "$env:USERPROFILE\.gemini\extensions\deeporbit\scripts\init_deeporbit_prompt.ps1" "C:\path\to\your\vault"
+#### Method A: Gemini CLI (Recommended)
+1. **Install Extension**:
+   ```bash
+   gemini extension install dull-bird/DeepOrbit
+   ```
+2. **Initialize Vault**: Run the script to inject core configuration into your Obsidian vault:
+   - **macOS/Linux**: `bash ~/.gemini/extensions/deeporbit/scripts/init_deeporbit_prompt.sh ~/path/to/your/vault`
+   - **Windows**: `& "$env:USERPROFILE\.gemini\extensions\deeporbit\scripts\init_deeporbit_prompt.ps1" "C:\path\to\your\vault"`
+3. **Activate**: Run `/do:init ~/path/to/your/vault` and then `/memory refresh`.
 
-# macOS/Linux (Bash):
-bash ~/.gemini/extensions/deeporbit/scripts/init_deeporbit_prompt.sh ~/path/to/your/vault
-
-# 3. Initialize in Gemini CLI
-/do:init ~/path/to/your/vault
-/memory refresh
-```
-
-The init script (or `/do:init` command) will:
-- Copy `DeepOrbitPrompt.md` and `deeporbit.json` into your vault
-- Create all vault folders (see structure below)
-- Inject `DeepOrbitPrompt.md` into `.gemini/settings.json`
+#### Method B: Claude Code (cc) / Cursor / Other Agents
+1. **Clone Repository**:
+   ```bash
+   git clone https://github.com/dull-bird/DeepOrbit.git && cd DeepOrbit
+   ```
+2. **Initialize Vault**: Run the initialization script found in the `scripts/` directory (same commands as above, but use `./scripts/...` path).
+3. **Activate**: Since DeepOrbit commands are semantic, you can simply ask the Agent in natural language (e.g., "run init" or "start research"). The Agent will discover the skills via `DeepOrbitPrompt.md` in your vault.
 
 ### Language Configuration
 
