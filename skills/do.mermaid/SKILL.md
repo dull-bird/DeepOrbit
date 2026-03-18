@@ -1,6 +1,6 @@
 ---
 name: do.mermaid
-description: Create accurate Mermaid diagrams in Obsidian. Covers all diagram types with syntax, examples, and common pitfalls. Use when generating any Mermaid code block or when the user mentions diagrams, flowcharts, mindmaps, sequence diagrams, gantt charts, or any other visualization.
+description: Create accurate Mermaid diagrams in Obsidian. Covers all diagram types with syntax, examples, and common pitfalls. Use when generating any Mermaid code block or when the user mentions diagrams, flowcharts, mindmaps, sequence diagrams, gantt charts, or any other visualization. For flowcharts, use top-down layout by default.
 ---
 
 # Mermaid Diagram Skill
