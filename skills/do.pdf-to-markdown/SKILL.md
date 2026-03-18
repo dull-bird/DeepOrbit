@@ -205,3 +205,4 @@ tags: [pdf-conversion]
 ## Rules
 
 - **DO NOT** try to read `deeporbit.json` for language settings. The output Markdown must preserve the original language of the PDF verbatim. **The Obsidian folder paths themselves will ALWAYS remain in English.**
+- Use the `run_command` tool to execute `obsidian open path="<absolute_path>"` for every Markdown file you create or modify. See the `do.obsidian-open` skill for details.

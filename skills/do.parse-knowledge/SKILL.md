@@ -55,4 +55,5 @@ When done, report back with the following structure:
 ## Rules
 
 - Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+- Use the `run_command` tool to execute `obsidian open path="<absolute_path>"` for every Markdown file you create or modify. See the `do.obsidian-open` skill for details.
 

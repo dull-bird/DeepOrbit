@@ -115,7 +115,7 @@ flowchart LR
 
 ## 技能一览
 
-DeepOrbit 内置 **24 个预配置 AI 技能**，分为两大类：
+DeepOrbit 内置 **25 个预配置 AI 技能**，分为两大类：
 
 ### 🌐 通用技能(无需 Obsidian)
 
@@ -165,6 +165,7 @@ mindmap
       do.obsidian-markdown
       do.obsidian-bases
       do.json-canvas
+      do.obsidian-open
 ```
 
 ### 技能速查表
@@ -183,6 +184,7 @@ mindmap
 | `/do:translate-markdown` | 逐 section 翻译 Markdown, 术语一致性校验 |
 | `/do:organize` | 深度知识库重组: 根目录清理 + 分类修复 + 孤立笔记 + 元数据 |
 | `/do:refresh-prompt` | 安全更新 DeepOrbitPrompt.md, diff 对比 + 合并选项 |
+| `do.obsidian-open` | 实用工具：通过官方 CLI 自动在 Obsidian 中打开修改过的笔记 |
 
 ---
 

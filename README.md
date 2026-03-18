@@ -115,7 +115,7 @@ flowchart LR
 
 ## Skills Overview
 
-DeepOrbit ships with **24 pre-configured AI skills**, split into two categories:
+DeepOrbit ships with **25 pre-configured AI skills**, split into two categories:
 
 ### 🌐 Universal Skills (Work Anywhere)
 
@@ -165,6 +165,7 @@ mindmap
       do.obsidian-markdown
       do.obsidian-bases
       do.json-canvas
+      do.obsidian-open
 ```
 
 ### Skills Quick Reference
@@ -183,6 +184,7 @@ mindmap
 | `/do:translate-markdown` | Translate Markdown to target language, section-by-section with verification |
 | `/do:organize` | Deep vault reorganization: root hygiene, taxonomy, orphans, metadata |
 | `/do:refresh-prompt` | Safely update DeepOrbitPrompt.md with diff comparison + merge options |
+| `do.obsidian-open` | Utility to automatically open modified notes in Obsidian via CLI |
 
 ---
 
