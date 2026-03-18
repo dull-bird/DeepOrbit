@@ -13,19 +13,16 @@ Analyze the Vault to identify organizational issues: root directory clutter, mes
 
 ## WORKFLOW
 
-### Step 0: Root Directory Hygiene (MANDATORY FIRST STEP)
+### Step 0: Vault Template Alignment (MANDATORY FIRST STEP)
 
-The vault root MUST be clean. Scan the root directory and enforce the whitelist:
+You **MUST** open and read `99_System/Templates/Vault_Tree_Template.md` using the `read_file` tool. This document defines the strict, canonical folder hierarchy for the vault.
+Your primary goal is to ensure the actual vault perfectly matches the principles in this template.
 
-**Allowed in root:**
-
-| Type | Allowed Items |
-|------|---------------|
-| Numbered folders | `00_Inbox`, `10_Diary`, `20_Projects`, `30_Research`, `40_Wiki`, `50_Resources`, `60_Notes`, `90_Plans`, `99_System` |
-| System config dirs | `.gemini`, `.agent`, `.agents`, `.obsidian`, `.git`, `.vscode` |
-| System config files | `DeepOrbitPrompt.md`, `deeporbit.json`, `.gitignore` |
-
-**Everything else in root is a violation.** For each violating item:
+1. **Root Cleanliness**: Ensure no Markdown files exist in the root. The only allowed items in root are:
+   - The numbered folders defined in the template (`00_Inbox`, etc.)
+   - System directories (`.gemini`, `.agent`, `.agents`, `.obsidian`, `.git`, `.vscode`)
+   - Config files (`DeepOrbitPrompt.md`, `deeporbit.json`, `.gitignore`)
+2. **Flag Violations**: Everything else in root is a violation. For each violating item:
 
 1. **Markdown files** → Propose moving to `00_Inbox/` (for triage) or the appropriate numbered folder
 2. **Unknown folders** → Propose merging into the correct numbered folder or creating a wikilink-based reference
@@ -52,10 +49,9 @@ The vault root MUST be clean. Scan the root directory and enforce the whitelist:
    - `ghost_links`: Links that don't point to an existing valid file.
 
 ### Step 2: Knowledge Base Taxonomy Review
-Perform a deep semantic review of the folder structures, especially within `40_Wiki` and `30_Research`.
+Perform a deep semantic review of the folder structures, especially within `40_Wiki` and `30_Research`, using the tree template as your guide.
 1. **Gather Directory Structure**: Use `list_dir` to see all current folders and their filenames.
-2. **Identify Overlapping Categories (Apply Modern PKM Principles)**:
-   - **Broad Domains over Granular Folders**: Folders should represent broad, stable areas. Highly specific or overlapping topics should be merged and distinguished by `#tags` or `[[MOCs]]`.
+2. **Enforce Template Rules**: Apply the "Flat Hierarchy" and "Semantics over Granularity" rules from the template. Recommend merging overlapping folders or moving overly nested structures.
    - **Actionability**: If two folders overlap so much that the user hesitates where to save a new note, they must be merged.
 3. **Evaluate Hierarchy**: Keep folder hierarchy as flat as possible (ideally ≤2 levels deep). Use links to connect related ideas rather than deep folders.
 
@@ -98,7 +94,7 @@ Present a comprehensive reorganization proposal, formatted as follows:
 
 * **NEVER execute structural changes without explicit user approval.** This vault is their digital brain.
 * When proposing taxonomy mergers, explain *why* (e.g., "80% similar notes").
-* Root directory hygiene (Step 0) is always the first thing checked, every time.
+* Template alignment (Step 0) is always the first thing checked, every time.
 * Always wait for `python scripts/analyze_vault.py` output before proceeding.
 
 ## Rules
