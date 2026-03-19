@@ -197,7 +197,10 @@ Before finalizing, **you MUST verify every item.** If any item fails, go back an
 
 2. **For audio/video:** Save the complete subtitle file as `source`, delete audio (`.m4a` files are too large).
 
-3. **Search vault** for the most relevant existing note to append a cross-reference link.
+3. **Auto-Linking via RAG**:
+   - **MANDATORY**: Execute `python scripts/rag/query_vault.py . "<Core Topic or Title>"`
+   - Read the context. If highly relevant notes exist in the vault, extract the top 2-3 notes.
+   - Append a `## Related Links` section to the VERY BOTTOM of your generated summary output. Briefly explain *why* each past note is relevant and use proper `[[Wikilinks]]`.
 
 ---
 

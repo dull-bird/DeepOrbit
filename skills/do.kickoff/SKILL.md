@@ -42,7 +42,9 @@ description: "Plan project kickoff"
 prompt: "Create a project kickoff plan for: [user's idea/inbox note]
 
 Follow these steps:
-1. Gather Context: Search 20_Projects and 10_Diary for existing notes related to this idea
+1. Gather Context via RAG:
+   - **CRITICAL**: Execute `python scripts/rag/query_vault.py . "[core subject of the user's idea]"`
+   - Analyze the RAG output to discover if this idea overlaps heavily with past notes or active projects.
 2. Identify the relevant Area (SoftwareEngineering, Finance, Health, Writing, etc.)
 3. Create the plan file at 90_Plans/Plan_YYYY-MM-DD_Kickoff_<ProjectName>.md using this format:
 
@@ -53,6 +55,10 @@ Follow these steps:
 
 ## Goal
 [One-sentence summary of project goal]
+
+## Discovered Context & Past Projects
+- RAG found these related past notes/projects: [List with [[Wikilinks]]]
+- **Merge Recommendation**: [If overlap is high, ask: "Should we merge this into [[Past Project]] instead of creating a new one?"]
 
 ## Project Structure
 - Area: [Relevant area from 30_Research]

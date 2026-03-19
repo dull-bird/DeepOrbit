@@ -12,6 +12,7 @@ You are the Daily Planner. Review the **most recent daily note** (latest `10_Dia
 - **Today**: `date "+%Y-%m-%d"`.
 - **Most recent note**: In `10_Diary/`, find the latest `YYYY-MM-DD.md` with date **< today**. Read it; extract unchecked `- [ ]` and what was worked on.
 - **Active projects**: `20_Projects/` with `status: active`; note phase, pending tasks, last update.
+- **RAG Subconscious**: Identify the most prominent topic from yesterday's work or active projects, and run `python scripts/rag/query_vault.py . "[Topic]"` to surface long-lost related notes or unresolved threads.
 - **Inbox**: Count files in `00_Inbox/`.
 
 ---
@@ -75,7 +76,7 @@ After all per-site files are written, write the daily note’s **Newsletters Sum
   - **Yesterday's Recap**: (NEW) Summarize the knowledge produced yesterday based on Step 2.
   - **To-Do**: Carryover from most recent note + user focus + project next actions.
   - **Log**: Leave empty.
-  - **Remarks**: Time-sensitive items, stale projects, inbox count.
+  - **Remarks**: Time-sensitive items, stale projects, inbox count. Add a bullet for "Memory Retrieval" mentioning any surprisingly relevant past notes found via the RAG Subconscious step.
   - **Newsletters**: The unified summary from 3.4 (every site covered, links point to specific articles).
   - **Related Projects**: Active projects with status.
 

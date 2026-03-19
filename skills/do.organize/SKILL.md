@@ -55,6 +55,10 @@ Perform a deep semantic review of the folder structures, especially within `40_W
    - **Actionability**: If two folders overlap so much that the user hesitates where to save a new note, they must be merged.
 3. **Evaluate Hierarchy**: Keep folder hierarchy as flat as possible (ideally ≤2 levels deep). Use links to connect related ideas rather than deep folders.
 
+### Step 2.5: Orphan Clustering & Inbox Isolation
+- **Inbox Protocol (CRITICAL)**: `00_Inbox/` items are intentionally fragmented ideas. Do NOT run RAG automatically on these files and DO NOT propose moving them into `20_Projects` or `30_Research`. Leave them for the user to triage manually via `/do:kickoff`.
+- **Orphan Clustering (RAG)**: For true `orphan_files` located *outside* of `00_Inbox`, execute `python scripts/rag/query_vault.py . "<Orphan Note Content>"` to find the most semantically similar existing folder or Wiki concept. Use this RAG result to propose a logical move for the orphan.
+
 ### Step 3: Proposal Generation
 Present a comprehensive reorganization proposal, formatted as follows:
 

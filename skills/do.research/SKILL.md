@@ -39,10 +39,10 @@ description: "Plan research strategy"
 prompt: "Create a research plan for: [user's topic]
 
 Follow these steps:
-1. Identify Context:
+1. Identify Context via Local RAG First:
+   - **CRITICAL**: Before searching the internet, execute `python scripts/rag/query_vault.py . "[Topic]"` to map out exactly what the user already knows in the vault.
    - Check if this relates to an active project in 20_Projects/
    - Determine the relevant Area (SoftwareEngineering, Finance, Health, etc.)
-   - Search 30_Research/ and 40_Wiki/ to avoid duplication
 2. Identify Persona & Sources: 
    - Scan 99_System/Prompts/ for the most relevant expertise.
    - **CRITICAL**: Read and strictly follow the whitelist guidelines in `99_System/Prompts/Research_Sources.md` to ensure a high signal-to-noise ratio in your research strategy.
@@ -53,9 +53,9 @@ Follow these steps:
 ## Research Goal
 [What the user will understand after completing this research]
 
-## Discovered Context
+## Discovered Context & Existing Internal Knowledge
 - Related Area: [Area Name]
-- Existing Notes: [List relevant existing notes, or "Not found"]
+- Known Concepts: [Summarize what the local RAG search revealed the user already knows about this topic, using [[Wikilinks]]]
 - Related Project: [Project Name (if applicable), or "None"]
 
 ## Research Strategy
