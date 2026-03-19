@@ -43,7 +43,9 @@ Follow these steps:
    - Check if this relates to an active project in 20_Projects/
    - Determine the relevant Area (SoftwareEngineering, Finance, Health, etc.)
    - Search 30_Research/ and 40_Wiki/ to avoid duplication
-2. Identify Persona: Scan 99_System/Prompts/ for the most relevant expertise
+2. Identify Persona & Sources: 
+   - Scan 99_System/Prompts/ for the most relevant expertise.
+   - **CRITICAL**: Read and strictly follow the whitelist guidelines in `99_System/Prompts/Research_Sources.md` to ensure a high signal-to-noise ratio in your research strategy.
 3. Create the plan file at 90_Plans/Plan_YYYY-MM-DD_Research_<Topic>.md using this format:
 
 # Research Plan: [Topic]

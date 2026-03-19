@@ -153,6 +153,8 @@ mindmap
       /do:parse-knowledge
       /do:note-summary
       /do:recap
+      /do:rag
+      /do:rag-index
      Academic Tools
       /do:arxiv-translator
     📄 Document Processing
@@ -180,6 +182,8 @@ mindmap
 | `/do:research` | Deep dive into a topic → Research notes + Wiki entries (two-agent workflow) |
 | `/do:ask` | Quick Q&A without heavy note-taking |
 | `/do:brainstorm` | Interactive Socratic brainstorming partner |
+| `/do:rag` | Ask questions using semantic search across your entire vault |
+| `/do:rag-index` | Index the Obsidian vault for semantic RAG search |
 | `/do:note-summary` | Auto-fetch URL/file/paper → structured summary + vault archiving |
 | `/do:parse-knowledge` | Turn unstructured text into vault-ready Research + Wiki notes |
 | `/do:arxiv-translator` | Download arXiv paper → translate LaTeX → compile PDF |
