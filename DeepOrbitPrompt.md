@@ -30,6 +30,11 @@ Read `deeporbit.json` in the current workspace to determine the exact folder pat
 `/do:note_summary` - Automatically fetch URLs/files, summarize, and categorize into `60_Notes`
 `/do:fix-links` - Fix ghost wikilinks in the knowledge base
 
+**Knowledge Retrieval & Search (Use These Autonomously!):**
+`/do:rag` - Semantic RAG search across the vault. **CRITICAL:** Use this autonomously whenever you need to recall past research, find context, or answer factual questions about the knowledge base!
+`/do:rag-index` - Re-index the vault for semantic search. Trigger this automatically if `/do:rag` mentions the index is outdated or missing.
+`/do:search` - Exact keyword or regex string match search across the vault files and metadata.
+
 **Setup:**
 `/do:init` - Copy plugin DeepOrbitPrompt.md to work dir, create vault folders per Structure below, and inject into .gemini/settings.json
 

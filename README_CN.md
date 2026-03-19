@@ -155,6 +155,7 @@ mindmap
       /do:recap
       /do:rag
       /do:rag-index
+      /do:search
     📚 学术工具
       /do:arxiv-translator
     📄 文档处理
@@ -184,6 +185,7 @@ mindmap
 | `/do:brainstorm` | 交互式苏格拉底式头脑风暴伙伴 |
 | `/do:rag` | 跨整个知识库进行 RAG 语义检索问答 |
 | `/do:rag-index` | 使用 ChromaDB 为知识库构建本地语义索引 |
+| `/do:search` | 通过关键字或正则在整个知识库中进行精确的全文检索 |
 | `/do:note-summary` | 自动抓取 URL/文件/论文 → 结构化摘要 + 知识库双链归档 |
 | `/do:parse-knowledge` | 将非结构化文本转化为知识库就绪的研究笔记 + Wiki 条目 |
 | `/do:arxiv-translator` | 下载 arXiv 论文 → 翻译 LaTeX → 编译 PDF |
