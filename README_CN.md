@@ -39,6 +39,7 @@ flowchart TD
 | [Gemini CLI](https://github.com/google-gemini/gemini-cli) 或 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | ✅ 是 | Agent 运行时 |
 | [ralph](https://github.com/gemini-cli-extensions/ralph) | **推荐** | 用于 `/do:pdf-to-markdown`、`/do:translate-markdown` 和 `/do:translate` |
 | `xelatex` | **推荐** | 用于 `/do:arxiv-translator`。<br/>- macOS: `brew install --cask mactex-no-gui`<br/>- Windows: [MiKTeX](https://miktex.org/) 或 [TeX Live](https://www.tug.org/texlive/) |
+| `obsidian-cli` | **推荐** | 用于 `do.obsidian-open` 自动在 Obsidian 打开笔记。<br/>- 参考 https://obsidian.md/cli |
 
 ### 安装说明
 
@@ -240,14 +241,17 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["输入：URL / PDF / 论文标题"] --> B["/do:note-summary"]
-    B --> C{识别类型}
-    C -->|URL| D["web_fetch 获取原文"]
-    C -->|PDF| E["read_file 视觉解析"]
-    C -->|标题| F["Search 溯源全文"]
-    D & E & F --> G["第一性原理拆解 + 结构化摘要"]
-    G --> H["自动存入 60_Notes/相应分类/"]
-    H --> I["创建 Wiki 双链关联"]
+    A["输入：URL / PDF / 标题"] --> B["/do:note-summary"]
+    B --> C["阶段 0：获取完整内容全文"]
+    C --> D["阶段 1：海选大纲与分类"]
+    D --> E{选择深度?}
+    E -->|Quick (速读)| I["阶段 4：执行输出质量核对清单"]
+    E -->|Standard / Deep| F["阶段 2：逐章节结构化总结"]
+    F --> G{是 Deep 深度?}
+    G -->|是| H["阶段 3：精读与批判性分析"]
+    G -->|否| I
+    H --> I
+    I --> J["阶段 5：存入 60_Notes 并建立双链"]
 ```
 
 ---

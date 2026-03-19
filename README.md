@@ -39,6 +39,7 @@ You give DeepOrbit raw inputs — an arXiv link, a PDF, a quick idea, a URL. The
 | [Gemini CLI](https://github.com/google-gemini/gemini-cli) or [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | ✅ Yes | Agent runtime |
 | [ralph](https://github.com/gemini-cli-extensions/ralph) | **recommended** | For `/do:pdf-to-markdown`, `/do:translate-markdown`, and `/do:translate` |
 | `xelatex` | **recommended** | For `/do:arxiv-translator`.<br/>- macOS: `brew install --cask mactex-no-gui`<br/>- Windows: [MiKTeX](https://miktex.org/) or [TeX Live](https://www.tug.org/texlive/) |
+| `obsidian-cli` | **recommended** | For `do.obsidian-open` to automatically open generated notes.<br/>- See: https://obsidian.md/cli |
 
 ### Setup Instructions
 
@@ -240,14 +241,17 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["Input: URL / PDF / Paper Title"] --> B["/do:note-summary"]
-    B --> C{Identify Type}
-    C -->|URL| D["web_fetch complete text"]
-    C -->|PDF| E["read_file visual parse"]
-    C -->|Title| F["Search to find source"]
-    D & E & F --> G["First-principles summary"]
-    G --> H["Save to 60_Notes/Category/"]
-    H --> I["Create Wiki backlinks"]
+    A["Input: URL / PDF / Title"] --> B["/do:note-summary"]
+    B --> C["Phase 0: Fetch Full Content"]
+    C --> D["Phase 1: Screening & Outline"]
+    D --> E{Depth Mode?}
+    E -->|Quick| I["Phase 4: Quality Verification"]
+    E -->|Standard / Deep| F["Phase 2: Section Summaries"]
+    F --> G{Is Deep Mode?}
+    G -->|Yes| H["Phase 3: Critical Analysis"]
+    G -->|No| I
+    H --> I
+    I --> J["Phase 5: Save to 60_Notes & Wiki Links"]
 ```
 
 ---

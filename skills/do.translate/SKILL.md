@@ -23,6 +23,11 @@ This skill acts as a smart router for translation requests, automatically detect
   - Step 2.1: Execute the `do.pdf-to-markdown` skill on the PDF to convert it to high-fidelity Markdown. Wait for the conversion checklist and promises to complete.
   - Step 2.2: Execute the `do.translate-markdown` skill on the resulting Markdown file to translate it into the target language.
 
+### 3. Archive & Standardize Output
+- After the PDF translation process is complete, you **MUST** move the final translated Markdown document (`.md`) and any extracted assets (like images) into the vault's paper directory: `60_Notes/papers/<Paper_Title>/`.
+- Ensure the file naming is standardized, such as `60_Notes/papers/<Paper_Title>/<Paper_Title>_<LANG>.md` (e.g. `60_Notes/papers/Attention Is All You Need/Attention Is All You Need_CN.md`).
+*(Note: If routed to `do.arxiv-translator`, it handles its own `.pdf` archiving internally).*
+
 ## Guidelines
 - Do not process the translation natively inside this skill. This is only a routing step.
 - Ensure you wait for `do.pdf-to-markdown` to completely finish before triggering `do.translate-markdown`.

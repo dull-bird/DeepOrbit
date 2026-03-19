@@ -42,10 +42,11 @@ Before starting, verify that all required system tools are installed.
 - **Standard compilation loop:** `xelatex` -> `bibtex` -> `xelatex` x2.
 - **Error Auto-Fixing:** If compilation fails, read the `.log` file, identify the error line, and fix the corresponding sub-file using `write_file` or `replace`.
 
-### 5. Integrity Verification & Review
+### 5. Integrity Verification & Archive
 - **Completeness Check:** Verify all sub-files in `sections/` are translated.
 - **Visual Check:** Compare the translated PDF with the original.
-- Clean up intermediate files and move the final `_CN.pdf` to the root.
+- **Standardized Archiving:** Move the final compiled PDF to the Obsidian vault at `60_Notes/papers/<Paper_Title>/<Paper_Title>_<LANG>.pdf` (e.g., `60_Notes/papers/Attention Is All You Need/Attention Is All You Need_CN.pdf`), aligning with `note-summary`'s structure.
+- Clean up intermediate files in the working directory.
 
 ## Guidelines
 - **Prefer `write_file` over `replace` for Translation**: Overwriting a small, dedicated section file is 100% reliable compared to searching for a literal string in a 20,000-line file.
