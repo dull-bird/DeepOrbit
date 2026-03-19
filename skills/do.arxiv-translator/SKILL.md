@@ -59,4 +59,8 @@ Before starting, verify that all required system tools are installed.
 ## Rules
 
 - Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+- **Missing Bibliography Style Fallback:** If `bibtex` fails with 'I couldn't open style file xxx.bst', it means the author forgot to include their custom bibliography style. You should automatically fallback by replacing `\bibliographystyle{xxx}` with a standard style like `\bibliographystyle{plainnat}` or `\bibliographystyle{unsrt}` in the main `.tex` file and recompile.
+- **Anti-Destruction Principle:** When fixing compilation errors or missing translations, NEVER extract files directly from the original tarball to overwrite existing `.tex` files, as this will destroy previously completed translations. Always inspect differences first.
+- **Large File Handling Strategy:** For translating `.tex` files, favor replacing the entire file content using `write_file` over piece-meal updates with `replace` to prevent partial translations.
+- **Integrity Verification:** Before declaring the task complete, explicitly check the translated document sections to ensure no section or subsection was accidentally reverted or skipped.
 

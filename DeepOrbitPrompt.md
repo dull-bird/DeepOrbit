@@ -23,7 +23,7 @@ Read `deeporbit.json` in the current workspace to determine the exact folder pat
 **Academic & Research Pack:**
 `/do:arxiv-translator` - Automatically download, translate, and compile arXiv papers
 `/do:marker` - High-fidelity PDF to Markdown conversion (with LaTeX formulas)
-`/do:translate-pdf` - Full PDF translation preserving layout
+`/do:translate` - Smartly route translation requests for arXiv or standard PDFs
 `/do:notebooklm` - Query NotebookLM via browser automation
 
 **Content Curation & Maintenance:**

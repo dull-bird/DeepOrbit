@@ -37,7 +37,7 @@ flowchart TD
 |------|--------|------|
 | [Obsidian](https://obsidian.md/) | ✅ 是 | 知识库管理 |
 | [Gemini CLI](https://github.com/google-gemini/gemini-cli) 或 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | ✅ 是 | Agent 运行时 |
-| [ralph](https://github.com/gemini-cli-extensions/ralph) | **推荐** | 用于 `/do:pdf-to-markdown` 和 `/do:translate-markdown` |
+| [ralph](https://github.com/gemini-cli-extensions/ralph) | **推荐** | 用于 `/do:pdf-to-markdown`、`/do:translate-markdown` 和 `/do:translate` |
 | `xelatex` | **推荐** | 用于 `/do:arxiv-translator`。<br/>- macOS: `brew install --cask mactex-no-gui`<br/>- Windows: [MiKTeX](https://miktex.org/) 或 [TeX Live](https://www.tug.org/texlive/) |
 
 ### 安装说明
@@ -132,6 +132,7 @@ mindmap
     📄 文档处理
       /do:pdf-to-markdown
       /do:translate-markdown
+      /do:translate
     ⚙️ 图表
       do.mermaid
 ```
@@ -156,6 +157,7 @@ mindmap
     📄 文档处理
       /do:pdf-to-markdown
       /do:translate-markdown
+      /do:translate
     🔧 知识库维护
       /do:fix-links
       /do:archive
@@ -182,6 +184,7 @@ mindmap
 | `/do:arxiv-translator` | 下载 arXiv 论文 → 翻译 LaTeX → 编译 PDF |
 | `/do:pdf-to-markdown` | PDF → Markdown, 完整性清单 + 图像提取 |
 | `/do:translate-markdown` | 逐 section 翻译 Markdown, 术语一致性校验 |
+| `/do:translate` | 智能路由 arXiv 或标准 PDF 的翻译请求至合适的子技能 |
 | `/do:organize` | 深度知识库重组: 根目录清理 + 分类修复 + 孤立笔记 + 元数据 |
 | `/do:refresh-prompt` | 安全更新 DeepOrbitPrompt.md, diff 对比 + 合并选项 |
 | `do.obsidian-open` | 实用工具：通过官方 CLI 自动在 Obsidian 中打开修改过的笔记 |

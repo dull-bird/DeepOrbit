@@ -37,7 +37,7 @@ You give DeepOrbit raw inputs — an arXiv link, a PDF, a quick idea, a URL. The
 |------|-----------|------|
 | [Obsidian](https://obsidian.md/) | ✅ Yes | Vault management |
 | [Gemini CLI](https://github.com/google-gemini/gemini-cli) or [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | ✅ Yes | Agent runtime |
-| [ralph](https://github.com/gemini-cli-extensions/ralph) | **recommended** | For `/do:pdf-to-markdown` and `/do:translate-markdown` |
+| [ralph](https://github.com/gemini-cli-extensions/ralph) | **recommended** | For `/do:pdf-to-markdown`, `/do:translate-markdown`, and `/do:translate` |
 | `xelatex` | **recommended** | For `/do:arxiv-translator`.<br/>- macOS: `brew install --cask mactex-no-gui`<br/>- Windows: [MiKTeX](https://miktex.org/) or [TeX Live](https://www.tug.org/texlive/) |
 
 ### Setup Instructions
@@ -132,6 +132,7 @@ mindmap
     📄 Document Processing
       /do:pdf-to-markdown
       /do:translate-markdown
+      /do:translate
     ⚙️ Diagramming
       do.mermaid
 ```
@@ -156,6 +157,7 @@ mindmap
     📄 Document Processing
       /do:pdf-to-markdown
       /do:translate-markdown
+      /do:translate
     🔧 Vault Maintenance
       /do:fix-links
       /do:archive
@@ -182,6 +184,7 @@ mindmap
 | `/do:arxiv-translator` | Download arXiv paper → translate LaTeX → compile PDF |
 | `/do:pdf-to-markdown` | PDF → Markdown with completeness checklist + image extraction |
 | `/do:translate-markdown` | Translate Markdown to target language, section-by-section with verification |
+| `/do:translate` | Smartly route translation requests for arXiv or standard PDFs to appropriate skills |
 | `/do:organize` | Deep vault reorganization: root hygiene, taxonomy, orphans, metadata |
 | `/do:refresh-prompt` | Safely update DeepOrbitPrompt.md with diff comparison + merge options |
 | `do.obsidian-open` | Utility to automatically open modified notes in Obsidian via CLI |
