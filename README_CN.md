@@ -230,11 +230,14 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["arXiv URL"] --> B["/do:arxiv-translator"]
-    B --> C["下载 LaTeX 源码"]
-    C --> D["翻译为目标语言"]
-    D --> E["使用 xelatex 编译"]
-    E --> F["翻译后的 PDF 就绪"]
+    A["输入：arXiv URL / 本地 PDF"] --> B["/do:translate"]
+    B --> C{识别类型}
+    C -->|arXiv| D["/do:arxiv-translator"]
+    D --> E["下载并翻译 LaTeX 源码"]
+    E --> F["编译为最终 PDF"]
+    C -->|PDF| G["/do:pdf-to-markdown"]
+    G --> H["/do:translate-markdown"]
+    F & H --> I["规范化存入 60_Notes/papers/"]
 ```
 
 ### 📝 自动化摘要与归档

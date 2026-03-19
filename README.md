@@ -230,11 +230,14 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["arXiv URL"] --> B["/do:arxiv-translator"]
-    B --> C["Download LaTeX source"]
-    C --> D["Translate to target language"]
-    D --> E["Compile with xelatex"]
-    E --> F["Translated PDF ready"]
+    A["Input: arXiv URL / Local PDF"] --> B["/do:translate"]
+    B --> C{Detect Type}
+    C -->|arXiv| D["/do:arxiv-translator"]
+    D --> E["Download & Translate LaTeX"]
+    E --> F["Compile to PDF"]
+    C -->|PDF| G["/do:pdf-to-markdown"]
+    G --> H["/do:translate-markdown"]
+    F & H --> I["Save to 60_Notes/papers/"]
 ```
 
 ### 📝 Automated Summary & Archiving
