@@ -90,80 +90,29 @@ After the planning agent returns, check the plan file path is `90_Plans/Plan_YYY
 
 # Phase 2: Launch Execution Agent (After User Confirmation)
 
-Once the user confirms the plan, spawn a fresh execution agent with clean context:
+Once the user confirms the plan, use the `run_command` tool to launch a **Ralph Loop**. Ralph will autonomously iterate through the plan's checklist, providing a much higher degree of reliability and iterative focus than a single subagent run.
 
+```bash
+/ralph:loop "You are the DeepOrbit Research Execution Agent. Your task is to execute the research plan at: 90_Plans/Plan_YYYY-MM-DD_Research_<Topic>.md
+
+CRITICAL RULES for this iteration:
+1. READ the plan file. Find the FIRST unchecked '- [ ]' task under 'Research Strategy' or 'Output Structure'.
+2. Execute ONLY THAT TASK in this specific turn. For example:
+   - If the task is to search the web, execute the search and read the results.
+   - If the task is to create the main research note, draft 30_Research/<Area>/<Topic>/<Topic>.md.
+   - If the task is to create an atomic Wiki concept, write it to 40_Wiki/<Category>/<ConceptName>.md.
+3. Apply Obsidian formatting rules (CRITICAL):
+   - Frontmatter MUST be at the very top (line 1), starting/ending with ---.
+   - Main Note Frontmatter: type: reference, created: YYYY-MM-DD, area, tags, status: complete.
+   - Wiki Notes: Keep atomic (1-3 paragraphs), use 99_System/Templates/Wiki_Template.md layout.
+   - Related Links: Do NOT put related/see-also links in frontmatter. Put them in '## Related Reading' section at the BOTTOM of the note body.
+4. After successfully completing the single task, modify the plan file tracking: change that specific '- [ ]' to '- [x]'.
+5. End your turn. Ralph will automatically start the next iteration for the next unchecked task.
+6. When ALL tasks in the plan are marked '- [x]', do the final linking (Append a link to 10_Diary/YYYY-MM-DD.md, archive the plan to 90_Plans/Archive/) and output exactly '<promise>RESEARCH_COMPLETE</promise>'." --completion-promise "RESEARCH_COMPLETE" --max-iterations 20
 ```
-subagent_type: "general-purpose"
-description: "Execute research plan"
-prompt: "Execute the research plan located at: 90_Plans/Plan_YYYY-MM-DD_Research_<Topic>.md
 
-Instructions:
-1. Read the plan file and note any user modifications or answers
-2. Conduct Research:
-   - Use WebSearch for current information
-   - Use wikipedia mcp tools to search related concepts
-   - Use WebFetch to read documentation
-   - Gather practical examples
-   - Identify atomic concepts to extract
+After the Ralph loop finishes (detects `RESEARCH_COMPLETE` promise), you (the Orchestrator) provide a final summary to the user:
 
-3. Create the Main Research Note:
-   - Path: 30_Research/<Area>/<Topic>/<Topic>.md
-   - Sections to include:
-     - Overview (high-level explanation)
-     - Core Concepts (with wikilinks to atomic notes)
-     - How It Works (technical details)
-     - Examples (practical code/scenarios)
-     - Best Practices
-     - Common Pitfalls
-     - Related Reading (links to related notes)
-     - References (must have valid external links to docs, articles)
-
-4. Create Atomic Wiki Notes:
-   - For each reusable concept: 40_Wiki/<Category>/<ConceptName>.md
-   - Keep concise (1-3 paragraphs)
-   - Include 'Related Concepts' section with related links (make sure the link is full and valid)
-   - the references should have valid links
-
-5. Create Visual Map (if complex topic):
-   - <Topic>_Map.canvas to visualize concept relationships
-
-6. Create Examples (if applicable):
-   - Save code examples in 30_Research/<Area>/<Topic>/examples/
-
-7. Link & Track:
-   - Append to today's Daily Note: 10_Diary/YYYY-MM-DD.md
-   - If related to a project, add link in project's Progress section
-
-8. Archive: Move plan to 90_Plans/Archive/
-
-## Obsidian Formatting Rules (CRITICAL)
-
-YAML Frontmatter:
-- Frontmatter MUST be at the very top of the file (line 1)
-- Format: starts with --- on line 1, ends with --- before content
-- Use array syntax for multi-value fields: tags: [tag1, tag2, tag3]
-- NO duplicate keys
-
-Main Research Note Frontmatter:
----
-type: reference
-created: YYYY-MM-DD
-area: \"[[AreaName]]\"
-tags: [research, topic-tags]
-status: complete
----
-
-Wiki Notes:
-- Use template: 99_System/Templates/Wiki_Template.md
-- Path: 40_Wiki/<Category>/<ConceptName>.md
-- Keep notes atomic and focused on a single concept
-
-Related Links:
-- Do NOT put related/see-also links in frontmatter
-- Put related links in a '## Related Reading' section at the BOTTOM of the note body
-- Format: - [[NoteName]] - brief description
-
-When done, report back with:
 ## Research Summary: [Topic]
 
 **Created:**
@@ -180,8 +129,7 @@ When done, report back with:
 - [ ] Consolidate through practical exercises
 - [ ] Apply to [[ProjectName]] (if applicable)
 - [ ] Review in one week to reinforce memory
-"
-```
+
 
 # Benefits of This Approach
 
