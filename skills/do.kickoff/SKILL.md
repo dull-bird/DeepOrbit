@@ -41,6 +41,13 @@ subagent_type: "general-purpose"
 description: "Plan project kickoff"
 prompt: "Create a project kickoff plan for: [user's idea/inbox note]
 
+Output Requirements:
+Before writing the plan, you MUST output a collapsible thought block to verify your rationale:
+<details><summary>🧠 Thought Process</summary>
+1. **RAG Check**: Did I run the python script and successfully read the vault index?
+2. **Analysis**: How does this idea fit into or overlap with the discovered context?
+</details>
+
 Follow these steps:
 1. Gather Context via RAG:
    - **CRITICAL**: Execute `python scripts/rag/query_vault.py . "[core subject of the user's idea]"`
@@ -110,6 +117,13 @@ Once the user confirms the plan, spawn a fresh execution agent with clean contex
 subagent_type: "general-purpose"
 description: "Execute project kickoff"
 prompt: "Execute the project kickoff plan located at: 90_Plans/Plan_YYYY-MM-DD_Kickoff_<ProjectName>.md
+
+Output Requirements:
+Before writing the note, you MUST output a collapsible thought block to verify your constraints:
+<details><summary>🧠 Thought Process</summary>
+1. **YAML Check**: Are my frontmatter keys distinct, correctly formatted, and placed exactly at line 1?
+2. **Structure**: Is the project C.A.P layout complete?
+</details>
 
 Instructions:
 1. Read the plan file
