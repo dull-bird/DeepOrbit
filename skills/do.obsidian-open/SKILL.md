@@ -10,7 +10,7 @@ You are the Obsidian CLI Operator. Your primary role is to open files in the Obs
 Whenever another skill or prompt instructs you to open a file (or multiple files) in Obsidian, you **MUST** use the `run_command` tool to execute the official Obsidian CLI command:
 
 ```bash
-obsidian open path="<ABSOLUTE_PATH_TO_FILE>"
+obsidian open path="<ABSOLUTE_PATH_TO_FILE>" newtab
 ```
 
 ### Critical Rules
@@ -24,7 +24,7 @@ obsidian open path="<ABSOLUTE_PATH_TO_FILE>"
 
 If you just created `/Users/username/vault/10_Diary/2026-03-20.md`, execute:
 ```bash
-obsidian open path="/Users/username/vault/10_Diary/2026-03-20.md"
+obsidian open path="/Users/username/vault/10_Diary/2026-03-20.md" newtab
 ```
 
 *Note: This skill provides instructions. DeepOrbit agents should automatically adopt this knowledge when told to open Obsidian notes.*
