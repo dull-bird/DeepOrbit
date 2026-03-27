@@ -101,4 +101,17 @@ else
   fi
 fi
 
+# 6. Ensure gemini-obsidian extension dependencies are installed
+OBSIDIAN_EXT_DIR="$HOME/.gemini/extensions/gemini-obsidian"
+if [[ -d "$OBSIDIAN_EXT_DIR" && -f "$OBSIDIAN_EXT_DIR/package.json" ]]; then
+  LANCEDB_MOD="$OBSIDIAN_EXT_DIR/node_modules/@lancedb/lancedb"
+  if [[ ! -d "$LANCEDB_MOD" ]]; then
+    echo "Installing gemini-obsidian extension dependencies (missing @lancedb/lancedb)..."
+    (cd "$OBSIDIAN_EXT_DIR" && npm install --silent)
+    echo "gemini-obsidian dependencies installed."
+  else
+    echo "gemini-obsidian extension dependencies OK."
+  fi
+fi
+
 echo "Done. Run \"/memory refresh\" in Gemini CLI to load DeepOrbitPrompt.md."
