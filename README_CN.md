@@ -37,6 +37,7 @@ flowchart TD
 |------|--------|------|
 | [Obsidian](https://obsidian.md/) | ✅ 是 | 知识库管理 |
 | [Gemini CLI](https://github.com/google-gemini/gemini-cli) 或 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | ✅ 是 | Agent 运行时 |
+| [obsidian-skills](https://github.com/kepano/obsidian-skills) | ✅ 是 | 处理 Obsidian 原生格式必需。如果你使用 Gemini CLI，可以直接告诉 AI：“请帮我把 https://github.com/kepano/obsidian-skills 加入到系统的 skills 里面去”。 |
 | [ralph](https://github.com/gemini-cli-extensions/ralph) | **推荐** | 用于 `/do:pdf-to-markdown`、`/do:translate-markdown` 和 `/do:translate` |
 | `xelatex` | **推荐** | 用于 `/do:arxiv-translator`。<br/>- macOS: `brew install --cask mactex-no-gui`<br/>- Windows: [MiKTeX](https://miktex.org/) 或 [TeX Live](https://www.tug.org/texlive/) |
 | `obsidian-cli` | **推荐** | 用于 `do.obsidian-open` 自动在 Obsidian 打开笔记。<br/>- 参考 https://obsidian.md/cli |

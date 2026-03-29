@@ -37,6 +37,7 @@ You give DeepOrbit raw inputs — an arXiv link, a PDF, a quick idea, a URL. The
 |------|-----------|------|
 | [Obsidian](https://obsidian.md/) | ✅ Yes | Vault management |
 | [Gemini CLI](https://github.com/google-gemini/gemini-cli) or [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | ✅ Yes | Agent runtime |
+| [obsidian-skills](https://github.com/kepano/obsidian-skills) | ✅ Yes | Required for native Obsidian formats. If using Gemini CLI, ask the AI to "add https://github.com/kepano/obsidian-skills to my system skills". |
 | [ralph](https://github.com/gemini-cli-extensions/ralph) | **recommended** | For `/do:pdf-to-markdown`, `/do:translate-markdown`, and `/do:translate` |
 | `xelatex` | **recommended** | For `/do:arxiv-translator`.<br/>- macOS: `brew install --cask mactex-no-gui`<br/>- Windows: [MiKTeX](https://miktex.org/) or [TeX Live](https://www.tug.org/texlive/) |
 | `obsidian-cli` | **recommended** | For `do.obsidian-open` to automatically open generated notes.<br/>- See: https://obsidian.md/cli |
