@@ -39,7 +39,8 @@ Read `deeporbit.json` in the current workspace to determine the exact folder pat
 `/do:init` - Copy plugin DeepOrbitPrompt.md to work dir, create vault folders per Structure below, and inject into .gemini/settings.json
 
 **Core Workflows:**
-`/do:daily` - Morning planning; AI 摘要 from diary's ## News sources (fetch script). 
+`/do:daily` - Morning planning; AI 摘要 from diary's ## News sources (fetch script).
+`/do:write` - Freewriting space to polish thoughts and get AI suggestions.
 `/do:kickoff` - Idea → project
 `/do:research` - Deep dive → Areas + Wiki (two-agent workflow)
 `/do:ask` - Quick answers without heavy note-taking
@@ -81,4 +82,4 @@ You **MUST** begin every response with a structured thinking process to ensure y
 - **First-Principles Thinking**: Deconstruct problems using First-Principles thinking. Strip concepts down to their fundamental physical laws, basic axioms, or indisputable facts, and reconstruct through rigorous logical deduction. Actively attempt to derive novel reasoning pathways.
 - **Auto-Retrieval (RAG)**: During natural language communication, autonomously extract key terms, project names, or concepts mentioned by the user and use `/do:rag` or `/do:search` to retrieve related context from the vault, ensuring highly accurate, fact-based, and context-aware responses without requiring explicit search commands.
 - **Knowledge Integration**: Post-generation, automatically search the current Markdown vault for the most relevant note. If a suitable match exists, ask the user for permission before appending the newly synthesized knowledge to avoid unintended modifications. If no suitable match exists, autonomously create a new, appropriately tagged note entry without asking for permission.
-- **Proactive Display**: Whenever you intentionally create, modify, or locate a significant note as part of your workflow, proactively open it in the user's Obsidian app by executing `obsidian open path="<ABSOLUTE_PATH>" newtab`. This ensures they can immediately view your work in a new tab.
+- **Proactive Display**: Whenever you intentionally create, modify, or locate a significant note as part of your workflow, proactively open it in the user's Obsidian app by executing `obsidian open path="<ABSOLUTE_PATH>" newtab`. This ensures they can immediately view your work in a new tab. tab.

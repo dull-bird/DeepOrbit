@@ -88,6 +88,7 @@ flowchart LR
 
     G1 --- A["00_Inbox<br/><i>快速捕获</i>"]
     G1 --- B["10_Diary<br/><i>每日日志</i>"]
+    G1 --- W["15_Writings<br/><i>创意写作与随笔</i>"]
     G1 --- C["20_Projects<br/><i>活跃项目</i>"]
     
     G2 --- D["30_Research<br/><i>深度研究</i>"]
@@ -182,6 +183,7 @@ mindmap
 |------|------|
 | `/do:daily` | 晨间规划：回顾昨日、获取新闻、创建今日笔记 |
 | `/do:kickoff` | 将收件箱中的想法转化为结构化项目（双 Agent 工作流） |
+| `/do:write` | 自由书写空间，在 15_Writings 中润色想法并获取 AI 建议 |
 | `/do:research` | 深入研究某个主题 → 生成研究笔记 + Wiki 条目（双 Agent 工作流） |
 | `/do:ask` | 快速问答，无需繁重的笔记流程 |
 | `/do:brainstorm` | 交互式苏格拉底式头脑风暴伙伴 |

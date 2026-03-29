@@ -88,6 +88,7 @@ flowchart LR
 
     G1 --- A["00_Inbox<br/><i>Quick captures</i>"]
     G1 --- B["10_Diary<br/><i>Daily logs</i>"]
+    G1 --- W["15_Writings<br/><i>Creative writing & essays</i>"]
     G1 --- C["20_Projects<br/><i>Active projects</i>"]
     
     G2 --- D["30_Research<br/><i>Deep dives</i>"]
@@ -104,6 +105,7 @@ flowchart LR
     style G3 fill:#16213e,stroke:#0f3460,color:#e0e0e0
     style A fill:#0f3460,stroke:#16213e,color:#e0e0e0
     style B fill:#0f3460,stroke:#16213e,color:#e0e0e0
+    style W fill:#0f3460,stroke:#16213e,color:#e0e0e0
     style C fill:#0f3460,stroke:#16213e,color:#e0e0e0
     style D fill:#0f3460,stroke:#16213e,color:#e0e0e0
     style E fill:#0f3460,stroke:#16213e,color:#e0e0e0
@@ -149,6 +151,7 @@ mindmap
     🧠 Daily & Planning
       /do:daily
       /do:kickoff
+      /do:write
     🔬 Research & Knowledge
       /do:research
       /do:parse-knowledge
@@ -270,3 +273,4 @@ flowchart TD
 ## Philosophy
 
 > Everything orbits around you. Keep your knowledge in motion, but let the AI agents do the heavy lifting of parsing, translating, summarizing, and maintaining the structural integrity of your ideas.
+lating, summarizing, and maintaining the structural integrity of your ideas.
