@@ -168,9 +168,10 @@ mindmap
       /do:organize
       /do:refresh-prompt
     ⚙️ Obsidian 集成
-      do.obsidian-markdown
-      do.obsidian-bases
-      do.json-canvas
+      obsidian-markdown
+      obsidian-bases
+      json-canvas
+      obsidian-cli
       do.obsidian-open
 ```
 

@@ -50,7 +50,7 @@ Read `deeporbit.json` in the current workspace to determine the exact folder pat
 `/do:archive` - Clean up completed items
 
 **Technical:**
-`do.obsidian-markdown`, `do.obsidian-bases`, `do.json-canvas`, `do.mermaid` - Obsidian features & diagrams
+`obsidian-markdown`, `obsidian-bases`, `json-canvas`, `obsidian-cli`, `do.mermaid` - Obsidian features & diagrams
 
 ## Output Format Constraints
 
