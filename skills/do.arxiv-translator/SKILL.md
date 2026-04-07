@@ -40,7 +40,13 @@ Before starting, verify that all required system tools are installed.
 ### 4. Compile & Auto-Fix
 - Use `xelatex -interaction=nonstopmode`.
 - **Standard compilation loop:** `xelatex` -> `bibtex` -> `xelatex` x2.
-- **Error Auto-Fixing:** If compilation fails, read the `.log` file, identify the error line, and fix the corresponding sub-file using `write_file` or `replace`.
+- **Missing Package Installation (First Priority):** If compilation fails with a `File 'xxx.sty' not found` or `LaTeX Error: File 'xxx.cls' not found` error, **ALWAYS attempt to install the missing package first** before modifying any source file:
+    1. Run `tlmgr search --file xxx.sty` to identify the TeX Live package name.
+    2. Run `tlmgr install <package-name>` (may require `sudo` on macOS/Linux).
+    3. If `tlmgr` is not available or fails, try `mktexlsr` to refresh the package database.
+    4. On macOS with MacTeX, you can also use `sudo tlmgr update --self && sudo tlmgr install <package-name>`.
+    5. Only after exhausting all installation options should you consider workarounds in source code.
+- **Other Error Auto-Fixing:** For non-package errors (e.g., undefined commands, syntax errors), read the `.log` file, identify the error line, and fix the corresponding sub-file using `write_file` or `replace`.
 
 ### 5. Integrity Verification & Archive
 - **Completeness Check:** Verify all sub-files in `sections/` are translated.
@@ -60,7 +66,18 @@ Before starting, verify that all required system tools are installed.
 ## Rules
 
 - Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
-- **Missing Bibliography Style Fallback:** If `bibtex` fails with 'I couldn't open style file xxx.bst', it means the author forgot to include their custom bibliography style. You should automatically fallback by replacing `\bibliographystyle{xxx}` with a standard style like `\bibliographystyle{plainnat}` or `\bibliographystyle{unsrt}` in the main `.tex` file and recompile.
+- **Missing Package — Install First, Never Remove:** If `xelatex` (or `pdflatex`) reports a missing `.sty` or `.cls` file, you MUST attempt to install the package using `tlmgr` **before** considering any source-code modification. The goal is to preserve the original paper's formatting as faithfully as possible. Only if installation is truly impossible (e.g., proprietary journal class not on CTAN) may you apply minimal source-level workarounds, and you must document the reason.
+    - **Install workflow:**
+      ```bash
+      # 1. Find the package name
+      tlmgr search --file <missing-file.sty>
+      # 2. Install it
+      sudo tlmgr install <package-name>
+      # 3. Refresh the filename database
+      sudo mktexlsr
+      ```
+    - Common shorthand packages to try first: `texlive-latex-extra`, `texlive-science`, `texlive-publishers`.
+- **Missing Bibliography Style Fallback:** If `bibtex` fails with 'I couldn't open style file xxx.bst', first try `tlmgr install <bibtex-style-package>`. Only if the `.bst` file is a custom one bundled with the paper (not on CTAN) should you fallback to `\bibliographystyle{plainnat}` or `\bibliographystyle{unsrt}`.
 - **Anti-Destruction Principle:** When fixing compilation errors or missing translations, NEVER extract files directly from the original tarball to overwrite existing `.tex` files, as this will destroy previously completed translations. Always inspect differences first.
 - **Large File Handling Strategy:** For translating `.tex` files, favor replacing the entire file content using `write_file` over piece-meal updates with `replace` to prevent partial translations.
 - **Integrity Verification:** Before declaring the task complete, explicitly check the translated document sections to ensure no section or subsection was accidentally reverted or skipped.
