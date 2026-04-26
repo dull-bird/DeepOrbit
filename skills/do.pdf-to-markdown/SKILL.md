@@ -18,9 +18,9 @@ Convert PDF documents into structured Markdown while ensuring **zero paragraph l
 ## Prerequisites
 
 ```bash
-pip install pdfplumber
+pip install PyMuPDF
 ```
-*(pdfplumber is ONLY for the `extract_images_pdfplumber.py` script, NOT for text extraction!)*
+*(PyMuPDF is ONLY for the `extract_images.py` script, NOT for text extraction!)*
 
 ---
 
@@ -58,7 +58,7 @@ Before converting any content, you MUST build a complete map of the document.
 4. **Extract all images** from the PDF using the built-in script:
 
 ```bash
-python {skill_path}/scripts/extract_images_pdfplumber.py <input.pdf>
+python {skill_path}/scripts/extract_images.py <input.pdf>
 ```
 
 This will:
