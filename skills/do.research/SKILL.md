@@ -92,10 +92,12 @@ After the planning agent returns, check the plan file path is `90_Plans/Plan_YYY
 
 # Phase 2: Launch Execution Agent (After User Confirmation)
 
-Once the user confirms the plan, use the `run_command` tool to launch a **Ralph Loop**. Ralph will autonomously iterate through the plan's checklist, providing a much higher degree of reliability and iterative focus than a single subagent run.
+Once the user confirms the plan, run the **manifest loop**: a fresh-context iteration reads the plan's checklist, executes ONE unchecked `- [ ]` task, marks it `- [x]`, and ends — repeating until the completion promise. Fresh context per task gives much higher reliability than one long subagent run. See **Loop runtimes** below for how to drive this on your agent; the prompt string is the same everywhere.
 
-```bash
-/ralph:loop "You are the DeepOrbit Research Execution Agent. Your task is to execute the research plan at: 90_Plans/Plan_YYYY-MM-DD_Research_<Topic>.md
+**Iteration prompt:**
+
+```text
+You are the DeepOrbit Research Execution Agent. Your task is to execute the research plan at: 90_Plans/Plan_YYYY-MM-DD_Research_<Topic>.md
 
 CRITICAL RULES for this iteration:
 1. READ the plan file. Find the FIRST unchecked '- [ ]' task under 'Research Strategy' or 'Output Structure'.
@@ -110,10 +112,20 @@ CRITICAL RULES for this iteration:
    - Related Links: Do NOT put related/see-also links in frontmatter. Put them in '## Related Reading' section at the BOTTOM of the note body.
 4. After successfully completing the single task, modify the plan file tracking: change that specific '- [ ]' to '- [x]'.
 5. End your turn. Ralph will automatically start the next iteration for the next unchecked task.
-6. When ALL tasks in the plan are marked '- [x]', do the final linking (Append a link to 10_Diary/YYYY-MM-DD.md, archive the plan to 90_Plans/Archive/) and output exactly '<promise>RESEARCH_COMPLETE</promise>'." --completion-promise "RESEARCH_COMPLETE" --max-iterations 20
+6. When ALL tasks in the plan are marked '- [x]', do the final linking (Append a link to 10_Diary/YYYY-MM-DD.md, archive the plan to 90_Plans/Archive/) and output exactly '<promise>RESEARCH_COMPLETE</promise>'.
 ```
 
-After the Ralph loop finishes (detects `RESEARCH_COMPLETE` promise), you (the Orchestrator) provide a final summary to the user:
+Completion promise: `RESEARCH_COMPLETE`. Suggested max iterations: ~20.
+
+### Loop runtimes (pick what your agent supports)
+
+| Runtime | How to drive the loop |
+|---|---|
+| **Claude Code** | Dispatch each iteration to a fresh sub-agent with the **Task tool**; the orchestrator re-invokes it until the promise appears. Or run headless: `while ! grep -q RESEARCH_COMPLETE .do_loop_out 2>/dev/null; do claude -p "<iteration prompt>" | tee .do_loop_out; done`. The `/loop` command also works. |
+| **Gemini CLI** | `/ralph:loop "<iteration prompt>" --completion-promise "RESEARCH_COMPLETE" --max-iterations 20` (requires the [ralph](https://github.com/gemini-cli-extensions/ralph) extension). |
+| **Any agent** | Re-send the iteration prompt manually until every task is `- [x]`. |
+
+After the loop finishes (the `RESEARCH_COMPLETE` promise appears), you (the Orchestrator) provide a final summary to the user:
 
 ## Research Summary: [Topic]
 

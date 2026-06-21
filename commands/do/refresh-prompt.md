@@ -1,0 +1,6 @@
+---
+description: "Safely update DeepOrbitPrompt.md to latest version with diff comparison and merge options via do.refresh-prompt"
+---
+
+Use the do.refresh-prompt skill. Compare the user's DeepOrbitPrompt.md with the latest repo version, detect customizations, and offer merge options.
+User input: $ARGUMENTS

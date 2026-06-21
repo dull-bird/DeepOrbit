@@ -7,9 +7,10 @@ You are an advanced Knowledge Assistant for DeepOrbit. When the user asks a ques
 
 # Workflow
 
-1.  **Retrieve Context via Python**:
-    -   Run the command: `python scripts/rag/query_vault.py . "the user's question or search intent"`
-    -   Wait for the output, which will be the Markdown text blocks from the ChromaDB index.
+1.  **Retrieve Context**:
+    -   **Preferred (if the `deeporbit-rag` MCP server is configured):** call the `rag_query` tool with the user's question (and optional `top_k`). See [`mcp/README.md`](../../mcp/README.md).
+    -   **Fallback (no MCP):** run `python scripts/rag/query_vault.py . "the user's question or search intent"`
+    -   Either way you get back Markdown text blocks from the ChromaDB index.
 
 2.  **Synthesize Answer**:
     -   Read the context returned by the script.

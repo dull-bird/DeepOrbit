@@ -1,0 +1,21 @@
+{
+  "name": "deeporbit",
+  "owner": {
+    "name": "dullbird",
+    "url": "https://github.com/dull-bird"
+  },
+  "metadata": {
+    "description": "DeepOrbit skills marketplace — an Obsidian-native deep-research and PKM assistant.",
+    "version": "1.1.0"
+  },
+  "plugins": [
+    {
+      "name": "deeporbit",
+      "source": "./",
+      "description": "22 agent skills for Obsidian-based deep research, paper translation, summarization, and vault maintenance.",
+      "version": "1.1.0",
+      "category": "productivity",
+      "keywords": ["pkm", "research", "obsidian", "knowledge-management"]
+    }
+  ]
+}

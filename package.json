@@ -1,12 +1,20 @@
 {
   "name": "deeporbit",
-  "version": "1.0.0",
-  "description": "DeepOrbit: Agent-driven Digital Research Assistant for Gemini CLI",
+  "version": "1.1.0",
+  "description": "DeepOrbit: an agent-driven research assistant — a portable Agent Skills pack that turns an Obsidian vault into an automated PKM and deep-research engine.",
   "keywords": [
-    "gemini-cli-extension",
+    "agent-skills",
+    "claude-code",
+    "claude-code-plugin",
     "pkm",
     "research",
     "agent",
     "obsidian"
-  ]
+  ],
+  "homepage": "https://github.com/dull-bird/DeepOrbit",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dull-bird/DeepOrbit.git"
+  },
+  "author": "dullbird"
 }

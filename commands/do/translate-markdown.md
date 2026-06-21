@@ -1,0 +1,6 @@
+---
+description: "Translate Markdown documents to a target language with completeness verification via do.translate-markdown"
+---
+
+Use the do.translate-markdown skill. Translate the given Markdown document following the 4-phase workflow: structural reconnaissance, section-by-section translation, completeness verification, and output cleanup.
+User input: $ARGUMENTS

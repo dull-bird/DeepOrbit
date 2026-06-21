@@ -1,0 +1,6 @@
+---
+description: "Convert PDF to high-fidelity Markdown with completeness verification and image extraction via do.pdf-to-markdown"
+---
+
+Use the do.pdf-to-markdown skill. Convert the given PDF into structured Markdown with guaranteed completeness. Follow the 4-phase workflow: structural reconnaissance, image extraction, page-by-page conversion, and verification.
+User input: $ARGUMENTS

@@ -1,0 +1,6 @@
+---
+description: "Quick answers without heavy note-taking; use do.ask for one-off questions"
+---
+
+Use the do.ask skill. Answer the user's question directly and concisely without creating or updating notes.
+User input: $ARGUMENTS

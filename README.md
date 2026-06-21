@@ -6,7 +6,7 @@
 
 [**中文文档**](README_CN.md)
 
-DeepOrbit turns your [Obsidian](https://obsidian.md/) vault into an AI-powered research engine. It uses specialized agent skills (via Gemini CLI / Claude Code) to automate deep research, paper translation, content curation, and vault maintenance — so you can focus on thinking, not filing.
+DeepOrbit turns your [Obsidian](https://obsidian.md/) vault into an AI-powered research engine. It uses portable **Agent Skills** (compatible with Claude Code, Cursor, Codex, Gemini CLI, and any agent that supports the standard) to automate deep research, paper translation, content curation, and vault maintenance — so you can focus on thinking, not filing.
 
 > [!IMPORTANT]
 > **Obsidian is required.** DeepOrbit's folder structure, wikilink system, and templates all depend on a local Obsidian vault.
@@ -36,33 +36,54 @@ You give DeepOrbit raw inputs — an arXiv link, a PDF, a quick idea, a URL. The
 | Tool | Required? | Note |
 |------|-----------|------|
 | [Obsidian](https://obsidian.md/) | ✅ Yes | Vault management |
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli) or [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | ✅ Yes | Agent runtime |
+| An Agent Skills runtime — [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Cursor, Codex, [Gemini CLI](https://github.com/google-gemini/gemini-cli), etc. | ✅ Yes | Agent runtime |
 | [obsidian-skills](https://github.com/kepano/obsidian-skills) | ✅ Yes | Required for native Obsidian formats. If using Gemini CLI, ask the AI to "add https://github.com/kepano/obsidian-skills to my system skills". |
-| [ralph](https://github.com/gemini-cli-extensions/ralph) | **recommended** | For `/do:pdf-to-markdown`, `/do:translate-markdown`, and `/do:translate` |
+| [ralph](https://github.com/gemini-cli-extensions/ralph) | **Gemini CLI only** | Drives the section-by-section *manifest loop* in `/do:pdf-to-markdown`, `/do:translate-markdown`, `/do:research`. On Claude Code the same loop runs natively via sub-agents (Task tool) or the `/loop` command — no extra install. |
 | `xelatex` | **recommended** | For `/do:arxiv-translator`.<br/>- macOS: `brew install --cask mactex-no-gui`<br/>- Windows: [MiKTeX](https://miktex.org/) or [TeX Live](https://www.tug.org/texlive/) |
 | `obsidian-cli` | **recommended** | For `do.obsidian-open` to automatically open generated notes.<br/>- See: https://obsidian.md/cli |
 
 ### Setup Instructions
 
-Choose the installation path based on your Agent tool:
+DeepOrbit is a standard **Agent Skills** pack. Pick whichever installer matches your agent — all three install the same skills from `skills/`.
 
-#### Method A: Gemini CLI (Recommended)
-1. **Install Extension**:
-   ```bash
-   gemini extension install dull-bird/DeepOrbit
-   ```
-2. **Initialize Vault**: Run the script to inject core configuration into your Obsidian vault:
-   - **macOS/Linux**: `bash ~/.gemini/extensions/deeporbit/scripts/init_deeporbit_prompt.sh ~/path/to/your/vault`
-   - **Windows**: `& "$env:USERPROFILE\.gemini\extensions\deeporbit\scripts\init_deeporbit_prompt.ps1" "C:\path\to\your\vault"`
-3. **Activate**: Run `/do:init ~/path/to/your/vault` and then `/memory refresh`.
+#### Method A: `npx skills` (Recommended — works with any agent)
 
-#### Method B: Claude Code (cc) / Cursor / Other Agents
-1. **Clone Repository**:
-   ```bash
-   git clone https://github.com/dull-bird/DeepOrbit.git && cd DeepOrbit
-   ```
-2. **Initialize Vault**: Run the initialization script found in the `scripts/` directory (same commands as above, but use `./scripts/...` path).
-3. **Activate**: Since DeepOrbit commands are semantic, you can simply ask the Agent in natural language (e.g., "run init" or "start research"). The Agent will discover the skills via `DeepOrbitPrompt.md` in your vault.
+The universal installer. It supports Claude Code, Cursor, Codex, Windsurf, and many others, and symlinks the skills into each tool's directory automatically.
+
+```bash
+# In your project (or run with --global for user-wide install)
+npx skills add dull-bird/DeepOrbit
+```
+
+#### Method B: Claude Code plugin
+
+```text
+/plugin marketplace add dull-bird/DeepOrbit
+/plugin install deeporbit@deeporbit
+```
+
+This registers all 22 `do.*` skills as a Claude Code plugin. Restart or reload skills to activate.
+
+#### Method C: Gemini CLI (compatibility)
+
+```bash
+gemini extension install dull-bird/DeepOrbit
+```
+
+The `commands/do/*.toml` slash commands keep working for Gemini CLI users.
+
+#### Then: initialize your vault (all methods)
+
+Inject DeepOrbit's core prompt into your Obsidian vault, then activate:
+
+- **macOS/Linux**: `bash scripts/init_deeporbit_prompt.sh ~/path/to/your/vault`
+- **Windows**: `& ".\scripts\init_deeporbit_prompt.ps1" "C:\path\to\your\vault"`
+
+Then ask your agent in natural language ("run init", "start research") — it discovers the skills automatically. Gemini CLI users can also run `/do:init ~/path/to/your/vault` followed by `/memory refresh`.
+
+#### Optional: native RAG tools via MCP
+
+`do.rag` and `do.search` shell out to the scripts in `scripts/rag/` by default. If you'd rather call them as native MCP tools (`rag_query`, `rag_search`), the repo ships an optional MCP server — see [`mcp/README.md`](mcp/README.md) and the project-scoped [`.mcp.json`](.mcp.json).
 
 ### Language Configuration
 
@@ -119,7 +140,7 @@ flowchart LR
 
 ## Skills Overview
 
-DeepOrbit ships with **25 pre-configured AI skills**, split into two categories:
+DeepOrbit ships with **22 pre-configured `do.*` skills** (plus optional external [obsidian-skills](https://github.com/kepano/obsidian-skills) for native Obsidian formats), split into two categories:
 
 ### 🌐 Universal Skills (Work Anywhere)
 
@@ -205,10 +226,12 @@ mindmap
 
 ### 🤖 Multi-Agent Compatibility
 
-DeepOrbit features a highly modular command design that adapts to different AI environments:
+DeepOrbit ships as tool-neutral **Agent Skills** (`skills/do.*/SKILL.md`), so any agent that supports the standard discovers and triggers them by description:
 
-*   **Gemini CLI (Antigravity)**: **Native Support**. You can directly use `/do:command` in your terminal to trigger its skill logic defined in the `commands/` folder.
-*   **Claude Code (cc)**: **Semantic Support**. While Claude Code does not natively register TOML-based slash commands, it actively reads `DeepOrbitPrompt.md`. You can simply use natural language (e.g., "run init" or "start research"), and Claude will semantically fulfill the request using the corresponding Skill logic.
+*   **Claude Code / Cursor / Codex / Windsurf**: Install via `npx skills add` or the Claude Code plugin. Skills trigger automatically by intent, or you invoke them in natural language ("start research", "summarize this PDF").
+*   **Gemini CLI**: In addition to skills, the `commands/do/*.toml` files register native `/do:command` slash commands.
+
+The single source of truth is `skills/`; the per-tool install directories are generated by the installer and are git-ignored.
 
 ---
 

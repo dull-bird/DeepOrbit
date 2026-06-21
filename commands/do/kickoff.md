@@ -1,0 +1,6 @@
+---
+description: "Convert an idea or inbox note into a structured project in 20_项目 via do.kickoff"
+---
+
+Use the do.kickoff skill. Turn the user's idea or inbox note into a project: plan first, then create the project note with C.A.P. layout and area frontmatter.
+User input: $ARGUMENTS

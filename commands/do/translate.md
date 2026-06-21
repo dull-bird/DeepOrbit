@@ -1,0 +1,6 @@
+---
+description: "Smartly route translation requests for arXiv or standard PDFs to appropriate skills via do.translate"
+---
+
+Use the do.translate skill. Detect the type of input provided and automatically route to the best translation skill (arxiv-translator or pdf-to-markdown followed by translate-markdown).
+User input: $ARGUMENTS

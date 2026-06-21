@@ -1,90 +1,65 @@
-# 技能开发操作指南
+# 技能开发指南（贡献者）
 
-## 目录结构
+> 本指南面向**修改 DeepOrbit 本身**的人。普通用户安装请看 [README](README.md) 的 Quick Start。
+
+## 单一事实来源
+
+所有技能的唯一源头是仓库里的 `skills/` 目录，**全是真实文件**（不再有软链接）：
 
 ```
-# 源码（你的工作区）
-/Users/lilei/Documents/work/repos/DeepOrbit/
-├── skills/
-│   ├── do.archive/
-│   │   └── SKILL.md
-│   ├── do.arxiv-translator/
-│   │   └── SKILL.md
-│   ├── do.pdf-to-markdown/
-│   │   ├── SKILL.md
-│   │   └── scripts/              # 有捆绑脚本
-│   │       └── extract_images_pdfplumber.py
-│   └── ...（共 22 个 do.* 技能）
-
-# 运行环境（Claude Code 实际读取的位置）
-/Users/lilei/.claude/skills/
-├── do.archive/
-│   └── SKILL.md
-├── do.arxiv-translator/
+skills/
+├── do.ask/
 │   └── SKILL.md
 ├── do.pdf-to-markdown/
-│   └── SKILL.md                  # ⚠️ 缺少 scripts/ 目录
+│   ├── SKILL.md
+│   └── scripts/            # 捆绑脚本（可执行助手）
+│       └── extract_images.py
 └── ...（共 22 个 do.* 技能）
 ```
 
-## 注意事项
+> ⚠️ 不要提交 `.agents/`、`.claude/skills/`、`.cursor/`、`.roo/` 等**各工具安装目录**，也不要提交
+> `skills-lock.json`。它们是**消费者**运行 `npx skills add` 时自动生成的产物，已在 `.gitignore` 中忽略。
 
-- **repo 里真实有捆绑脚本的技能**：`do.pdf-to-markdown/scripts/`、`do.ghost-link-fixer/scripts/`
-- **已安装的技能缺少这些脚本目录**，复制时需要补全
-- **技能更新后必须重启 Claude Code**（或重新运行 `/skills`）才能生效
+## 编辑技能
 
----
+直接用编辑器修改 `skills/do.<name>/SKILL.md`。约定：
 
-## 日常操作流程
+- frontmatter 必须有 `name` 和 `description`，`name` 必须等于目录名（`do.<name>`）。
+- `description` 是触发信号，写清楚**何时该用**，而不仅是它是什么。
+- `SKILL.md` 保持精简；长参考/示例拆到同目录的独立文件并链接过去（渐进式披露）。
+- 可执行助手放在该技能的 `scripts/` 下。
 
-### 1. 在编辑器中修改 SKILL.md
+## 本地测试（让 Claude Code 加载你的改动）
 
-用 VS Code（或其他编辑器）打开 repo，直接编辑 `skills/do.xxx/SKILL.md` 文件。
-
-### 2. 同步到 Claude Code 技能目录
-
-每次修改后运行：
+在仓库目录下用通用安装器把技能链接进当前项目（开发模式，软链接会实时反映你的编辑）：
 
 ```bash
-# 复制到 ~/.claude/skills/
-cp -r /Users/lilei/Documents/work/repos/DeepOrbit/skills/* /Users/lilei/.claude/skills/
+npx skills add .            # 从当前仓库安装到本项目
+# 或装到用户级，供任意项目使用：
+npx skills add . --global
 ```
 
-这条命令直接覆盖目标目录下的技能文件夹，包括脚本等捆绑资源。
-
-## # 3. 重启 Claude Code
-
-关闭当前会话重新打开，/skills 命令会加载最新版本。
-
----
-
-## 首次补齐遗漏的脚本目录
-
-目前有两个技能缺少捆绑脚本，运行一次补齐：
-
-```bash
-cp -r /Users/lilei/Documents/work/repos/DeepOrbit/skills /tmp/deeporbit_skills
-cp -r /tmp/deeporbit_skills/do.pdf-to-markdown /Users/lilei/.claude/skills/do.pdf-to-markdown
-cp -r /tmp/deeporbit_skills/do.ghost-link-fixer /Users/lilei/.claude/skills/do.ghost-link-fixer
-```
-
----
+改完后重启 Claude Code（或重新运行 `/skills`）即可加载最新版本。
+因为安装的是软链接，编辑 `skills/` 下的源文件会直接生效，无需手动复制。
 
 ## 添加新技能
 
-在 repo 的 `skills/` 下创建新目录，例如 `skills/do.new-skill/SKILL.md`，然后执行上述同步命令即可。
+1. 在 `skills/` 下新建 `do.<new-skill>/SKILL.md`，按上面的约定填写 frontmatter。
+2. 如有脚本，放进 `skills/do.<new-skill>/scripts/`。
+3. 按 [AGENTS.md](AGENTS.md) 的「Skill & command sync」规则，更新 `README.md` 和 `README_CN.md`
+   的技能计数、思维导图和速查表（中英文都要改）。
 
----
-
-## 验证安装
+## 验证
 
 ```bash
-# 检查技能文件完整性
-ls /Users/lilei/.claude/skills/ | grep "do\." | sort
+# 列出全部技能
+ls -d skills/do.*/ | sort
 
-# 检查某个技能是否包含脚本等捆绑资源
-ls -R /Users/lilei/.claude/skills/do.pdf-to-markdown/
+# 检查 frontmatter name 与目录名是否一致
+for d in skills/do.*/; do n=$(basename "$d"); \
+  fm=$(awk '/^name:/{print $2; exit}' "$d/SKILL.md"); \
+  [ "$n" != "$fm" ] && echo "MISMATCH: $n vs $fm"; done
 
-# 检查技能数量
-ls -d /Users/lilei/.claude/skills/do.*/ | wc -l
+# 检查带脚本的技能
+ls -R skills/do.pdf-to-markdown/
 ```

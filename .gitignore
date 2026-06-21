@@ -9,6 +9,48 @@ env/
 # Node
 node_modules/
 
+# Skills installer artifacts (generated when consumers run `npx skills add`)
+# The single source of truth is skills/. These per-tool dirs are install output.
+.agents/
+.adal/
+.augment/
+.bob/
+.codebuddy/
+.commandcode/
+.continue/
+.cortex/
+.crush/
+.factory/
+.goose/
+.iflow/
+.junie/
+.kilocode/
+.kiro/
+.kode/
+.mcpjam/
+.mux/
+.neovate/
+.openhands/
+.pi/
+.pochi/
+.qoder/
+.qwen/
+.roo/
+.trae/
+.vibe/
+.windsurf/
+.zencoder/
+skills-lock.json
+.cursor/
+
+# Claude Code local (personal) settings — keep shared config out of personal file
+.claude/settings.local.json
+.claude/skills/
+
+# Local build/runtime caches
+.tmp/
+.venv_pdf/
+
 # OS
 .DS_Store
 Thumbs.db

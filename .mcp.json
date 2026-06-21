@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "deeporbit-rag": {
+      "command": "python3",
+      "args": ["${CLAUDE_PROJECT_DIR}/mcp/deeporbit_rag/server.py"],
+      "env": {
+        "DEEPORBIT_VAULT": "${DEEPORBIT_VAULT}"
+      }
+    }
+  }
+}

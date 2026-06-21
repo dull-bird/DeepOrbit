@@ -6,7 +6,7 @@
 
 [**English**](README.md)
 
-DeepOrbit 将你的 [Obsidian](https://obsidian.md/) 知识库变成 AI 驱动的研究引擎。它通过专用的 Agent 技能（基于 Gemini CLI / Claude Code）自动完成深度研究、论文翻译、内容策展和知识库维护 —— 让你专注于思考，而非整理。
+DeepOrbit 将你的 [Obsidian](https://obsidian.md/) 知识库变成 AI 驱动的研究引擎。它通过可移植的 **Agent Skills**（兼容 Claude Code、Cursor、Codex、Gemini CLI 等任意支持该标准的 Agent）自动完成深度研究、论文翻译、内容策展和知识库维护 —— 让你专注于思考，而非整理。
 
 > [!IMPORTANT]
 > **需要安装 Obsidian。** DeepOrbit 的文件夹结构、双链系统和模板都依赖本地 Obsidian 知识库。
@@ -36,33 +36,54 @@ flowchart TD
 | 工具 | 必需？ | 说明 |
 |------|--------|------|
 | [Obsidian](https://obsidian.md/) | ✅ 是 | 知识库管理 |
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli) 或 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | ✅ 是 | Agent 运行时 |
+| 任一 Agent Skills 运行时 —— [Claude Code](https://docs.anthropic.com/en/docs/claude-code)、Cursor、Codex、[Gemini CLI](https://github.com/google-gemini/gemini-cli) 等 | ✅ 是 | Agent 运行时 |
 | [obsidian-skills](https://github.com/kepano/obsidian-skills) | ✅ 是 | 处理 Obsidian 原生格式必需。如果你使用 Gemini CLI，可以直接告诉 AI：“请帮我把 https://github.com/kepano/obsidian-skills 加入到系统的 skills 里面去”。 |
-| [ralph](https://github.com/gemini-cli-extensions/ralph) | **推荐** | 用于 `/do:pdf-to-markdown`、`/do:translate-markdown` 和 `/do:translate` |
+| [ralph](https://github.com/gemini-cli-extensions/ralph) | **仅 Gemini CLI** | 为 `/do:pdf-to-markdown`、`/do:translate-markdown`、`/do:research` 驱动分节的 *manifest 循环*。在 Claude Code 上同样的循环用子代理（Task 工具）或 `/loop` 命令原生运行，无需额外安装。 |
 | `xelatex` | **推荐** | 用于 `/do:arxiv-translator`。<br/>- macOS: `brew install --cask mactex-no-gui`<br/>- Windows: [MiKTeX](https://miktex.org/) 或 [TeX Live](https://www.tug.org/texlive/) |
 | `obsidian-cli` | **推荐** | 用于 `do.obsidian-open` 自动在 Obsidian 打开笔记。<br/>- 参考 https://obsidian.md/cli |
 
 ### 安装说明
 
-根据你使用的 Agent 工具，选择对应的安装路径：
+DeepOrbit 是标准的 **Agent Skills** 技能包。任选一种与你的 Agent 匹配的安装方式 —— 三种方式安装的都是 `skills/` 里同一套技能。
 
-#### 方法 A: Gemini CLI (推荐)
-1. **安装扩展**:
-   ```bash
-   gemini extension install dull-bird/DeepOrbit
-   ```
-2. **初始化知识库**: 运行脚本将核心配置注入你的 Obsidian 知识库：
-   - **macOS/Linux**: `bash ~/.gemini/extensions/deeporbit/scripts/init_deeporbit_prompt.sh ~/你的/知识库/路径`
-   - **Windows**: `& "$env:USERPROFILE\.gemini\extensions\deeporbit\scripts\init_deeporbit_prompt.ps1" "C:\你的\知识库\路径"`
-3. **激活**: 运行 `/do:init ~/你的/知识库/路径` 后执行 `/memory refresh`。
+#### 方法 A：`npx skills`（推荐 —— 通用，适配任意 Agent）
 
-#### 方法 B: Claude Code (cc) / Cursor / 其他 Agent
-1. **克隆仓库**:
-   ```bash
-   git clone https://github.com/dull-bird/DeepOrbit.git && cd DeepOrbit
-   ```
-2. **初始化知识库**: 运行仓库内 `scripts/` 下的初始化脚本（命令同上，路径改为 `./scripts/...`）。
-3. **激活**: 由于 DeepOrbit 指令是语义化的，你只需在对话中下令（如“帮我执行 init” 或 “开始 research”），Agent 即可通过你知识库中的 `DeepOrbitPrompt.md` 识别并执行对应技能。
+通用安装器，支持 Claude Code、Cursor、Codex、Windsurf 等，会自动把技能软链接到各工具的目录里。
+
+```bash
+# 在你的项目目录下执行（加 --global 可做用户级全局安装）
+npx skills add dull-bird/DeepOrbit
+```
+
+#### 方法 B：Claude Code 插件
+
+```text
+/plugin marketplace add dull-bird/DeepOrbit
+/plugin install deeporbit@deeporbit
+```
+
+这会把全部 22 个 `do.*` 技能注册为 Claude Code 插件。安装后重启或重新加载技能即可生效。
+
+#### 方法 C：Gemini CLI（兼容）
+
+```bash
+gemini extension install dull-bird/DeepOrbit
+```
+
+`commands/do/*.toml` 里的斜杠命令对 Gemini CLI 用户继续可用。
+
+#### 然后：初始化知识库（所有方式通用）
+
+将 DeepOrbit 的核心提示词注入你的 Obsidian 知识库，再激活：
+
+- **macOS/Linux**：`bash scripts/init_deeporbit_prompt.sh ~/你的/知识库/路径`
+- **Windows**：`& ".\scripts\init_deeporbit_prompt.ps1" "C:\你的\知识库\路径"`
+
+之后用自然语言对 Agent 下令（如「执行 init」「开始 research」），它会自动发现并触发技能。Gemini CLI 用户也可运行 `/do:init ~/你的/知识库/路径` 后执行 `/memory refresh`。
+
+#### 可选：通过 MCP 暴露原生 RAG 工具
+
+`do.rag` 和 `do.search` 默认调用 `scripts/rag/` 下的脚本。如果你想把它们作为原生 MCP 工具（`rag_query`、`rag_search`）调用，仓库附带一个可选的 MCP server —— 见 [`mcp/README.md`](mcp/README.md) 和项目级的 [`.mcp.json`](.mcp.json)。
 
 ### 语言配置
 
@@ -118,7 +139,7 @@ flowchart LR
 
 ## 技能一览
 
-DeepOrbit 内置 **25 个预配置 AI 技能**，分为两大类：
+DeepOrbit 内置 **22 个预配置 `do.*` 技能**（另可选装外部 [obsidian-skills](https://github.com/kepano/obsidian-skills) 以支持 Obsidian 原生格式），分为两大类：
 
 ### 🌐 通用技能(无需 Obsidian)
 
@@ -204,10 +225,12 @@ mindmap
 
 ### 🤖 多 AI Agent 兼容说明
 
-DeepOrbit 采用了高度模块化的指令设计，支持多种 AI 交互方式：
+DeepOrbit 以工具无关的 **Agent Skills**（`skills/do.*/SKILL.md`）形式分发，任何支持该标准的 Agent 都能按描述自动发现并触发它们：
 
-*   **Gemini CLI (Antigravity)**: **原生支持**。你可以直接在终端输入 `/do:command` 来触发 `commands/` 文件夹中定义的 TOML 指令。
-*   **Claude Code (cc)**: **语义化支持**。虽然 Claude 暂不支持直接触发 TOML 快捷指令，但它会主动阅读项目中的 `DeepOrbitPrompt.md`。你只需以自然语言下令（如：“帮我执行 init” 或 “开始 research”），Claude 就能精准调用对应的 Skill 逻辑。
+*   **Claude Code / Cursor / Codex / Windsurf**：通过 `npx skills add` 或 Claude Code 插件安装。技能会按意图自动触发，你也可以用自然语言调用（如「开始 research」「总结这个 PDF」）。
+*   **Gemini CLI**：除技能外，`commands/do/*.toml` 还会注册原生的 `/do:command` 斜杠命令。
+
+唯一的事实来源是 `skills/`；各工具的安装目录由安装器自动生成，已被 git 忽略。
 
 ---
 

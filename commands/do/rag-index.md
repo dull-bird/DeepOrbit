@@ -1,0 +1,6 @@
+---
+description: "Index the Obsidian vault for semantic RAG search using ChromaDB"
+---
+
+Use the do.rag-index skill. Run the python script scripts/rag/index_vault.py to build the local index.
+User input: $ARGUMENTS

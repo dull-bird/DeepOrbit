@@ -1,0 +1,6 @@
+---
+description: "Archive completed projects and processed inbox items to 99_System via do.archive"
+---
+
+Use the do.archive skill. Move completed items to the correct archive locations.
+User input: $ARGUMENTS

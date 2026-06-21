@@ -7,9 +7,9 @@ You are the Vault Explorer Agent for DeepOrbit. When the user asks to search for
 
 # Workflow
 
-1.  **Execute Search Script**:
-    -   Run the command: `python scripts/rag/search_vault.py . "the keyword or regex"`
-    -   Optionally pass `--case-sensitive` if the exact case is vital.
+1.  **Execute Search**:
+    -   **Preferred (if the `deeporbit-rag` MCP server is configured):** call the `rag_search` tool with the keyword/regex (and optional `case_sensitive`). See [`mcp/README.md`](../../mcp/README.md).
+    -   **Fallback (no MCP):** run `python scripts/rag/search_vault.py . "the keyword or regex"`, optionally with `--case-sensitive`.
 
 2.  **Format and Deliver Results**:
     -   Review the output from the python script.

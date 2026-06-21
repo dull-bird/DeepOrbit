@@ -1,0 +1,6 @@
+---
+description: "Summarize user's recently added or modified markdown files within directories 00-90, excluding 99_System using the do.recap skill"
+---
+
+Use the do.recap skill to fetch and summarize recently added or modified markdown files based on the given time range.
+User input: $ARGUMENTS
