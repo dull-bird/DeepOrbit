@@ -22,6 +22,69 @@ const capabilities = zh ? [
 ];
 
 const runtimes = ['Kimi Code', 'OpenClaw', 'Gemini / Antigravity', 'Codex'];
+const installOptions = zh ? [
+  {
+    name: '通用安装',
+    context: '克隆仓库并安装本地 Core；适用于任何 Agent。',
+    prompt: '请帮我安装 DeepOrbit：克隆 https://github.com/dull-bird/DeepOrbit.git，进入目录后执行 python3 -m pip install -e .。然后为我的 Obsidian vault 运行 deeporbit --vault <VAULT_PATH> init 和 doctor，并报告可用能力。',
+    command: 'git clone https://github.com/dull-bird/DeepOrbit.git\ncd DeepOrbit\npython3 -m pip install -e .'
+  },
+  {
+    name: 'Gemini / Antigravity',
+    context: '链接本地 Extension，启用命令、MCP 与 hooks。',
+    prompt: '请在本机安装并链接 DeepOrbit 的 Gemini Extension。若仓库未克隆，先克隆 https://github.com/dull-bird/DeepOrbit.git；然后执行 gemini extensions link <DEEPORBIT_PATH>，验证 extension，并说明如何为我的 vault 运行 deeporbit init。',
+    command: 'gemini extensions link /path/to/DeepOrbit'
+  },
+  {
+    name: 'Kimi Code',
+    context: '直接加载标准 Agent Skills，不依赖插件市场。',
+    prompt: '请为 Kimi Code 启用 DeepOrbit。克隆 https://github.com/dull-bird/DeepOrbit.git（如尚未存在），安装 Python Core，并以 kimi --skills-dir <DEEPORBIT_PATH>/skills 启动。请确认 do.todo、do.rag 和 do.calendar 可以被发现。',
+    command: 'kimi --skills-dir /path/to/DeepOrbit/skills'
+  },
+  {
+    name: 'OpenClaw',
+    context: '把 portable Skills 放入当前工作区的 .agents/skills。',
+    prompt: '请为当前 OpenClaw 工作区安装 DeepOrbit。克隆 https://github.com/dull-bird/DeepOrbit.git（如尚未存在），将其中每个 skills/do.* 文件夹复制或软链接到当前工作区 .agents/skills/，安装 Python Core，并运行 openclaw skills check 验证。',
+    command: 'mkdir -p .agents/skills\ncp -R /path/to/DeepOrbit/skills/do.* .agents/skills/'
+  },
+  {
+    name: 'Codex',
+    context: '安装 portable Skills；插件与 MCP 作为可选增强。',
+    prompt: '请为 Codex 安装 DeepOrbit。使用 npx skills add dull-bird/DeepOrbit 或克隆 https://github.com/dull-bird/DeepOrbit.git 后加载 skills/。安装 Python Core，初始化我的 Obsidian vault，并在可用时启用 .codex-plugin 与 mcp/deeporbit_rag/server.py。请验证 todo、rag、agenda 和 calendar 命令。',
+    command: 'npx skills add dull-bird/DeepOrbit'
+  }
+] : [
+  {
+    name: 'Universal',
+    context: 'Clone the repository and install the local Core for any agent.',
+    prompt: 'Install DeepOrbit for me: clone https://github.com/dull-bird/DeepOrbit.git, enter the directory, and run python3 -m pip install -e .. Then run deeporbit --vault <VAULT_PATH> init and doctor for my Obsidian vault, and report available capabilities.',
+    command: 'git clone https://github.com/dull-bird/DeepOrbit.git\ncd DeepOrbit\npython3 -m pip install -e .'
+  },
+  {
+    name: 'Gemini / Antigravity',
+    context: 'Link the local Extension to enable commands, MCP, and hooks.',
+    prompt: 'Install and link the DeepOrbit Gemini Extension locally. Clone https://github.com/dull-bird/DeepOrbit.git if needed, run gemini extensions link <DEEPORBIT_PATH>, validate the extension, and explain how to run deeporbit init for my vault.',
+    command: 'gemini extensions link /path/to/DeepOrbit'
+  },
+  {
+    name: 'Kimi Code',
+    context: 'Load standard Agent Skills directly, without a plugin marketplace.',
+    prompt: 'Enable DeepOrbit for Kimi Code. Clone https://github.com/dull-bird/DeepOrbit.git if needed, install the Python Core, and start Kimi with kimi --skills-dir <DEEPORBIT_PATH>/skills. Confirm that do.todo, do.rag, and do.calendar are discoverable.',
+    command: 'kimi --skills-dir /path/to/DeepOrbit/skills'
+  },
+  {
+    name: 'OpenClaw',
+    context: 'Place portable Skills in the current workspace .agents/skills directory.',
+    prompt: 'Install DeepOrbit for my current OpenClaw workspace. Clone https://github.com/dull-bird/DeepOrbit.git if needed, copy or symlink each skills/do.* folder into the current workspace .agents/skills/, install the Python Core, and run openclaw skills check to verify it.',
+    command: 'mkdir -p .agents/skills\ncp -R /path/to/DeepOrbit/skills/do.* .agents/skills/'
+  },
+  {
+    name: 'Codex',
+    context: 'Install portable Skills; plugin and MCP are optional enhancements.',
+    prompt: 'Install DeepOrbit for Codex. Use npx skills add dull-bird/DeepOrbit, or clone https://github.com/dull-bird/DeepOrbit.git and load skills/. Install the Python Core, initialize my Obsidian vault, and enable .codex-plugin and mcp/deeporbit_rag/server.py if available. Verify todo, rag, agenda, and calendar.',
+    command: 'npx skills add dull-bird/DeepOrbit'
+  }
+];
 ---
 <section class="hero container">
   <div class="hero-title">
@@ -102,6 +165,28 @@ $ deeporbit --vault ~/Vault calendar export</code></pre>
   </div>
 </section>
 
+<section id="install" class="well install-section">
+  <div class="container section">
+    <div class="section-head">
+      <div class="eyebrow">Install prompts</div>
+      <div><h2>{zh ? '选一个运行时，复制一条能执行的安装提示词。' : 'Choose a runtime. Copy one prompt an agent can execute.'}</h2><p class="section-intro">{zh ? '这些按钮复制的是完整安装请求：它会要求 Agent 克隆、安装、验证，并且不把缓存或密钥写入你的 vault。命令行用户也可以直接复制右侧命令。' : 'Each button copies a complete request: clone, install, validate, and keep caches and secrets out of the vault. Terminal users can copy the direct command at right.'}</p></div>
+    </div>
+    <div class="install-list">
+      {installOptions.map((option) => (
+        <article class="install-row">
+          <div><h3>{option.name}</h3><p>{option.context}</p></div>
+          <pre><code>{option.command}</code></pre>
+          <div class="install-actions">
+            <button class="copy-button" type="button" data-copy={option.prompt} data-label={zh ? '复制安装提示词' : 'Copy install prompt'}>{zh ? '复制安装提示词' : 'Copy install prompt'}</button>
+            <button class="copy-command" type="button" data-copy={option.command} data-label={zh ? '复制命令' : 'Copy command'}>{zh ? '复制命令' : 'Copy command'}</button>
+          </div>
+        </article>
+      ))}
+    </div>
+    <p id="copy-status" class="copy-status" aria-live="polite"></p>
+  </div>
+</section>
+
 <section class="container section runtime-section">
   <div class="section-head"><div class="eyebrow">One portable contract</div><div><h2>{zh ? '选择你的 Agent，而不是被 Agent 选择。' : 'Choose your agent. Do not be chosen by one.'}</h2><p class="section-intro">{zh ? '运行时的 hooks、MCP 和 Goal 只提升体验；计划、任务和知识都留在任何工具可读的文件中。' : 'Runtime hooks, MCP, and Goals improve the experience; plans, tasks, and knowledge stay in files every tool can read.'}</p></div></div>
   <div class="runtime-list">
@@ -165,6 +250,19 @@ $ deeporbit --vault ~/Vault calendar export</code></pre>
   .runtime-row { display: grid; grid-template-columns: 80px minmax(160px, .55fr) 1.45fr; gap: 32px; padding: 26px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
   .runtime-row > span { color: var(--accent-ink); font-size: .82rem; }
   .runtime-row p { margin: 0; }
+  .install-section { border-block: 1px solid var(--line); }
+  .install-list { border-top: 1px solid var(--line); }
+  .install-row { display: grid; grid-template-columns: minmax(180px, .7fr) minmax(250px, 1fr) auto; gap: 28px; align-items: center; padding: 25px 0; border-bottom: 1px solid var(--line); }
+  .install-row h3 { font-size: 1.12rem; }
+  .install-row p { margin: 7px 0 0; color: var(--body); font-size: .92rem; }
+  .install-row pre { margin: 0; padding: 14px; border-radius: 9px; font-size: .78rem; line-height: 1.6; }
+  .install-row pre code { padding: 0; background: transparent; white-space: pre-wrap; }
+  .install-actions { display: grid; gap: 8px; justify-items: stretch; }
+  .copy-button, .copy-command { min-height: 38px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--ink); cursor: pointer; font: inherit; font-size: .8rem; font-weight: 700; white-space: nowrap; transition: transform .18s ease, background .18s ease; }
+  .copy-button { color: var(--paper); background: var(--ink); border-color: var(--ink); }
+  .copy-button:hover, .copy-command:hover { transform: translateY(-1px); }
+  .copy-button:active, .copy-command:active { transform: scale(.98); }
+  .copy-status { min-height: 1.5em; margin: 18px 0 0; color: var(--accent-ink); font-size: .88rem; }
   .cta { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; margin-block: 40px 120px; padding: 56px; background: var(--ink); color: var(--paper); }
   .cta .eyebrow { color: var(--accent); }
   .cta h2 { margin-top: 16px; }
@@ -183,7 +281,35 @@ $ deeporbit --vault ~/Vault calendar export</code></pre>
     .capability, .runtime-row { grid-template-columns: 54px 1fr; gap: 14px; }
     .capability code { grid-column: 2; }
     .runtime-row p { grid-column: 2; }
+    .install-row { grid-template-columns: 1fr; gap: 14px; }
+    .install-actions { grid-template-columns: 1fr 1fr; }
     .system-grid { gap: 52px; }
     .cta { margin-inline: 0; padding: 40px 28px; gap: 32px; }
   }
 </style>
+
+<script>
+  const status = document.querySelector<HTMLParagraphElement>('#copy-status');
+  const copy = async (value: string) => {
+    if (!navigator.clipboard) throw new Error('Clipboard API unavailable');
+    await navigator.clipboard.writeText(value);
+  };
+
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      try {
+        await copy(button.dataset.copy || '');
+      } catch {
+        if (status) status.textContent = button.dataset.label?.includes('复制')
+          ? '浏览器未允许剪贴板访问，请直接选择并复制右侧命令。'
+          : 'Clipboard access is unavailable. Select and copy the command directly.';
+        return;
+      }
+      const label = button.dataset.label || 'Copied';
+      const original = button.textContent;
+      button.textContent = label.includes('复制') ? '已复制' : 'Copied';
+      if (status) status.textContent = label.includes('复制') ? '已复制到剪贴板。' : 'Copied to the clipboard.';
+      window.setTimeout(() => { button.textContent = original; }, 1600);
+    });
+  });
+</script>
