@@ -1,13 +1,23 @@
 ---
 date: YYYY-MM-DD
 type: daily
+status: active
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+tags: [daily]
 ---
 
 # YYYY-MM-DD
 
 ## 待办事项
 
-- [ ]
+通过 `do.todo` 快速添加；原任务所在文件是唯一事实来源。
+
+```tasks
+not done
+happens on YYYY-MM-DD
+sort by due
+```
 
 ## 日志
 
@@ -18,6 +28,8 @@ type: daily
 ## 新闻摘要
 
 ## 相关项目
+
+![[99_System/Bases/Projects.base#Active projects]]
 
 ## News sources
 

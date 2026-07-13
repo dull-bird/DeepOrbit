@@ -3,11 +3,15 @@ __pycache__/
 *.py[cod]
 *$py.class
 .venv/
+.venv*/
 venv/
 env/
 
 # Node
 node_modules/
+site/.astro/
+site/dist/
+*.egg-info/
 
 # Skills installer artifacts (generated when consumers run `npx skills add`)
 # The single source of truth is skills/. These per-tool dirs are install output.

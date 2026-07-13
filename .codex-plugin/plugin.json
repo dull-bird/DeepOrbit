@@ -1,0 +1,22 @@
+{
+  "name": "deeporbit",
+  "version": "2.0.0",
+  "description": "Local-first Obsidian research, knowledge, task, and retrieval workflows for Codex.",
+  "author": {
+    "name": "dullbird",
+    "url": "https://github.com/dull-bird"
+  },
+  "homepage": "https://dull-bird.github.io/DeepOrbit/",
+  "repository": "https://github.com/dull-bird/DeepOrbit",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "DeepOrbit",
+    "shortDescription": "Turn an Obsidian vault into a portable knowledge system.",
+    "longDescription": "DeepOrbit provides checkpointed research, local retrieval, writing, task, agenda, calendar, and vault-maintenance workflows.",
+    "developerName": "dullbird",
+    "category": "Productivity",
+    "capabilities": ["skills", "mcp", "hooks"],
+    "defaultPrompt": "Use DeepOrbit to work with this Obsidian vault."
+  },
+  "mcpServers": "./.mcp.json"
+}

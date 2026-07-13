@@ -1,0 +1,15 @@
+filters:
+  and:
+    - 'type == "reference" || type == "research"'
+views:
+  - type: table
+    name: Research library
+    order:
+      - file.name
+      - area
+      - status
+      - created
+      - updated
+    sort:
+      - property: updated
+        direction: DESC

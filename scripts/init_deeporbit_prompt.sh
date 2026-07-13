@@ -20,26 +20,29 @@ if [[ -z "$SOURCE" ]]; then
   exit 1
 fi
 
-# 2. Copy to work dir as DeepOrbitPrompt.md
+# 2. Copy defaults without overwriting user customizations
 mkdir -p "$DEST"
-cp "$SOURCE" "$DEST/DeepOrbitPrompt.md"
-echo "Copied prompt to: $DEST/DeepOrbitPrompt.md"
+if [[ ! -f "$DEST/DeepOrbitPrompt.md" ]]; then
+  cp "$SOURCE" "$DEST/DeepOrbitPrompt.md"
+  echo "Copied prompt to: $DEST/DeepOrbitPrompt.md"
+else
+  echo "Preserved existing prompt: $DEST/DeepOrbitPrompt.md"
+fi
 
 # 2.5 Copy deeporbit.json context file
 CONFIG_SOURCE=""
 [[ -f "$REPO_ROOT/deeporbit.json" ]] && CONFIG_SOURCE="$REPO_ROOT/deeporbit.json"
 [[ -z "$CONFIG_SOURCE" && -f "$EXTENSION_DIR/deeporbit.json" ]] && CONFIG_SOURCE="$EXTENSION_DIR/deeporbit.json"
 
-if [[ -n "$CONFIG_SOURCE" ]]; then
+if [[ -n "$CONFIG_SOURCE" && ! -f "$DEST/deeporbit.json" ]]; then
   cp "$CONFIG_SOURCE" "$DEST/deeporbit.json"
   echo "Copied configuration to: $DEST/deeporbit.json"
-else
-  echo "" > "$DEST/deeporbit.json"
 fi
 
 # 3. Create folder structure
 DIR_INBOX="00_Inbox"
 DIR_DIARY="10_Diary"
+DIR_WRITINGS="15_Writings"
 DIR_PROJECTS="20_Projects"
 DIR_RESEARCH="30_Research"
 DIR_WIKI="40_Wiki"
@@ -48,18 +51,19 @@ DIR_NOTES="60_Notes"
 DIR_PLANS="90_Plans"
 DIR_SYSTEM="99_System"
 
-VAULT_DIRS="$DIR_INBOX $DIR_DIARY $DIR_PROJECTS $DIR_RESEARCH $DIR_WIKI $DIR_RESOURCES $DIR_NOTES $DIR_PLANS $DIR_SYSTEM"
+VAULT_DIRS="$DIR_INBOX $DIR_DIARY $DIR_WRITINGS $DIR_PROJECTS $DIR_RESEARCH $DIR_WIKI $DIR_RESOURCES $DIR_NOTES $DIR_PLANS $DIR_SYSTEM"
 for d in $VAULT_DIRS; do mkdir -p "$DEST/$d"; done
 
-# Rename existing localized folders to English equivalents if they exist
-[ -d "$DEST/$DIR_RESOURCES/产品发布" ] && mv "$DEST/$DIR_RESOURCES/产品发布" "$DEST/$DIR_RESOURCES/Product_Launches"
-[ -d "$DEST/$DIR_RESOURCES/新闻" ] && mv "$DEST/$DIR_RESOURCES/新闻" "$DEST/$DIR_RESOURCES/News"
-[ -d "$DEST/$DIR_SYSTEM/提示词" ] && mv "$DEST/$DIR_SYSTEM/提示词" "$DEST/$DIR_SYSTEM/Prompts"
-[ -d "$DEST/$DIR_SYSTEM/归档" ] && mv "$DEST/$DIR_SYSTEM/归档" "$DEST/$DIR_SYSTEM/Archive"
-
 mkdir -p "$DEST/$DIR_RESOURCES/Newsletters" "$DEST/$DIR_RESOURCES/Product_Launches" "$DEST/$DIR_RESOURCES/News"
-mkdir -p "$DEST/$DIR_SYSTEM/Templates" "$DEST/$DIR_SYSTEM/Prompts" "$DEST/$DIR_SYSTEM/Archive"
+mkdir -p "$DEST/$DIR_SYSTEM/Templates" "$DEST/$DIR_SYSTEM/Prompts" "$DEST/$DIR_SYSTEM/Archive" "$DEST/$DIR_SYSTEM/Bases" "$DEST/$DIR_SYSTEM/Calendar"
 echo "Created vault folders based on configuration."
+
+# Use the v2 core for conflict-aware localized-folder migration and config upgrades.
+if [[ -d "$REPO_ROOT/src/deeporbit" ]]; then
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" python3 -m deeporbit --vault "$DEST" init || {
+    echo "Warning: DeepOrbit core reported migration conflicts; review the JSON above." >&2
+  }
+fi
 
 # 4. Copy plugin system contents into DEST/$DIR_SYSTEM (even if it already exists — overlay)
 PLUGIN_ROOT="$(dirname "$SOURCE")"
@@ -68,7 +72,7 @@ PLUGIN_SYS_NAME="99_System"
 
 if [[ -d "$PLUGIN_ROOT/$PLUGIN_SYS_NAME" ]]; then
   mkdir -p "$DEST/$DIR_SYSTEM"
-  cp -r "$PLUGIN_ROOT/$PLUGIN_SYS_NAME/"* "$DEST/$DIR_SYSTEM/" 2>/dev/null || true
+  cp -rn "$PLUGIN_ROOT/$PLUGIN_SYS_NAME/"* "$DEST/$DIR_SYSTEM/" 2>/dev/null || true
   echo "Copied $PLUGIN_SYS_NAME contents (templates, etc.) from plugin into $DEST/$DIR_SYSTEM"
 fi
 

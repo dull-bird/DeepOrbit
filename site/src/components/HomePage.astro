@@ -1,0 +1,91 @@
+---
+interface Props { lang: 'zh' | 'en' }
+const { lang } = Astro.props;
+const zh = lang === 'zh';
+const base = import.meta.env.BASE_URL;
+const home = zh ? base : `${base}en/`;
+const runtimes = ['Kimi Code', 'OpenClaw', 'Gemini / Antigravity', 'Codex'];
+---
+<section class="hero container">
+  <div>
+    <div class="eyebrow">Local first · Agent native · Obsidian</div>
+    <h1>Deep<br /><span>Orbit</span></h1>
+  </div>
+  <div class="hero-copy">
+    <p class="reading-copy">{zh ? '让你的研究、项目、写作与待办围绕同一个本地知识库运转，并能在不同 AI Agent 之间迁移。' : 'Run research, projects, writing, and tasks around one local knowledge base that moves across AI agents.'}</p>
+    <div class="actions">
+      <a class="button primary" href={`${home}docs/`}>{zh ? '开始使用' : 'Get started'}</a>
+      <a class="button" href="https://github.com/dull-bird/DeepOrbit">View source</a>
+    </div>
+  </div>
+  <div class="orbit" aria-hidden="true"><i></i><b></b><span></span></div>
+</section>
+
+<section id="system" class="container section">
+  <div class="section-head">
+    <div class="eyebrow">{zh ? '一个系统，四个入口' : 'One system, four entrances'}</div>
+    <h2>{zh ? '文件是真相，Agent 是能力。' : 'Files hold truth. Agents provide capability.'}</h2>
+  </div>
+  <div class="rule-list">
+    {runtimes.map((runtime, index) => (
+      <div class="rule-row">
+        <div><span class="tag">0{index + 1}</span><h3>{runtime}</h3></div>
+        <p>{zh ? '读取同一套 Agent Skills、Markdown checkpoints 与本机索引；原生 Goal、Hooks 和 MCP 只增强体验。' : 'Reads the same Agent Skills, Markdown checkpoints, and local index; native goals, hooks, and MCP only enhance the experience.'}</p>
+      </div>
+    ))}
+  </div>
+</section>
+
+<section class="well">
+  <div class="container section two-col">
+    <div>
+      <div class="eyebrow">{zh ? '同步而不搬运缓存' : 'Sync notes, not caches'}</div>
+      <h2>{zh ? 'Git 与 Obsidian Sync 都可以。' : 'Use Git or Obsidian Sync.'}</h2>
+    </div>
+    <p class="reading-copy">{zh ? '笔记与配置跟随你的同步方式移动。FTS 与可选语义索引留在每台电脑本地，并在查询前自动增量重建。' : 'Notes and configuration travel through your sync method. FTS and optional semantic indexes stay local to each machine and refresh incrementally before retrieval.'}</p>
+  </div>
+</section>
+
+<section class="container section">
+  <div class="section-head"><div class="eyebrow">Workflow</div><h2>{zh ? '从捕捉到连接，再到行动。' : 'Capture, connect, then act.'}</h2></div>
+  <div class="flow" aria-label="DeepOrbit workflow">
+    <div><span>01</span><strong>{zh ? '捕捉' : 'Capture'}</strong><small>Inbox · Todo · URL · PDF</small></div>
+    <div><span>02</span><strong>{zh ? '理解' : 'Understand'}</strong><small>Research · RAG · Wiki</small></div>
+    <div><span>03</span><strong>{zh ? '组织' : 'Organize'}</strong><small>Properties · Bases · Graph</small></div>
+    <div><span>04</span><strong>{zh ? '行动' : 'Act'}</strong><small>Agenda · Projects · Calendar</small></div>
+  </div>
+</section>
+
+<style>
+  .hero { position: relative; min-height: calc(100dvh - 72px); display: grid; grid-template-columns: 1.15fr .85fr; align-items: center; gap: 64px; padding-block: 80px; overflow: hidden; }
+  .hero h1 span { color: var(--accent); }
+  .hero-copy { align-self: end; padding-bottom: 12vh; max-width: 560px; }
+  .actions { display: flex; gap: 12px; margin-top: 30px; flex-wrap: wrap; }
+  .orbit { position: absolute; width: min(52vw, 650px); aspect-ratio: 1; border: 1px solid var(--line); border-radius: 50%; right: -22%; top: -18%; opacity: .8; animation: drift 12s ease-in-out infinite alternate; }
+  .orbit::after { content: ''; position: absolute; inset: 18%; border: 1px solid var(--line); border-radius: 50%; }
+  .orbit i, .orbit b, .orbit span { position: absolute; display: block; border-radius: 50%; background: var(--accent); }
+  .orbit i { width: 14px; height: 14px; left: 13%; top: 27%; }
+  .orbit b { width: 8px; height: 8px; right: 14%; bottom: 32%; }
+  .orbit span { width: 5px; height: 5px; left: 47%; bottom: 18%; }
+  .section { padding-block: 120px; }
+  .section-head { display: grid; grid-template-columns: .65fr 1.35fr; gap: 32px; align-items: start; margin-bottom: 64px; }
+  .well { background: var(--surface); border-block: 1px solid var(--line); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); border-block: 1px solid var(--line); }
+  .flow div { min-height: 190px; padding: 24px; border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+  .flow div:last-child { border-right: 0; }
+  .flow span { color: var(--accent-ink); font-size: .78rem; }
+  .flow strong { margin-top: auto; font-size: 1.5rem; }
+  .flow small { color: var(--muted); }
+  @keyframes drift { to { transform: translate(-24px, 18px) rotate(8deg); } }
+  @media (max-width: 760px) {
+    .hero, .section-head, .two-col { grid-template-columns: 1fr; }
+    .hero { min-height: auto; gap: 30px; }
+    .hero-copy { padding: 0; }
+    .orbit { opacity: .35; }
+    .section { padding-block: 80px; }
+    .flow { grid-template-columns: 1fr 1fr; }
+    .flow div:nth-child(2) { border-right: 0; }
+    .flow div { border-bottom: 1px solid var(--line); }
+  }
+</style>

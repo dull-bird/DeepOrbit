@@ -1,0 +1,5 @@
+description = "Capture, list, or complete portable Markdown tasks via do.todo"
+prompt = """
+Use the do.todo skill.
+User input: {{args}}
+"""

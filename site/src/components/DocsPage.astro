@@ -1,0 +1,54 @@
+---
+interface Props { lang: 'zh' | 'en' }
+const { lang } = Astro.props;
+const zh = lang === 'zh';
+---
+<section class="container docs">
+  <aside>
+    <div class="eyebrow">Documentation</div>
+    <a href="#install">{zh ? '安装' : 'Install'}</a>
+    <a href="#doctor">Doctor</a>
+    <a href="#tasks">{zh ? '待办与日历' : 'Tasks & calendar'}</a>
+    <a href="#sync">{zh ? '同步与 RAG' : 'Sync & RAG'}</a>
+    <a href="#plugins">{zh ? 'Obsidian 插件' : 'Obsidian plugins'}</a>
+  </aside>
+  <article class="reading">
+    <div class="eyebrow">{zh ? '三分钟开始' : 'Start in three minutes'}</div>
+    <h1>{zh ? '把知识留在自己的文件里。' : 'Keep knowledge in your own files.'}</h1>
+    <p class="reading-copy">{zh ? 'DeepOrbit 的 Skills 可以被不同 Agent 读取；Python Core 提供确定性的初始化、检索和任务操作。' : 'DeepOrbit Skills are readable by different agents; its Python Core provides deterministic initialization, retrieval, and task operations.'}</p>
+
+    <h2 id="install">{zh ? '安装' : 'Install'}</h2>
+    <pre><code>git clone https://github.com/dull-bird/DeepOrbit.git
+cd DeepOrbit
+python3 -m pip install -e .
+deeporbit --vault ~/Vault init
+deeporbit --vault ~/Vault doctor</code></pre>
+
+    <h2 id="doctor">Doctor</h2>
+    <p>{zh ? 'Doctor 检查 vault、缓存、Git、Obsidian CLI、ChromaDB 和可选社区插件。缺少增强组件不会阻止基础功能。' : 'Doctor checks the vault, cache, Git, Obsidian CLI, ChromaDB, and optional community plugins. Missing enhancements do not block core features.'}</p>
+    <pre><code>deeporbit --vault ~/Vault doctor
+deeporbit --vault ~/Vault index ensure
+deeporbit --vault ~/Vault rag "project orbit"</code></pre>
+
+    <h2 id="tasks">{zh ? '待办与日历' : 'Tasks and calendar'}</h2>
+    <pre><code>deeporbit --vault ~/Vault todo add "Review paper" --today --due 2026-07-15
+deeporbit --vault ~/Vault agenda
+deeporbit --vault ~/Vault calendar export</code></pre>
+    <p>{zh ? '日历导出是本地 ICS 快照，不声称云端双向同步。' : 'Calendar export is a local ICS snapshot; it does not claim cloud two-way sync.'}</p>
+
+    <h2 id="sync">{zh ? '同步与 RAG' : 'Sync and RAG'}</h2>
+    <p>{zh ? 'Git 或 Obsidian Sync 只同步 Markdown 与 deeporbit.json。索引位于系统缓存目录，每台设备在查询前自行更新。' : 'Git or Obsidian Sync carries only Markdown and deeporbit.json. Indexes live in the OS cache and refresh locally before queries.'}</p>
+
+    <h2 id="plugins">{zh ? 'Obsidian 能力' : 'Obsidian capabilities'}</h2>
+    <p>{zh ? 'Properties、Bases、Graph、Backlinks 与 Daily Notes 是默认能力。Tasks、Dataview 和 Calendar 是可选增强，卸载后数据仍可读。' : 'Properties, Bases, Graph, Backlinks, and Daily Notes are defaults. Tasks, Dataview, and Calendar are optional enhancements; data remains readable without them.'}</p>
+  </article>
+</section>
+
+<style>
+  .docs { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 80px; padding-block: 90px; }
+  aside { position: sticky; top: 108px; align-self: start; display: grid; gap: 12px; color: var(--muted); }
+  article h1 { margin: 18px 0 36px; font-size: clamp(2.8rem, 7vw, 5.8rem); }
+  article h2 { margin: 74px 0 20px; font-size: 2rem; scroll-margin-top: 110px; }
+  article p { font-family: var(--reading); font-size: 1.05rem; line-height: 1.85; }
+  @media (max-width: 760px) { .docs { grid-template-columns: 1fr; gap: 36px; } aside { position: static; grid-template-columns: repeat(2, 1fr); } }
+</style>

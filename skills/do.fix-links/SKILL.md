@@ -1,6 +1,6 @@
 ---
 name: do.fix-links
-description: Automatically scans wiki links in 40_Wiki, identifies missing note files, and automatically completes them. Includes: 1. Automatic creation of missing files; 2. Deep content filling (Wiki + First Principles); 3. Intelligent automatic classification.
+description: "Automatically scans wiki links in 40_Wiki, identifies missing note files, and automatically completes them. Includes: 1. Automatic creation of missing files; 2. Deep content filling (Wiki + First Principles); 3. Intelligent automatic classification."
 ---
 
 # Ghost Link Fixer & Filler (Pro)
@@ -33,5 +33,4 @@ Enter `/do:fix-links` directly in the command line.
 ## Rules
 
 - Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
-- Use the `run_command` tool to execute `obsidian open path="<absolute_path>"` for every Markdown file you create or modify. See the `do.obsidian-open` skill for details.
-
+- Use `do.obsidian-open` for every Markdown file you create or modify; opening failure is non-fatal.

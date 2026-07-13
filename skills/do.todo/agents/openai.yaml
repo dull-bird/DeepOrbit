@@ -1,0 +1,4 @@
+interface:
+  display_name: "DeepOrbit Todo"
+  short_description: "Capture and manage portable Markdown tasks"
+  default_prompt: "Add, list, or complete tasks in this DeepOrbit vault."

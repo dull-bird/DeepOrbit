@@ -1,0 +1,5 @@
+description = "Export dated tasks to portable ICS via do.calendar"
+prompt = """
+Use the do.calendar skill.
+User input: {{args}}
+"""

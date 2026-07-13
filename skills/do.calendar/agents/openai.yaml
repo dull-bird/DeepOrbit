@@ -1,0 +1,4 @@
+interface:
+  display_name: "DeepOrbit Calendar"
+  short_description: "Export task dates to a portable ICS calendar"
+  default_prompt: "Export dated DeepOrbit tasks to an ICS calendar file."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Initialize DeepOrbit"
+  short_description: "Create or upgrade a DeepOrbit vault safely"
+  default_prompt: "Initialize this Obsidian vault for DeepOrbit and report any migration conflicts."

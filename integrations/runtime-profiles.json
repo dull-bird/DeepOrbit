@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "portable_core": {
+    "skills": "skills/",
+    "commands": "commands/do/",
+    "python": "src/deeporbit/",
+    "mcp": "mcp/deeporbit_rag/server.py"
+  },
+  "runtimes": {
+    "kimi": {
+      "manifest": "kimi.plugin.json",
+      "skills": true,
+      "commands": true,
+      "mcp": true,
+      "hooks": true,
+      "goal": "experimental"
+    },
+    "gemini-antigravity": {
+      "manifest": "gemini-extension.json",
+      "skills": true,
+      "commands": true,
+      "mcp": true,
+      "hooks": true,
+      "goal": "tracker"
+    },
+    "openclaw": {
+      "skill_root": ".agents/skills",
+      "skills": true,
+      "commands": false,
+      "mcp": true,
+      "hooks": true,
+      "goal": "native"
+    },
+    "codex": {
+      "manifest": ".codex-plugin/plugin.json",
+      "skills": true,
+      "commands": true,
+      "mcp": true,
+      "hooks": true,
+      "goal": "native"
+    }
+  }
+}

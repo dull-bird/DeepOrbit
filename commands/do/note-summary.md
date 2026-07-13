@@ -1,0 +1,6 @@
+---
+description: "Summarize a URL, file, paper, or topic into 60_Notes via do.note-summary"
+---
+
+Use the do.note-summary skill. Fetch the full source, summarize it faithfully, link relevant knowledge, and archive it in the vault.
+User input: $ARGUMENTS

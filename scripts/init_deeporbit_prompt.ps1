@@ -23,25 +23,28 @@ if (-not $Source) {
 $DestDir = [System.IO.Path]::GetFullPath($Dest)
 if (-not (Test-Path $DestDir)) { New-Item -ItemType Directory -Path $DestDir -Force | Out-Null }
 $DestFile = Join-Path $DestDir "DeepOrbitPrompt.md"
-Copy-Item -Path $Source -Destination $DestFile -Force
-Write-Host "Copied prompt to: $DestFile"
+if (-not (Test-Path $DestFile)) {
+  Copy-Item -Path $Source -Destination $DestFile
+  Write-Host "Copied prompt to: $DestFile"
+} else {
+  Write-Host "Preserved existing prompt: $DestFile"
+}
 
 # 2.5 Copy deeporbit.json context file
 $ConfigSource = $null
 if (Test-Path (Join-Path $RepoRoot "deeporbit.json")) { $ConfigSource = Join-Path $RepoRoot "deeporbit.json" }
 if (-not $ConfigSource -and (Test-Path (Join-Path $ExtensionDir "deeporbit.json"))) { $ConfigSource = Join-Path $ExtensionDir "deeporbit.json" }
 
-if ($ConfigSource) {
+if ($ConfigSource -and -not (Test-Path (Join-Path $DestDir "deeporbit.json"))) {
   $DestConfig = Join-Path $DestDir "deeporbit.json"
   Copy-Item -Path $ConfigSource -Destination $DestConfig -Force
   Write-Host "Copied configuration to: $DestConfig"
-} else {
-  New-Item -ItemType File -Path (Join-Path $DestDir "deeporbit.json") -Force | Out-Null
 }
 
 # 3. Create folder structure
 $DirInbox = "00_Inbox"
 $DirDiary = "10_Diary"
+$DirWritings = "15_Writings"
 $DirProjects = "20_Projects"
 $DirResearch = "30_Research"
 $DirWiki = "40_Wiki"
@@ -50,32 +53,22 @@ $DirNotes = "60_Notes"
 $DirPlans = "90_Plans"
 $DirSystem = "99_System"
 
-$vaultDirs = @($DirInbox, $DirDiary, $DirProjects, $DirResearch, $DirWiki, $DirResources, $DirNotes, $DirPlans, $DirSystem)
+$vaultDirs = @($DirInbox, $DirDiary, $DirWritings, $DirProjects, $DirResearch, $DirWiki, $DirResources, $DirNotes, $DirPlans, $DirSystem)
 foreach ($d in $vaultDirs) { New-Item -ItemType Directory -Path (Join-Path $DestDir $d) -Force | Out-Null }
 
-# Rename existing localized folders to English equivalents if they exist
-$renameMap = @{
-  "$DirResources\产品发布" = "$DirResources\Product_Launches"
-  "$DirResources\新闻" = "$DirResources\News"
-  "$DirSystem\提示词" = "$DirSystem\Prompts"
-  "$DirSystem\归档" = "$DirSystem\Archive"
-}
-
-foreach ($oldName in $renameMap.Keys) {
-  $oldPath = Join-Path $DestDir $oldName
-  $newName = $renameMap[$oldName]
-  $newPath = Join-Path $DestDir $newName
-  if (Test-Path $oldPath) {
-    # If the new path already exists for some reason, we might want to move contents or just let it fail.
-    # We will use Rename-Item. Rename-Item expects just the new name, not the full path.
-    Rename-Item -Path $oldPath -NewName (Split-Path $newPath -Leaf) -Force
-  }
-}
-
-@("$DirResources\Newsletters", "$DirResources\Product_Launches", "$DirResources\News", "$DirSystem\Templates", "$DirSystem\Prompts", "$DirSystem\Archive") | ForEach-Object {
+@("$DirResources\Newsletters", "$DirResources\Product_Launches", "$DirResources\News", "$DirSystem\Templates", "$DirSystem\Prompts", "$DirSystem\Archive", "$DirSystem\Bases", "$DirSystem\Calendar") | ForEach-Object {
   New-Item -ItemType Directory -Path (Join-Path $DestDir $_) -Force | Out-Null
 }
 Write-Host "Created vault folders."
+
+# Use the v2 core for conflict-aware localized-folder migration and config upgrades.
+$CorePath = Join-Path $RepoRoot "src\deeporbit"
+if (Test-Path $CorePath) {
+  $oldPythonPath = $env:PYTHONPATH
+  $env:PYTHONPATH = (Join-Path $RepoRoot "src")
+  try { python -m deeporbit --vault $DestDir init }
+  finally { $env:PYTHONPATH = $oldPythonPath }
+}
 
 # 4. Copy plugin system contents into DEST\system_folder (even if it already exists — overlay)
 $PluginRoot = Split-Path -Parent $Source
@@ -84,7 +77,10 @@ $PluginSysName = "99_System"
 $SysSource = Join-Path $PluginRoot $PluginSysName
 if (Test-Path $SysSource) {
   $SysDest = Join-Path $DestDir $DirSystem
-  Get-ChildItem -Path $SysSource -Force | Copy-Item -Destination $SysDest -Recurse -Force
+  Get-ChildItem -Path $SysSource -Force | ForEach-Object {
+    $target = Join-Path $SysDest $_.Name
+    if (-not (Test-Path $target)) { Copy-Item -Path $_.FullName -Destination $SysDest -Recurse }
+  }
   Write-Host "Copied $SysSource contents (templates, etc.) from plugin into $SysDest"
 }
 

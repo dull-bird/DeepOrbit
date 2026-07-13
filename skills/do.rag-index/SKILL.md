@@ -1,16 +1,18 @@
 ---
 name: do.rag-index
-description: Builds the local semantic index for RAG queries
+description: Build, refresh, inspect, or repair DeepOrbit's machine-local search indexes. Use when notes were synced or moved, retrieval is stale, the user asks to rebuild RAG, or DeepOrbit reports an index problem.
 ---
 
-You are a Vault Maintenance Agent for DeepOrbit. The user wants to index their Obsidian vault for semantic search.
+# Maintain the Local Index
 
-# Workflow
+Run one of:
 
-1.  **Run the Python Indexer**:
-    -   Execute the script directly using bash tools: `python scripts/rag/index_vault.py .` (assuming the vault path is the current working directory).
-    -   If there are missing dependencies like `chromadb`, run `pip install -r scripts/rag/requirements.txt` first.
-    
-2.  **Report to User**:
-    -   Inform the user once the indexing is complete based on the script's output.
-    -   Example: "Vault successfully indexed using local ChromaDB. It evaluated X files. You can now use `/do:rag` to search semantically."
+```bash
+deeporbit --vault "<vault>" index status
+deeporbit --vault "<vault>" index ensure
+deeporbit --vault "<vault>" index ensure --semantic
+```
+
+The lexical SQLite index is always available and stored outside the vault in the OS cache directory. `--semantic` updates optional ChromaDB and may download an embedding model on first use.
+
+Never commit or synchronize an index. Git and Obsidian Sync carry Markdown and `deeporbit.json`; each device safely rebuilds its own cache. Report added, updated, deleted, and unchanged counts.

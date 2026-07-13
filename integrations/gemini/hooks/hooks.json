@@ -1,0 +1,19 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "name": "deeporbit-context",
+        "command": "python3 ${extensionPath}/scripts/hooks/deeporbit_hook.py --runtime gemini --event session-start",
+        "timeout": 3000
+      }
+    ],
+    "AfterTool": [
+      {
+        "name": "deeporbit-index-dirty",
+        "matcher": "write_file|replace|run_shell_command",
+        "command": "python3 ${extensionPath}/scripts/hooks/deeporbit_hook.py --runtime gemini --event file-change",
+        "timeout": 3000
+      }
+    ]
+  }
+}

@@ -1,0 +1,78 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  lang?: 'zh' | 'en';
+  alternate?: string;
+}
+
+const { title, description, lang = 'zh', alternate = lang === 'zh' ? 'en/' : '' } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const home = lang === 'zh' ? base : `${base}en/`;
+---
+<!doctype html>
+<html lang={lang} data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <link rel="icon" href={`${base}favicon.svg`} />
+    <title>{title}</title>
+    <script is:inline>
+      (() => {
+        try {
+          const saved = localStorage.getItem('deeporbit-theme');
+          const theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          document.documentElement.dataset.theme = theme;
+        } catch {}
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="header">
+      <div class="container header-inner">
+        <a class="brand" href={home} aria-label="DeepOrbit home">
+          <svg viewBox="0 0 120 108" width="34" role="img" aria-label="DeepOrbit bird">
+            <path d="M12 60C22 53 34 51 44 53C50 41 58 33 70 33C66 41 66 49 70 55C84 41 104 39 118 47C104 51 92 59 86 69C100 69 108 73 112 83C98 79 82 77 68 77C60 77 50 73 44 65C32 69 20 67 12 60Z" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span>DeepOrbit</span>
+        </a>
+        <nav aria-label="Primary navigation">
+          <a href={`${home}#system`}>{lang === 'zh' ? '系统' : 'System'}</a>
+          <a href={`${home}docs/`}>{lang === 'zh' ? '文档' : 'Docs'}</a>
+          <a href="https://github.com/dull-bird/DeepOrbit">GitHub</a>
+          <a class="lang" href={`${base}${alternate}`}>{lang === 'zh' ? 'EN' : '中'}</a>
+          <button id="theme" type="button" aria-label="Toggle color theme">◐</button>
+        </nav>
+      </div>
+    </header>
+    <main><slot /></main>
+    <footer>
+      <div class="container footer-inner">
+        <span>DeepOrbit · dull-bird</span>
+        <span>{lang === 'zh' ? '知识留在你的文件里。' : 'Your knowledge stays in your files.'}</span>
+      </div>
+    </footer>
+    <script is:inline>
+      document.querySelector('#theme')?.addEventListener('click', () => {
+        const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next;
+        try { localStorage.setItem('deeporbit-theme', next); } catch {}
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  .header { position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(14px); }
+  .header-inner, .footer-inner { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.02em; }
+  .brand svg { color: var(--accent); }
+  nav { display: flex; align-items: center; gap: 20px; font-size: .9rem; }
+  nav button { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; color: var(--ink); background: transparent; cursor: pointer; }
+  .lang { color: var(--muted); }
+  footer { margin-top: 100px; border-top: 1px solid var(--line); color: var(--muted); font-size: .86rem; }
+  @media (max-width: 640px) { nav a:not(.lang) { display: none; } }
+</style>

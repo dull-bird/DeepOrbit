@@ -1,0 +1,4 @@
+interface:
+  display_name: "DeepOrbit Agenda"
+  short_description: "Summarize today and upcoming tasks"
+  default_prompt: "Build my current agenda from tasks across this DeepOrbit vault."

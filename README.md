@@ -1,299 +1,193 @@
 # DeepOrbit
 
-![DeepOrbit Banner](deeporbit.png)
+![DeepOrbit](deeporbit.png)
 
-> **An AI-agent system that bridges LLMs with Obsidian to automate deep research and personal knowledge management.**
+> A local-first Obsidian knowledge system that works across Kimi Code, OpenClaw, Gemini/Antigravity, Codex, and other Agent Skills runtimes.
 
-[**中文文档**](README_CN.md)
+[中文](README_CN.md) · [Documentation](https://dull-bird.github.io/DeepOrbit/) · [Architecture](docs/architecture.md)
 
-DeepOrbit turns your [Obsidian](https://obsidian.md/) vault into an AI-powered research engine. It uses portable **Agent Skills** (compatible with Claude Code, Cursor, Codex, Gemini CLI, and any agent that supports the standard) to automate deep research, paper translation, content curation, and vault maintenance — so you can focus on thinking, not filing.
+DeepOrbit keeps research, projects, writing, tasks, and retrieval in ordinary local files. Agent Skills describe workflows; a small Python core handles deterministic operations such as safe initialization, incremental search, task IDs, and calendar export. Native goals, hooks, plugins, and MCP improve each runtime without becoming required for correctness.
 
-> [!IMPORTANT]
-> **Obsidian is required.** DeepOrbit's folder structure, wikilink system, and templates all depend on a local Obsidian vault.
+## Why DeepOrbit
 
-🙏 **Acknowledgments**: DeepOrbit is deeply inspired by [OrbitOS by MarsWang42](https://github.com/MarsWang42/OrbitOS). We extend our sincere gratitude for their innovative approach to vault structure and agent-driven workflows.
+- **Portable:** the same `skills/` work across Agent Skills runtimes.
+- **Local-first:** Markdown is authoritative; no DeepOrbit cloud account is required.
+- **Sync-neutral:** use Git, Obsidian Sync, or any filesystem sync. Search indexes rebuild locally.
+- **Obsidian-native:** Properties, Bases, Graph, Backlinks, Daily Notes, Callouts, and Canvas remain useful outside an agent.
+- **Graceful fallback:** ChromaDB, MCP, Obsidian CLI, Tasks, Dataview, and Calendar are optional.
+- **Checkpointed:** long work resumes from Markdown checklists instead of an external self-invoking loop.
 
----
+## Three-minute tutorial
 
-## How It Works
-
-```mermaid
-flowchart TD
-    A["🧠 You"] -->|ideas, URLs, PDFs| B["⚙️ DeepOrbit Agent"]
-    B -->|selects skill| C["🧩 Skill Pack"]
-    C -->|writes notes| D["📂 Obsidian Vault"]
-    D -->|wikilinks| A
-```
-
-You give DeepOrbit raw inputs — an arXiv link, a PDF, a quick idea, a URL. The Agent Engine routes your request to the right **Skill**, which processes, translates, summarizes, or structures the content and saves it directly into your Obsidian vault with proper metadata and wikilinks.
-
----
-
-## Quick Start
-
-### Prerequisites
-
-| Tool | Required? | Note |
-|------|-----------|------|
-| [Obsidian](https://obsidian.md/) | ✅ Yes | Vault management |
-| An Agent Skills runtime — [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Cursor, Codex, [Gemini CLI](https://github.com/google-gemini/gemini-cli), etc. | ✅ Yes | Agent runtime |
-| [obsidian-skills](https://github.com/kepano/obsidian-skills) | ✅ Yes | Required for native Obsidian formats. If using Gemini CLI, ask the AI to "add https://github.com/kepano/obsidian-skills to my system skills". |
-| [ralph](https://github.com/gemini-cli-extensions/ralph) | **Gemini CLI only** | Drives the section-by-section *manifest loop* in `/do:pdf-to-markdown`, `/do:translate-markdown`, `/do:research`. On Claude Code the same loop runs natively via sub-agents (Task tool) or the `/loop` command — no extra install. |
-| `xelatex` | **recommended** | For `/do:arxiv-translator`.<br/>- macOS: `brew install --cask mactex-no-gui`<br/>- Windows: [MiKTeX](https://miktex.org/) or [TeX Live](https://www.tug.org/texlive/) |
-| `obsidian-cli` | **recommended** | For `do.obsidian-open` to automatically open generated notes.<br/>- See: https://obsidian.md/cli |
-
-### Setup Instructions
-
-DeepOrbit is a standard **Agent Skills** pack. Pick whichever installer matches your agent — all three install the same skills from `skills/`.
-
-#### Method A: `npx skills` (Recommended — works with any agent)
-
-The universal installer. It supports Claude Code, Cursor, Codex, Windsurf, and many others, and symlinks the skills into each tool's directory automatically.
+### 1. Install the portable Skills
 
 ```bash
-# In your project (or run with --global for user-wide install)
 npx skills add dull-bird/DeepOrbit
 ```
 
-#### Method B: Claude Code plugin
-
-```text
-/plugin marketplace add dull-bird/DeepOrbit
-/plugin install deeporbit@deeporbit
-```
-
-This registers all 22 `do.*` skills as a Claude Code plugin. Restart or reload skills to activate.
-
-#### Method C: Gemini CLI (compatibility)
+Or clone the repository and install the deterministic core:
 
 ```bash
-gemini extension install dull-bird/DeepOrbit
+git clone https://github.com/dull-bird/DeepOrbit.git
+cd DeepOrbit
+python3 -m pip install -e .
 ```
 
-The `commands/do/*.toml` slash commands keep working for Gemini CLI users.
+### 2. Initialize a vault
 
-#### Then: initialize your vault (all methods)
-
-Inject DeepOrbit's core prompt into your Obsidian vault, then activate:
-
-- **macOS/Linux**: `bash scripts/init_deeporbit_prompt.sh ~/path/to/your/vault`
-- **Windows**: `& ".\scripts\init_deeporbit_prompt.ps1" "C:\path\to\your\vault"`
-
-Then ask your agent in natural language ("run init", "start research") — it discovers the skills automatically. Gemini CLI users can also run `/do:init ~/path/to/your/vault` followed by `/memory refresh`.
-
-#### Optional: native RAG tools via MCP
-
-`do.rag` and `do.search` shell out to the scripts in `scripts/rag/` by default. If you'd rather call them as native MCP tools (`rag_query`, `rag_search`), the repo ships an optional MCP server — see [`mcp/README.md`](mcp/README.md) and the project-scoped [`.mcp.json`](.mcp.json).
-
-### Language Configuration
-
-Edit `deeporbit.json` in your vault root to set the AI's interaction language:
-
-```json
-{ "language": "zh-CN" }
+```bash
+deeporbit --vault ~/Documents/MyVault init
+deeporbit --vault ~/Documents/MyVault doctor
 ```
 
-> **Note:** Folder paths always stay in English for stability. Only the AI's responses and generated note content follow this setting.
+Initialization is idempotent. Existing notes and customized prompt files are preserved. Legacy localized folders are merged only when safe; conflicts are reported without overwriting either file.
 
----
+### 3. Use it
 
-## Vault Structure
-
-```mermaid
-flowchart LR
-    V["📦 Your Obsidian Vault"]
-    
-    V --- G1["Captured & Active"]
-    V --- G2["Knowledge Base"]
-    V --- G3["Resources & System"]
-
-    G1 --- A["00_Inbox<br/><i>Quick captures</i>"]
-    G1 --- B["10_Diary<br/><i>Daily logs</i>"]
-    G1 --- W["15_Writings<br/><i>Creative writing & essays</i>"]
-    G1 --- C["20_Projects<br/><i>Active projects</i>"]
-    
-    G2 --- D["30_Research<br/><i>Deep dives</i>"]
-    G2 --- E["40_Wiki<br/><i>Atomic concepts</i>"]
-    G2 --- G["60_Notes<br/><i>Summaries & captures</i>"]
-    
-    G3 --- F["50_Resources<br/><i>Newsletters & Products</i>"]
-    G3 --- H["90_Plans<br/><i>Execution plans</i>"]
-    G3 --- I["99_System<br/><i>Templates & Prompts</i>"]
-
-    style V fill:#1a1a2e,stroke:#16213e,color:#e0e0e0
-    style G1 fill:#16213e,stroke:#0f3460,color:#e0e0e0
-    style G2 fill:#16213e,stroke:#0f3460,color:#e0e0e0
-    style G3 fill:#16213e,stroke:#0f3460,color:#e0e0e0
-    style A fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style B fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style W fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style C fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style D fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style E fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style F fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style G fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style H fill:#0f3460,stroke:#16213e,color:#e0e0e0
-    style I fill:#0f3460,stroke:#16213e,color:#e0e0e0
+```bash
+deeporbit --vault ~/Documents/MyVault todo add "Review the paper" --today --due 2026-07-15
+deeporbit --vault ~/Documents/MyVault agenda
+deeporbit --vault ~/Documents/MyVault rag "index tracking"
+deeporbit --vault ~/Documents/MyVault calendar export
+deeporbit --vault ~/Documents/MyVault open 10_Diary/2026-07-15.md
 ```
 
----
+You can also ask your agent naturally: “research index tracking”, “add this to today”, “what is overdue?”, or “find my previous notes about RAG”.
 
-## Skills Overview
+## Runtime compatibility
 
-DeepOrbit ships with **22 pre-configured `do.*` skills** (plus optional external [obsidian-skills](https://github.com/kepano/obsidian-skills) for native Obsidian formats), split into two categories:
+| Runtime | Portable Skills | Native package | Commands | MCP | Optional hooks | Long-work enhancement |
+|---|---:|---|---:|---:|---:|---|
+| Kimi Code | Yes | `kimi.plugin.json` | Yes | Yes | Yes | Experimental Goal + checkpoints |
+| OpenClaw | Yes | Workspace `.agents/skills` | Natural language | Yes | Yes | Native Goal + checkpoints |
+| Gemini / Antigravity | Yes | `gemini-extension.json` | Yes | Yes | Yes | Plan/Tracker + checkpoints |
+| Codex | Yes | `.codex-plugin/plugin.json` | Yes | Yes | Yes | Thread Goal + checkpoints |
+| Other Agent Skills runtimes | Yes | — | Runtime-dependent | Optional | — | Markdown checkpoints |
 
-### 🌐 Universal Skills (Work Anywhere)
+The runtime feature is never the only place progress is stored. Long workflows write a plan with checked and unchecked items under `90_Plans/` and can resume after interruption or on another agent.
 
-These skills work independently — no Obsidian vault required.
+## Sync and local retrieval
 
-```mermaid
-mindmap
-  root((Universal Skills))
-    🧠 Thinking
-      /do:ask
-      /do:brainstorm
-    📚 Academic
-      /do:arxiv-translator
-    📄 Document Processing
-      /do:pdf-to-markdown
-      /do:translate-markdown
-      /do:translate
-    ⚙️ Diagramming
-      do.mermaid
+Only notes, templates, Bases, and `deeporbit.json` belong in the vault. Machine-local indexes live under the operating system cache directory, keyed by the stable vault ID.
+
+```text
+Git / Obsidian Sync             Each computer
+Markdown + deeporbit.json  -->  ~/.cache/deeporbit/<vault-id>/
+                                  search.sqlite
+                                  manifest.json
+                                  optional chromadb/
 ```
 
-### 📂 Obsidian Skills (Require Vault)
+Every retrieval checks for added, changed, renamed, and deleted files before querying. The default SQLite FTS index has no third-party dependencies. Optional semantic retrieval is available with:
 
-These skills read from or write to the DeepOrbit vault structure.
-
-```mermaid
-mindmap
-  root((Obsidian Skills))
-    🧠 Daily & Planning
-      /do:daily
-      /do:kickoff
-      /do:write
-    🔬 Research & Knowledge
-      /do:research
-      /do:parse-knowledge
-      /do:note-summary
-      /do:recap
-      /do:rag
-      /do:rag-index
-      /do:search
-     Academic Tools
-      /do:arxiv-translator
-    📄 Document Processing
-      /do:pdf-to-markdown
-      /do:translate-markdown
-      /do:translate
-    🔧 Vault Maintenance
-      /do:fix-links
-      /do:archive
-      /do:organize
-      /do:refresh-prompt
-    ⚙️ Obsidian Integration
-      obsidian-markdown
-      obsidian-bases
-      json-canvas
-      obsidian-cli
-      do.obsidian-open
+```bash
+python3 -m pip install -e '.[rag]'
+deeporbit --vault ~/Documents/MyVault index ensure --semantic
+deeporbit --vault ~/Documents/MyVault rag "a conceptual query" --semantic
 ```
 
-### Skills Quick Reference
+Do not commit or synchronize vector databases. See [Sync and RAG](docs/sync-and-rag.md).
 
-| Command | What it does |
-|---------|-------------|
-| `/do:daily` | Morning planning: recap yesterday, fetch news, create today's note |
-| `/do:kickoff` | Convert an inbox idea into a structured project (two-agent workflow) |
-| `/do:research` | Deep dive into a topic → Research notes + Wiki entries (two-agent workflow) |
-| `/do:ask` | Quick Q&A without heavy note-taking |
-| `/do:brainstorm` | Interactive Socratic brainstorming partner |
-| `/do:rag` | Ask questions using semantic search across your entire vault |
-| `/do:rag-index` | Index the Obsidian vault for semantic RAG search |
-| `/do:search` | Fast exact keyword or regex string match search across your vault |
-| `/do:note-summary` | Auto-fetch URL/file/paper → structured summary + vault archiving |
-| `/do:parse-knowledge` | Turn unstructured text into vault-ready Research + Wiki notes |
-| `/do:arxiv-translator` | Download arXiv paper → translate LaTeX → compile PDF |
-| `/do:pdf-to-markdown` | PDF → Markdown with completeness checklist + image extraction |
-| `/do:translate-markdown` | Translate Markdown to target language, section-by-section with verification |
-| `/do:translate` | Smartly route translation requests for arXiv or standard PDFs to appropriate skills |
-| `/do:organize` | Deep vault reorganization: root hygiene, taxonomy, orphans, metadata |
-| `/do:refresh-prompt` | Safely update DeepOrbitPrompt.md with diff comparison + merge options |
-| `do.obsidian-open` | Utility to automatically open modified notes in Obsidian via CLI |
+## Obsidian integration
 
----
+DeepOrbit ships native Bases for projects, research, task-containing notes, and knowledge health under `99_System/Bases/`.
 
-### 🤖 Multi-Agent Compatibility
+Core Obsidian features:
 
-DeepOrbit ships as tool-neutral **Agent Skills** (`skills/do.*/SKILL.md`), so any agent that supports the standard discovers and triggers them by description:
+- Properties provide a shared schema (`type`, `status`, `area`, `created`, `updated`, `tags`).
+- Bases provide editable file-level dashboards.
+- Graph and Backlinks expose conceptual relationships and orphans.
+- Daily Notes connect agenda, recap, and current work.
+- Canvas is available for spatial research maps when it improves understanding.
 
-*   **Claude Code / Cursor / Codex / Windsurf**: Install via `npx skills add` or the Claude Code plugin. Skills trigger automatically by intent, or you invoke them in natural language ("start research", "summarize this PDF").
-*   **Gemini CLI**: In addition to skills, the `commands/do/*.toml` files register native `/do:command` slash commands.
+Optional community plugins:
 
-The single source of truth is `skills/`; the per-tool install directories are generated by the installer and are git-ignored.
+| Plugin | Enhancement | Required? |
+|---|---|---:|
+| Tasks | Rich task queries and completion UI | No |
+| Dataview | Advanced read-only dashboards | No |
+| Calendar | Daily Note navigation | No |
 
----
+Obsidian CLI is preferred for opening generated notes. DeepOrbit falls back to `obsidian://` URIs and then to printing the absolute path.
 
----
+## Tasks, agenda, and calendar
 
-## Core Workflow Examples
+Tasks remain portable Markdown:
 
-### 🌅 Morning Routine
-
-```mermaid
-flowchart TD
-    A["Run /do:daily"] --> B["Review yesterday's diary"]
-    B --> C["Knowledge Recap: what changed in 24h?"]
-    C --> D["Set today's goals"]
-    D --> E["Fetch news from ## News sources"]
-    E --> F["Generate summaries in 50_Resources/Newsletters/"]
-    F --> G["Create today's diary: 10_Diary/YYYY-MM-DD.md"]
+```markdown
+- [ ] Review DeepOrbit architecture #task ⏳ 2026-07-13 📅 2026-07-15 ^do-20260713120000-a1b2c3
 ```
 
-### 💡 Idea → Project
+The stable block ID supports exact completion and stable iCalendar UIDs. ICS export is a local snapshot with alarms; it does not claim two-way Google or Apple Calendar synchronization. See [Tasks and calendar](docs/todo-calendar.md).
 
-```mermaid
-flowchart TD
-    A["Idea in 00_Inbox"] -->|"/do:kickoff"| B["Planning Agent<br/>creates plan in 90_Plans/"]
-    B -->|"User reviews"| C["Execution Agent<br/>creates project in 20_Projects/"]
-    C --> D["Inbox item archived to 99_System/Archive/"]
+## Skill catalog
+
+DeepOrbit 2.0 ships **26 `do.*` skills**. `skills/` is the single source of truth; every skill has paired Claude-style Markdown and Gemini TOML commands.
+
+| Skill | Purpose |
+|---|---|
+| `do.init` | Safely initialize or upgrade a vault |
+| `do.daily` | Daily planning, recap, news, and project context |
+| `do.todo` | Capture, list, and complete Markdown tasks |
+| `do.agenda` | Group overdue, today, upcoming, and unscheduled tasks |
+| `do.calendar` | Export dated tasks to portable ICS |
+| `do.kickoff` | Turn an idea into a structured project |
+| `do.write` | Polish raw thoughts into personal writing |
+| `do.research` | Checkpointed evidence-based deep research |
+| `do.ask` | Lightweight vault-aware Q&A |
+| `do.brainstorm` | Interactive idea exploration |
+| `do.rag` | Self-refreshing local retrieval |
+| `do.rag-index` | Inspect and refresh lexical or semantic indexes |
+| `do.search` | Fast lexical and phrase search |
+| `do.note-summary` | Full-source summaries and captures |
+| `do.parse-knowledge` | Convert unstructured material into durable notes |
+| `do.recap` | Summarize recent vault changes |
+| `do.arxiv-translator` | Translate and compile arXiv LaTeX sources |
+| `do.pdf-to-markdown` | Checkpointed high-fidelity PDF conversion |
+| `do.translate-markdown` | Complete, glossary-consistent Markdown translation |
+| `do.translate` | Route document translation to the right workflow |
+| `do.mermaid` | Select and create suitable Mermaid diagrams |
+| `do.fix-links` | Find and resolve ghost wikilinks |
+| `do.organize` | Analyze and safely reorganize a vault |
+| `do.archive` | Archive completed projects and processed items |
+| `do.refresh-prompt` | Merge upstream prompt changes without losing customizations |
+| `do.obsidian-open` | Open notes through CLI, URI, or path fallback |
+
+## MCP tools
+
+The optional server exposes:
+
+- `deeporbit_status`
+- `rag_search`
+- `rag_query`
+- `task_agenda`
+
+Install with `python3 -m pip install -e '.[mcp]'`. Lexical retrieval works without ChromaDB. See [MCP reference](mcp/README.md).
+
+## Development
+
+```bash
+python3 -m pip install -e '.[dev]'
+python3 -m unittest discover -s tests -v
+python3 scripts/validate_repo.py
+npm --prefix site install
+npm --prefix site run build
 ```
 
-### 📄 Academic Paper Pipeline
+CI validates Python behavior, skills and commands, JSON manifests, shell syntax, runtime profiles, and the GitHub Pages build. When changing a skill or command, update both README files as required by [AGENTS.md](AGENTS.md).
 
-```mermaid
-flowchart TD
-    A["Input: arXiv URL / Local PDF"] --> B["/do:translate"]
-    B --> C{Detect Type}
-    C -->|arXiv| D["/do:arxiv-translator"]
-    D --> E["Download & Translate LaTeX"]
-    E --> F["Compile to PDF"]
-    C -->|PDF| G["/do:pdf-to-markdown"]
-    G --> H["/do:translate-markdown"]
-    F & H --> I["Save to 60_Notes/papers/"]
-```
+## Documentation map
 
-### 📝 Automated Summary & Archiving
+- Tutorial: [Getting started](docs/getting-started.md)
+- How-to: [Sync and rebuild RAG](docs/sync-and-rag.md)
+- How-to: [Tasks and calendar](docs/todo-calendar.md)
+- Reference: [Runtime compatibility](docs/runtime-compatibility.md)
+- Explanation: [Architecture](docs/architecture.md)
 
-```mermaid
-flowchart TD
-    A["Input: URL / PDF / Title"] --> B["/do:note-summary"]
-    B --> C["Phase 0: Fetch Full Content"]
-    C --> D["Phase 1: Screening & Outline"]
-    D --> E{Depth Mode?}
-    E -->|Quick| I["Phase 4: Quality Verification"]
-    E -->|Standard / Deep| F["Phase 2: Section Summaries"]
-    F --> G{Is Deep Mode?}
-    G -->|Yes| H["Phase 3: Critical Analysis"]
-    G -->|No| I
-    H --> I
-    I --> J["Phase 5: Save to 60_Notes & Wiki Links"]
-```
+## Acknowledgments
 
----
+DeepOrbit was inspired by [OrbitOS](https://github.com/MarsWang42/OrbitOS) and uses ideas from the portable Agent Skills ecosystem. See [skills/ACKNOWLEDGMENTS.md](skills/ACKNOWLEDGMENTS.md).
 
-## Philosophy
+## License
 
-> Everything orbits around you. Keep your knowledge in motion, but let the AI agents do the heavy lifting of parsing, translating, summarizing, and maintaining the structural integrity of your ideas.
-lating, summarizing, and maintaining the structural integrity of your ideas.
+[MIT](LICENSE)

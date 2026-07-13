@@ -1,174 +1,77 @@
 ---
 name: do.research
-description: Deep research workflow for technologies, concepts, or complex topics
+description: Plan and execute checkpointed deep research for technologies, concepts, papers, or complex questions. Use when the user asks for deep research, a literature review, evidence synthesis, or a durable research note in their DeepOrbit vault.
 ---
 
-You are the Research Coordinator for DeepOrbit. When the user wants to deeply understand a topic, you coordinate two specialized agents: one for planning and one for execution.
+# Deep Research
 
-# Workflow Overview
+Produce evidence-backed research while preserving progress in a Markdown plan. Runtime-native goals, trackers, or subagents may accelerate the work but are never required.
 
-This skill uses **two separate agents** to keep context fresh and focused:
+## 1. Establish context
 
-1.  **Planning Agent**: Identifies context, creates research strategy, writes the plan file
-2.  **Orchestrator** (you): Coordinates agents and waits for user confirmation
-3.  **Execution Agent**: Conducts research and creates notes with fresh context
+1. Run `deeporbit --vault "<vault>" rag "<topic>"` to find related notes. If the CLI is unavailable, inspect `20_Projects`, `30_Research`, and `40_Wiki` directly.
+2. Read `99_System/Prompts/Research_Sources.md` when it exists.
+3. Identify the question, intended depth, existing knowledge, related project, and output language from `deeporbit.json`.
+4. Ask only for choices that materially change the research.
 
-# Your Role as Orchestrator
+## 2. Create a checkpoint plan
 
-1.  When `/do:research` is invoked, spawn the planning agent
-2.  Planning agent creates the plan file and returns the path
-3.  Notify the user to review the plan
-4.  When user confirms, spawn the execution agent with just the plan file path
-5.  Report back the execution agent's results
+Write `90_Plans/Plan_YYYY-MM-DD_Research_<Topic>.md`:
 
-# Input Context
+```markdown
+---
+deeporbit_workflow: 1
+workflow_id: research-<date>-<slug>
+status: active
+topic: <topic>
+---
 
-The user will provide:
+# Research Plan: <Topic>
 
--   A topic to research (e.g., "React Server Components", "Consistent Hashing", "OAuth2")
--   Optional: Specific questions or goals
--   Optional: Related project context
+## Goal
+<Decision or understanding this work must enable>
 
-# Phase 1: Launch Planning Agent
+## Existing knowledge
+- Related notes: [[...]]
+- Related project: [[...]]
 
-When the user invokes `/do:research` with their topic, immediately spawn a planning agent using the Task tool:
-
-```
-subagent_type: "general-purpose"
-description: "Plan research strategy"
-prompt: "Create a research plan for: [user's topic]
-
-Follow these steps:
-1. Identify Context via Local RAG First:
-   - **CRITICAL**: Before searching the internet, execute `python scripts/rag/query_vault.py . "[Topic]"` to map out exactly what the user already knows in the vault.
-   - Check if this relates to an active project in 20_Projects/
-   - Determine the relevant Area (SoftwareEngineering, Finance, Health, etc.)
-2. Identify Persona & Sources: 
-   - Scan 99_System/Prompts/ for the most relevant expertise.
-   - **CRITICAL**: Read and strictly follow the whitelist guidelines in `99_System/Prompts/Research_Sources.md` to ensure a high signal-to-noise ratio in your research strategy.
-3. Create the plan file at 90_Plans/Plan_YYYY-MM-DD_Research_<Topic>.md using this format:
-
-# Research Plan: [Topic]
-
-## Research Goal
-[What the user will understand after completing this research]
-
-## Discovered Context & Existing Internal Knowledge
-- Related Area: [Area Name]
-- Known Concepts: [Summarize what the local RAG search revealed the user already knows about this topic, using [[Wikilinks]]]
-- Related Project: [Project Name (if applicable), or "None"]
-
-## Research Strategy
-[ ] Search official documentation
-[ ] Use Wikipedia MCP to search [Related Concept 1] [Related Concept 2]
-[ ] Find practical examples and use cases
-[ ] Identify key concepts for knowledge base extraction
-[ ] Create practical examples (if applicable)
-[ ] Find common pitfalls and best practices
-
-## Output Structure
-- Main Note: 30_Research/<Area>/<Topic>/<Topic>.md
-- Atomic Concept: 40_Wiki/<Category>/<Concept Name>.md
-- Examples/Resources: 30_Research/<Area>/<Topic>/examples/ (if needed)
-
-## Clarification Questions (Optional)
-*If you have answers, please fill them below. If left blank, I will proceed with standard assumptions.*
-
-**Q:** What is your current knowledge level? (Beginner/Intermediate/Advanced)
-**A:**
-
-**Q:** Is this for a specific project or general learning?
-**A:**
-
-**Q:** Do you prefer a theory-first or example-driven approach?
-**A:**
-
-4. Return the path to the created plan file.
-"
+## Checklist
+- [ ] Search primary and official sources
+- [ ] Search independent secondary sources
+- [ ] Compare claims and record contradictions
+- [ ] Draft the main research note
+- [ ] Extract durable atomic concepts
+- [ ] Verify citations, links, and completeness
 ```
 
-After the planning agent returns, check the plan file path is `90_Plans/Plan_YYYY-MM-DD_Research_<Topic>.md`. Then notify the user:
-"I have created the research plan at `[plan file path]`. Please review and modify as needed, then confirm to proceed with execution."
+Let the user review the plan when the scope is broad, expensive, or ambiguous. Otherwise continue.
 
-# Phase 2: Launch Execution Agent (After User Confirmation)
+## 3. Execute with checkpoints
 
-Once the user confirms the plan, run the **manifest loop**: a fresh-context iteration reads the plan's checklist, executes ONE unchecked `- [ ]` task, marks it `- [x]`, and ends — repeating until the completion promise. Fresh context per task gives much higher reliability than one long subagent run. See **Loop runtimes** below for how to drive this on your agent; the prompt string is the same everywhere.
+- Work through the checklist in dependency order and mark each item immediately after it succeeds.
+- Continue in the same turn while context and tool limits allow.
+- If interrupted, reread the plan and resume at the first unchecked item.
+- When the runtime exposes a Goal or Task Tracker, attach the plan's goal to it. Never store the only copy of progress in runtime state.
+- Do not use external self-invocation extensions, headless loops, or completion-promise polling.
 
-**Iteration prompt:**
+Prefer primary sources. For current facts, browse and cite. Record sources beside supported claims and state uncertainty or disagreement explicitly.
 
-```text
-You are the DeepOrbit Research Execution Agent. Your task is to execute the research plan at: 90_Plans/Plan_YYYY-MM-DD_Research_<Topic>.md
+## 4. Write durable outputs
 
-CRITICAL RULES for this iteration:
-1. READ the plan file. Find the FIRST unchecked '- [ ]' task under 'Research Strategy' or 'Output Structure'.
-2. Execute ONLY THAT TASK in this specific turn. For example:
-   - If the task is to search the web, execute the search and read the results.
-   - If the task is to create the main research note, draft 30_Research/<Area>/<Topic>/<Topic>.md.
-   - If the task is to create an atomic Wiki concept, write it to 40_Wiki/<Category>/<ConceptName>.md.
-3. Apply Obsidian formatting rules (CRITICAL):
-   - Frontmatter MUST be at the very top (line 1), starting/ending with ---.
-   - Main Note Frontmatter: type: reference, created: YYYY-MM-DD, area, tags, status: complete.
-   - Wiki Notes: Keep atomic (1-3 paragraphs), use 99_System/Templates/Wiki_Template.md layout.
-   - Related Links: Do NOT put related/see-also links in frontmatter. Put them in '## Related Reading' section at the BOTTOM of the note body.
-4. After successfully completing the single task, modify the plan file tracking: change that specific '- [ ]' to '- [x]'.
-5. End your turn. Ralph will automatically start the next iteration for the next unchecked task.
-6. When ALL tasks in the plan are marked '- [x]', do the final linking (Append a link to 10_Diary/YYYY-MM-DD.md, archive the plan to 90_Plans/Archive/) and output exactly '<promise>RESEARCH_COMPLETE</promise>'.
-```
+- Main note: `30_Research/<Area>/<Topic>/<Topic>.md`
+- Atomic concepts: `40_Wiki/<Category>/<Concept>.md`
+- Supporting files: `30_Research/<Area>/<Topic>/assets/`
 
-Completion promise: `RESEARCH_COMPLETE`. Suggested max iterations: ~20.
+Use frontmatter at line 1 with `type`, `created`, `area`, `tags`, and `status`. Put related links in a final `## Related Reading` section, not frontmatter. Keep atomic concepts focused.
 
-### Loop runtimes (pick what your agent supports)
+## 5. Verify and finish
 
-| Runtime | How to drive the loop |
-|---|---|
-| **Claude Code** | Dispatch each iteration to a fresh sub-agent with the **Task tool**; the orchestrator re-invokes it until the promise appears. Or run headless: `while ! grep -q RESEARCH_COMPLETE .do_loop_out 2>/dev/null; do claude -p "<iteration prompt>" | tee .do_loop_out; done`. The `/loop` command also works. |
-| **Gemini CLI** | `/ralph:loop "<iteration prompt>" --completion-promise "RESEARCH_COMPLETE" --max-iterations 20` (requires the [ralph](https://github.com/gemini-cli-extensions/ralph) extension). |
-| **Any agent** | Re-send the iteration prompt manually until every task is `- [x]`. |
+Before setting the plan to `status: complete`:
 
-After the loop finishes (the `RESEARCH_COMPLETE` promise appears), you (the Orchestrator) provide a final summary to the user:
+- Every checklist item is checked.
+- Major claims have working sources.
+- Contradictions and limitations are visible.
+- Output files exist at the planned paths.
+- Wikilinks resolve or are intentionally marked as future concepts.
 
-## Research Summary: [Topic]
-
-**Created:**
-- Main Note: [[Topic]] located in 30_Research/<Area>/
-- Knowledge Base Concepts: [[Concept1]], [[Concept2]], etc.
-- Examples: [count] files located in examples/ (if any)
-
-**Key Takeaways:**
-1. Key point 1
-2. Key point 2
-3. Key point 3
-
-**Next Steps:**
-- [ ] Consolidate through practical exercises
-- [ ] Apply to [[ProjectName]] (if applicable)
-- [ ] Review in one week to reinforce memory
-
-
-# Benefits of This Approach
-
-1.  **Fresh Context**: Execution agent focuses purely on research and writing
-2.  **Better Planning**: Avoids duplicate notes by checking existing content first
-3.  **User Control**: User can adjust strategy before execution
-4.  **Reduced Token Usage**: Research happens with clean context
-
-# Edge Cases
-
--   **Topic too broad**: Planning agent should break into sub-topics
--   **Topic already exists**: Planning agent should note this; execution updates existing note
--   **Hands-on topic**: Ensure examples/ folder is created with working code
-
-# Follow-up Protocol
-
-If user asks for changes:
-
-1.  Read the existing research note
-2.  Make modifications directly - do not create duplicates
-3.  Add new atomic concepts to Wiki if needed
-4.  Update status if research is incomplete
-
-## Rules
-
-- Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
-- Use the `run_command` tool to execute `obsidian open path="<absolute_path>"` for every Markdown file you create or modify. See the `do.obsidian-open` skill for details.
-
+Link the result from today's Daily Note. Open the main note using `do.obsidian-open`; inability to launch Obsidian is non-fatal.

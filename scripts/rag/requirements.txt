@@ -1,2 +1,3 @@
+# The lexical index has no third-party dependencies.
+# Optional semantic retrieval:
 chromadb>=0.4.0
-tqdm>=4.65.0

@@ -1,13 +1,5 @@
 ---
-description: "Copy plugin DeepOrbitPrompt.md to work dir and inject context.fileName into .gemini/settings.json"
+description: "Initialize or safely upgrade a DeepOrbit vault via do.init"
 ---
 
-Use the do.init workflow. Run the init script for the current OS; pass the user's target directory from $ARGUMENTS if provided, otherwise use current working directory.
-
-1. On Windows (PowerShell): run scripts\init_deeporbit_prompt.ps1 [TARGET], or from extension folder: & "%USERPROFILE%\.gemini\extensions\deeporbit\scripts\init_deeporbit_prompt.ps1" [TARGET].
-
-2. On macOS/Linux (Bash): run scripts/init_deeporbit_prompt.sh [TARGET], or from extension folder: bash "$HOME/.gemini/extensions/deeporbit/scripts/init_deeporbit_prompt.sh" [TARGET]. Optional: install jq to merge existing .gemini/settings.json.
-
-3. The script copies the plugin's DeepOrbitPrompt.md to TARGET/DeepOrbitPrompt.md, creates the vault folder structure from the Structure section (00_Inbox through 99_System, 50_Resources/Newsletters, 50_Resources/Product_Launches, 99_System/Templates, 99_System/Prompts, 99_System/Archive), then creates TARGET/.gemini/ and writes or merges settings.json so context.fileName includes DeepOrbitPrompt.md.
-
-4. Remind the user to run /memory refresh in Gemini CLI to load the prompt.
+Use the do.init skill. Initialize the target in $ARGUMENTS, or the current directory when omitted. Report migration conflicts without overwriting either file.

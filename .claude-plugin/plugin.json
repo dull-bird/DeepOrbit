@@ -1,7 +1,7 @@
 {
   "name": "deeporbit",
-  "version": "1.1.0",
-  "description": "Agent-driven research assistant: 22 skills that turn an Obsidian vault into an automated PKM and deep-research engine (research, paper translation, summarization, vault maintenance).",
+  "version": "2.0.0",
+  "description": "Local-first Obsidian research, retrieval, writing, tasks, calendar, and vault-maintenance workflows.",
   "author": {
     "name": "dullbird",
     "url": "https://github.com/dull-bird"

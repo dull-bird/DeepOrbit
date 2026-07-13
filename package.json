@@ -1,6 +1,6 @@
 {
   "name": "deeporbit",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "DeepOrbit: an agent-driven research assistant — a portable Agent Skills pack that turns an Obsidian vault into an automated PKM and deep-research engine.",
   "keywords": [
     "agent-skills",
@@ -16,5 +16,11 @@
     "type": "git",
     "url": "https://github.com/dull-bird/DeepOrbit.git"
   },
-  "author": "dullbird"
+  "author": "dullbird",
+  "scripts": {
+    "test": "python3 -m unittest discover -s tests -v",
+    "test:contracts": "python3 scripts/validate_repo.py",
+    "site:dev": "npm --prefix site run dev",
+    "site:build": "npm --prefix site run build"
+  }
 }

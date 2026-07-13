@@ -1,0 +1,36 @@
+{
+  "name": "deeporbit",
+  "version": "2.0.0",
+  "description": "Portable DeepOrbit workflows for Obsidian research and personal knowledge management.",
+  "author": "dullbird",
+  "homepage": "https://dull-bird.github.io/DeepOrbit/",
+  "skills": "./skills/",
+  "commands": "./commands/do/",
+  "interface": {
+    "displayName": "DeepOrbit",
+    "shortDescription": "Local-first Obsidian knowledge workflows",
+    "longDescription": "Research, retrieval, writing, tasks, calendar export, and vault maintenance with portable Agent Skills.",
+    "developerName": "dullbird",
+    "websiteURL": "https://dull-bird.github.io/DeepOrbit/"
+  },
+  "mcpServers": {
+    "deeporbit": {
+      "command": "python3",
+      "args": ["./mcp/deeporbit_rag/server.py"],
+      "cwd": "./"
+    }
+  },
+  "hooks": [
+    {
+      "event": "SessionStart",
+      "command": "python3 ./scripts/hooks/deeporbit_hook.py --runtime kimi --event session-start",
+      "timeout": 3
+    },
+    {
+      "event": "PostToolUse",
+      "matcher": "Write|Edit|Bash",
+      "command": "python3 ./scripts/hooks/deeporbit_hook.py --runtime kimi --event file-change",
+      "timeout": 3
+    }
+  ]
+}

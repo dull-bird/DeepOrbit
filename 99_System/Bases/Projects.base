@@ -1,0 +1,23 @@
+filters:
+  and:
+    - 'type == "project"'
+views:
+  - type: table
+    name: Active projects
+    filters:
+      and:
+        - 'status != "done"'
+    order:
+      - file.name
+      - status
+      - area
+      - updated
+    sort:
+      - property: updated
+        direction: DESC
+  - type: cards
+    name: Project cards
+    order:
+      - file.name
+      - status
+      - area

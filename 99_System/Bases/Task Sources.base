@@ -1,0 +1,13 @@
+filters:
+  and:
+    - 'file.hasTag("task")'
+views:
+  - type: table
+    name: Notes containing tasks
+    order:
+      - file.name
+      - file.folder
+      - file.mtime
+    sort:
+      - property: file.mtime
+        direction: DESC

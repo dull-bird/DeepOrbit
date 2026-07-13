@@ -1,5 +1,16 @@
 {
-    "name": "deeporbit",
-    "version": "1.1.0",
-    "description": "DeepOrbit: A fully automated, Agent-driven Digital Research Assistant."
+  "name": "deeporbit",
+  "version": "2.0.0",
+  "description": "Local-first Obsidian research, retrieval, writing, tasks, and calendar workflows.",
+  "contextFileName": "DeepOrbitPrompt.md",
+  "hooks": "./integrations/gemini/hooks/hooks.json",
+  "mcpServers": {
+    "deeporbit": {
+      "command": "python3",
+      "args": ["${extensionPath}/mcp/deeporbit_rag/server.py"],
+      "env": {
+        "DEEPORBIT_ROOT": "${extensionPath}"
+      }
+    }
+  }
 }

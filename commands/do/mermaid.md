@@ -1,0 +1,6 @@
+---
+description: "Create or repair an appropriate Mermaid diagram via do.mermaid"
+---
+
+Use the do.mermaid skill and select the smallest diagram type that clarifies the relationship.
+User input: $ARGUMENTS

@@ -198,7 +198,7 @@ Before finalizing, **you MUST verify every item.** If any item fails, go back an
 2. **For audio/video:** Save the complete subtitle file as `source`, delete audio (`.m4a` files are too large).
 
 3. **Auto-Linking via RAG**:
-   - **MANDATORY**: Execute `python scripts/rag/query_vault.py . "<Core Topic or Title>"`
+   - **MANDATORY**: Execute `deeporbit --vault . rag "<Core Topic or Title>"`
    - Read the context. If highly relevant notes exist in the vault, extract the top 2-3 notes.
    - Append a `## Related Links` section to the VERY BOTTOM of your generated summary output. Briefly explain *why* each past note is relevant and use proper `[[Wikilinks]]`.
 
@@ -263,5 +263,5 @@ tags:
 ## Rules
 
 - Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
-- Use the `run_command` tool to execute `obsidian open path="<absolute_path>"` for every Markdown file you create or modify. See the `do.obsidian-open` skill for details.
+- Use `do.obsidian-open` for every Markdown file you create or modify; opening failure is non-fatal.
 - Use `do.mermaid` skill for all diagram syntax. Do not inline Mermaid rules.

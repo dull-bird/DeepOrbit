@@ -57,7 +57,7 @@ Perform a deep semantic review of the folder structures, especially within `40_W
 
 ### Step 2.5: Orphan Clustering & Inbox Isolation
 - **Inbox Protocol (CRITICAL)**: `00_Inbox/` items are intentionally fragmented ideas. Do NOT run RAG automatically on these files and DO NOT propose moving them into `20_Projects` or `30_Research`. Leave them for the user to triage manually via `/do:kickoff`.
-- **Orphan Clustering (RAG)**: For true `orphan_files` located *outside* of `00_Inbox`, execute `python scripts/rag/query_vault.py . "<Orphan Note Content>"` to find the most semantically similar existing folder or Wiki concept. Use this RAG result to propose a logical move for the orphan.
+- **Orphan Clustering (RAG)**: For true `orphan_files` located *outside* of `00_Inbox`, execute `deeporbit --vault . rag "<Orphan Note Content>"` to find the most similar existing folder or Wiki concept. Use this result to propose a logical move for the orphan.
 
 ### Step 3: Proposal Generation
 Present a comprehensive reorganization proposal, formatted as follows:
@@ -104,4 +104,4 @@ Present a comprehensive reorganization proposal, formatted as follows:
 ## Rules
 
 - Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
-- Use the `run_command` tool to execute `obsidian open path="<absolute_path>"` for every Markdown file you create or modify. See the `do.obsidian-open` skill for details.
+- Use `do.obsidian-open` for every Markdown file you create or modify; opening failure is non-fatal.

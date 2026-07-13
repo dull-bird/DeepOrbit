@@ -12,7 +12,7 @@ You are the Daily Planner. Review the **most recent daily note** (latest `10_Dia
 - **Today**: `date "+%Y-%m-%d"`.
 - **Most recent note**: In `10_Diary/`, find the latest `YYYY-MM-DD.md` with date **< today**. Read it; extract unchecked `- [ ]` and what was worked on.
 - **Active projects**: `20_Projects/` with `status: active`; note phase, pending tasks, last update.
-- **RAG Subconscious**: Identify the most prominent topic from yesterday's work or active projects, and run `python scripts/rag/query_vault.py . "[Topic]"` to surface long-lost related notes or unresolved threads.
+- **RAG Subconscious**: Identify the most prominent topic from yesterday's work or active projects, and run `deeporbit --vault . rag "[Topic]"` to surface long-lost related notes or unresolved threads.
 - **Inbox**: Count files in `00_Inbox/`.
 
 ---
@@ -108,5 +108,4 @@ Daily note format: `99_System/Templates/Daily_Note.md`. Fetch script: `scripts/f
 ## Rules
 
 - Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
-- Use the `run_command` tool to execute `obsidian open path="<absolute_path>"` for every Markdown file you create or modify. See the `do.obsidian-open` skill for details.
-
+- Use `do.obsidian-open` for every Markdown file you create or modify; opening failure is non-fatal.

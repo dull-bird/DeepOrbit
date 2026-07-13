@@ -14,7 +14,7 @@ skills/
 │   ├── SKILL.md
 │   └── scripts/            # 捆绑脚本（可执行助手）
 │       └── extract_images.py
-└── ...（共 22 个 do.* 技能）
+└── ...（共 26 个 do.* 技能）
 ```
 
 > ⚠️ 不要提交 `.agents/`、`.claude/skills/`、`.cursor/`、`.roo/` 等**各工具安装目录**，也不要提交
@@ -42,6 +42,12 @@ npx skills add . --global
 改完后重启 Claude Code（或重新运行 `/skills`）即可加载最新版本。
 因为安装的是软链接，编辑 `skills/` 下的源文件会直接生效，无需手动复制。
 
+运行仓库契约验证前，请先安装开发依赖：
+
+```bash
+python3 -m pip install -e '.[dev]'
+```
+
 ## 添加新技能
 
 1. 在 `skills/` 下新建 `do.<new-skill>/SKILL.md`，按上面的约定填写 frontmatter。
@@ -52,6 +58,9 @@ npx skills add . --global
 ## 验证
 
 ```bash
+# 一次检查技能、命令配对、manifest 和 README 计数
+python scripts/validate_repo.py
+
 # 列出全部技能
 ls -d skills/do.*/ | sort
 

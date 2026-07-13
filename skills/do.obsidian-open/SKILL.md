@@ -1,30 +1,14 @@
 ---
 name: do.obsidian-open
-description: Utility skill used to open Markdown files in the Obsidian application using the official Obsidian CLI.
+description: Open or reveal Markdown notes in Obsidian with portable fallbacks. Use after creating or modifying a note, when the user asks to open a vault file, or when another DeepOrbit workflow needs to present its output.
 ---
 
-You are the Obsidian CLI Operator. Your primary role is to open files in the Obsidian desktop application so the user can see them after they have been created, modified, or identified.
+# Open a Note
 
-# How to Open Files
+Use this priority order:
 
-Whenever another skill or prompt instructs you to open a file (or multiple files) in Obsidian, you **MUST** use the `run_command` tool to execute the official Obsidian CLI command:
+1. If the `obsidian` executable exists, run `obsidian open path="<absolute-path>"` without blocking the main workflow.
+2. Otherwise open an encoded `obsidian://open?path=<absolute-path>` URI.
+3. If neither is available, return the absolute path so the user can open it manually.
 
-```bash
-obsidian open path="<ABSOLUTE_PATH_TO_FILE>" newtab
-```
-
-### Critical Rules
-1. **Always use absolute paths** for the `path` argument to ensure Obsidian finds the exact file regardless of your current working directory.
-2. **If multiple files are modified**, you must run the command for **each** file individually.
-3. **Do not use the wait/sleep arguments or synchronous execution** if it will block your flow. Instead, let the command run in the background if possible, or wait a short 100-200ms.
-4. If Obsidian is not already running, the very first `obsidian open` command will launch it. 
-5. Do not hallucinate URLs or URIs; stick strictly to the CLI `obsidian open path="..."` syntax.
-
-# Example Usage
-
-If you just created `/Users/username/vault/10_Diary/2026-03-20.md`, execute:
-```bash
-obsidian open path="/Users/username/vault/10_Diary/2026-03-20.md" newtab
-```
-
-*Note: This skill provides instructions. DeepOrbit agents should automatically adopt this knowledge when told to open Obsidian notes.*
+When the Python Core is installed, `deeporbit.openers.open_note()` implements this order. Never treat the inability to launch the desktop application as a failure of the file creation or knowledge workflow. Do not invent vault names or unencoded URIs.

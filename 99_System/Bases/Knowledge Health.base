@@ -1,0 +1,15 @@
+filters:
+  and:
+    - 'file.inFolder("40_Wiki") || file.inFolder("30_Research")'
+views:
+  - type: table
+    name: Recently maintained
+    order:
+      - file.name
+      - type
+      - area
+      - tags
+      - file.mtime
+    sort:
+      - property: file.mtime
+        direction: DESC

@@ -14,6 +14,9 @@ Unprocessed notes, quick captures, ideas, and fleeting thoughts. Content here sh
 ### `10_Diary/`
 Daily logs and journals. Format: `YYYY-MM-DD.md`. Includes morning plans, daily recaps, and news summaries.
 
+### `15_Writings/`
+Drafts, essays, and polished personal writing produced through `do.write`.
+
 ### `20_Projects/`
 Active projects with a defined start and end. Each project should have its own dedicated subfolder to house related materials and plans. Completed projects should be moved to `99_System/Archive/`.
 
@@ -35,6 +38,8 @@ High-level execution plans, strategy documents, or step-by-step AI workflows gen
 ### `99_System/`
 System configuration, templates, scripts, embedded attachments, and archives.
 - `99_System/Templates/`: Templates for creating new types of notes.
+- `99_System/Bases/`: Native Obsidian Bases for projects, research, task sources, and knowledge health.
+- `99_System/Calendar/`: Portable calendar exports such as `DeepOrbit.ics`.
 - `99_System/Archive/`: Archived projects and legacy notes no longer needed but kept for reference.
 
 ## 2. Structural Principles

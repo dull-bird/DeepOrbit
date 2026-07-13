@@ -1,6 +1,6 @@
 ---
-description: "Index the Obsidian vault for semantic RAG search using ChromaDB"
+description: "Build, refresh, inspect, or repair DeepOrbit's machine-local search indexes"
 ---
 
-Use the do.rag-index skill. Run the python script scripts/rag/index_vault.py to build the local index.
+Use the do.rag-index skill. Refresh lexical search and optional semantic retrieval without writing indexes into the vault.
 User input: $ARGUMENTS

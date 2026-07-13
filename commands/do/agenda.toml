@@ -1,0 +1,5 @@
+description = "Build today's agenda from tasks across the vault via do.agenda"
+prompt = """
+Use the do.agenda skill.
+User input: {{args}}
+"""
