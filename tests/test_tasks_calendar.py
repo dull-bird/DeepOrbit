@@ -2,10 +2,9 @@ import datetime as dt
 import tempfile
 import unittest
 from pathlib import Path
-
 from deeporbit.calendar import export_ics
 from deeporbit.config import load_config
-from deeporbit.errors import TaskNotFoundError
+from deeporbit.errors import PrivacyError, TaskNotFoundError
 from deeporbit.tasks import add_task, agenda, complete_task, parse_tasks
 from deeporbit.vault import initialize
 
@@ -43,6 +42,22 @@ class TaskCalendarTests(unittest.TestCase):
         self.assertIn(f"UID:{task.id}@deeporbit.local", first)
         self.assertIn("BEGIN:VALARM", first)
         self.assertIn("TRIGGER;RELATED=START:PT9H", first)
+
+    def test_ics_privacy_mode_redacts_sensitive_fields(self):
+        add_task(self.config, "Email jane.doe@example.com about 555-123-4567", due="2026-07-14")
+        output, count = export_ics(self.config, privacy_mode="redact")
+        text = output.read_text(encoding="utf-8")
+        self.assertEqual(count, 1)
+        self.assertNotIn("jane.doe@example.com", text)
+        self.assertNotIn("555-123-4567", text)
+        self.assertIn("<EMAIL>", text)
+        self.assertIn("<PHONE>", text)
+        self.assertIn("<VAULT_PATH>", text)
+
+    def test_ics_privacy_mode_blocks_sensitive_fields(self):
+        add_task(self.config, "Email jane.doe@example.com", scheduled="2026-07-14")
+        with self.assertRaises(PrivacyError):
+            export_ics(self.config, privacy_mode="block")
 
 
 if __name__ == "__main__":

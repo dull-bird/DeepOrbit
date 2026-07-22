@@ -4,6 +4,7 @@ import datetime as dt
 from pathlib import Path
 
 from .config import Config
+from .privacy import sanitize_value
 from .tasks import parse_tasks
 
 
@@ -11,7 +12,7 @@ def _escape(value: str) -> str:
     return value.replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
 
 
-def export_ics(config: Config, output: Path | None = None) -> tuple[Path, int]:
+def export_ics(config: Config, output: Path | None = None, *, privacy_mode: str | None = None) -> tuple[Path, int]:
     output = output or config.vault / "99_System" / "Calendar" / "DeepOrbit.ics"
     output.parent.mkdir(parents=True, exist_ok=True)
     now = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -22,7 +23,14 @@ def export_ics(config: Config, output: Path | None = None) -> tuple[Path, int]:
         if task.done or not date:
             continue
         compact = date.replace("-", "")
+        effective_mode = privacy_mode or config.privacy.get("outbound_mode", "allow")
         summary = re_clean_task(task.text)
+        summary = sanitize_value(
+            summary,
+            mode=effective_mode,
+            rules=config.privacy.get("rules"),
+        ).value
+        description = task.path if effective_mode == "allow" else "<VAULT_PATH>"
         lines.extend([
             "BEGIN:VEVENT",
             f"UID:{task.id}@deeporbit.local",
@@ -30,7 +38,7 @@ def export_ics(config: Config, output: Path | None = None) -> tuple[Path, int]:
             f"DTSTART;VALUE=DATE:{compact}",
             f"DTEND;VALUE=DATE:{(dt.date.fromisoformat(date) + dt.timedelta(days=1)).strftime('%Y%m%d')}",
             f"SUMMARY:{_escape(summary)}",
-            f"DESCRIPTION:{_escape(task.path)}",
+            f"DESCRIPTION:{_escape(description)}",
             "BEGIN:VALARM",
             "ACTION:DISPLAY",
             "TRIGGER;RELATED=START:PT9H",
@@ -46,6 +54,7 @@ def export_ics(config: Config, output: Path | None = None) -> tuple[Path, int]:
 
 def re_clean_task(text: str) -> str:
     import re
+
     text = re.sub(r"\s+#task\b", "", text)
     text = re.sub(r"\s+[⏳📅]\s*\d{4}-\d{2}-\d{2}", "", text)
     return text.strip()

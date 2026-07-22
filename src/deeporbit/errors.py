@@ -8,5 +8,13 @@ class ConfigError(DeepOrbitError):
     code = "CONFIG_ERROR"
 
 
+class GitSyncError(DeepOrbitError):
+    code = "GIT_SYNC_ERROR"
+
+
+class PrivacyError(DeepOrbitError):
+    code = "PRIVACY_ERROR"
+
+
 class TaskNotFoundError(DeepOrbitError):
     code = "TASK_NOT_FOUND"
