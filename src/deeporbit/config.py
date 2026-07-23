@@ -93,10 +93,17 @@ def _normalize_privacy(raw: dict) -> dict:
             rules.append(dict(default))
     if not rules:
         rules = [dict(r) for r in DEFAULT_PRIVACY["rules"]]
+    scan = raw.get("scan", {})
     return {
         "outbound_mode": raw.get("outbound_mode", DEFAULT_PRIVACY["outbound_mode"]),
         "confirm_high_risk": raw.get("confirm_high_risk", DEFAULT_PRIVACY["confirm_high_risk"]),
         "rules": rules,
+        "scan": {
+            "exclude": list(scan.get("exclude", ["60_Notes/微信读书", "node_modules"])),
+            "thresholds": scan.get("thresholds", {}),
+            "category_cap": int(scan.get("category_cap", 6)),
+            "llm_verify": bool(scan.get("llm_verify", False)),
+        },
     }
 
 

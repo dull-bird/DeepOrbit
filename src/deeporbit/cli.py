@@ -9,12 +9,14 @@ from pathlib import Path
 from .config import load_config
 from .doctor import diagnose
 from .errors import DeepOrbitError
+from .frontmatter import write_fields
 from .links import add_link, describe_link, list_links, remove_link, resolve_vault, route_link, set_default
 from .profile import observe as profile_observe
 from .profile import compact as profile_compact
 from .profile import set_field as profile_set_field
 from .profile import set_focus as profile_set_focus
 from .profile import show as profile_show
+from .privacy_scanner import DEFAULT_THRESHOLDS, LEVELS, PRIVACY_CATEGORIES, scan_file, scan_vault
 from .calendar import export_ics
 from .cron import add_job, list_jobs, remove_job, run_due, set_enabled
 from .git_sync import sync_vault
@@ -150,6 +152,18 @@ def parser() -> argparse.ArgumentParser:
     serve_cmd.add_argument("--open", action="store_true", help="Open the dashboard in a browser")
     serve_cmd.add_argument("--agent", default="auto", help="ACP agent command (auto tries omp, claude, gemini)")
     serve_cmd.add_argument("--privacy-mode", choices=["allow", "redact", "block"], default=None)
+    privacy = commands.add_parser("privacy", help="Privacy scanning and enforcement")
+    privacy_sub = privacy.add_subparsers(dest="privacy_command", required=True)
+    privacy_scan = privacy_sub.add_parser("scan", help="Scan vault notes for privacy risk")
+    privacy_scan.add_argument("--min-level", choices=["low", "medium", "high", "critical"], default="low")
+    privacy_scan.add_argument("--tag", action="store_true", help="Write privacy_level frontmatter")
+    privacy_scan.add_argument("--dry-run", action="store_true", help="Show changes without writing")
+    privacy_scan.add_argument("--explain", action="store_true", help="Show per-file scoring layer breakdown")
+    privacy_verify = privacy_sub.add_parser("verify", help="Collect gray-zone files with excerpts for LLM review")
+    privacy_verify.add_argument("--max-chars", type=int, default=800, help="Max excerpt chars per file")
+    privacy_apply = privacy_sub.add_parser("apply", help="Batch-apply privacy levels from a JSON decisions file")
+    privacy_apply.add_argument("decisions", help="Path to JSON file: [{\"path\": ..., \"level\": ...}]")
+    privacy_apply.add_argument("--dry-run", action="store_true", help="Show changes without writing")
     return root
 
 
@@ -280,6 +294,100 @@ def run(args: argparse.Namespace) -> int:
     elif args.command == "calendar":
         path, count = export_ics(config, args.output, privacy_mode=args.privacy_mode)
         _print({"path": str(path), "events": count})
+    elif args.command == "privacy":
+        if args.privacy_command == "scan":
+            results = []
+            tagged = 0
+            min_index = LEVELS.index(args.min_level)
+            privacy_scan = config.privacy.get("scan", {})
+            exclude = list(privacy_scan.get("exclude", []))
+            for score in scan_vault(
+                config.vault,
+                index_dirs=config.index_dirs,
+                exclude_dirs=exclude,
+            ):
+                # Effective level: frontmatter tag (explicit decision) overrides heuristic
+                effective = score.existing_level if score.existing_level in LEVELS else score.level
+                if LEVELS.index(effective) < min_index:
+                    continue
+                rel = str(Path(score.path).relative_to(config.vault))
+                entry: dict = {
+                    "path": rel,
+                    "level": effective,
+                    "heuristic_level": score.level,
+                    "score": score.score,
+                    "categories": score.categories,
+                    "patterns": score.patterns,
+                    "tagged": score.existing_level is not None,
+                }
+                if args.explain:
+                    entry["explain"] = {
+                        "raw_score": score.raw_score,
+                        "length_factor": score.length_factor,
+                        "source_factor": score.source_factor,
+                        "voice_factor": score.voice_factor,
+                        "filename_signal": score.filename_signal,
+                    }
+                results.append(entry)
+                if args.tag and not args.dry_run:
+                    note = Path(score.path)
+                    updated = write_fields(note.read_text(encoding="utf-8"), {"privacy_level": score.level})
+                    note.write_text(updated, encoding="utf-8")
+                    tagged += 1
+            _print({"dry_run": args.dry_run, "tagged": tagged, "count": len(results), "results": results})
+        elif args.privacy_command == "verify":
+            from .content_signals import extract_sensitive_excerpt
+
+            th = DEFAULT_THRESHOLDS
+            gray_low = th["high"] - 2
+            gray_high = th["critical"] + 2
+            privacy_scan_cfg = config.privacy.get("scan", {})
+            exclude = list(privacy_scan_cfg.get("exclude", []))
+            # Collect all keywords for excerpt extraction
+            all_keywords: list[str] = []
+            for _kws in PRIVACY_CATEGORIES.values():
+                all_keywords.extend(_kws[1])
+            items = []
+            for score in scan_vault(
+                config.vault,
+                index_dirs=config.index_dirs,
+                exclude_dirs=exclude,
+            ):
+                if not (gray_low <= score.score <= gray_high):
+                    continue
+                rel = str(Path(score.path).relative_to(config.vault))
+                text = Path(score.path).read_text(encoding="utf-8", errors="ignore")
+                excerpt = extract_sensitive_excerpt(text, all_keywords, max_chars=args.max_chars)
+                items.append({
+                    "path": rel,
+                    "score": score.score,
+                    "heuristic_level": score.level,
+                    "categories": score.categories,
+                    "source_factor": score.source_factor,
+                    "voice_factor": score.voice_factor,
+                    "excerpt": excerpt,
+                })
+            _print({"gray_zone": [gray_low, gray_high], "count": len(items), "items": items})
+        elif args.privacy_command == "apply":
+            decisions_path = Path(args.decisions)
+            decisions = json.loads(decisions_path.read_text(encoding="utf-8"))
+            applied = 0
+            errors = []
+            for item in decisions:
+                rel = item["path"]
+                level = item["level"]
+                if level not in LEVELS:
+                    errors.append({"path": rel, "error": f"invalid level: {level}"})
+                    continue
+                note = config.vault / rel
+                if not note.exists():
+                    errors.append({"path": rel, "error": "file not found"})
+                    continue
+                if not args.dry_run:
+                    updated = write_fields(note.read_text(encoding="utf-8"), {"privacy_level": level})
+                    note.write_text(updated, encoding="utf-8")
+                applied += 1
+            _print({"dry_run": args.dry_run, "applied": applied, "errors": errors})
     elif args.command == "serve":
         from .server import serve as serve_dashboard
 
