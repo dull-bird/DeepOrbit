@@ -1,0 +1,40 @@
+{
+  "schema_version": 2,
+  "vault_id": "example-vault",
+  "language": "zh-CN",
+  "host": "example",
+  "index": {
+    "directories": [
+      "00_Inbox",
+      "10_Diary",
+      "15_Writings",
+      "20_Projects",
+      "30_Research",
+      "40_Wiki",
+      "50_Resources",
+      "60_Notes",
+      "70_Family",
+      "90_Plans"
+    ],
+    "semantic_backend": "auto"
+  },
+  "readonly": {
+    "directories": ["60_Notes/微信读书"]
+  },
+  "privacy": {
+    "outbound_mode": "redact",
+    "confirm_high_risk": true,
+    "rules": [],
+    "scan": {
+      "exclude": ["60_Notes/微信读书", "node_modules"],
+      "thresholds": {},
+      "category_cap": 6,
+      "llm_verify": false
+    }
+  },
+  "agent": {
+    "name": "omp",
+    "mode": "acp",
+    "updated": "2026-07-24T00:00:00+00:00"
+  }
+}
