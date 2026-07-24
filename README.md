@@ -116,12 +116,14 @@ Authorship is one invisible frontmatter field, never a visible badge: agents **m
 - `deeporbit --vault ~/Documents/MyVault suggest` — prioritized issues derived from vault state (done-not-archived, dormant projects, stale index, empty profile…).
 - `/do:mentor` — a coach, not an assistant: diagnoses from `status` + `suggest` + profile, teaches one method slice at a time (GTD for commitments, PARA for filing, Zettelkasten for knowledge, Atomic Habits for rhythm — boundaries researched in [docs/methodology.md](docs/methodology.md), materialized into each vault), and leaves you with one next action.
 - `/do:dream` — the vault's offline consolidation: promotes repeated themes to Wiki, finds hidden connections, nudges lifecycle decisions, records profile observations. It proposes; you approve.
-- `deeporbit cron add dream "Run the do.dream consolidation workflow" --every daily` — device-local schedules; `cron run-due` reports what's due for your agent runtime or system cron.
+- `deeporbit cron add dream "Run the do.dream consolidation workflow" --every daily` — device-local schedules; `cron run-due --agent` reports what's due and wraps each job in the configured agent CLI's handoff command.
+- `/do:agent` — detect agent CLIs installed on this machine (omp/claude/gemini/codex), pick one via an ask form, and hand execution to it (ACP/RPC/print). See [docs/agent-cli.md](docs/agent-cli.md).
+- `/do:teach-me` — export vault knowledge into [teach-me](https://github.com/dull-bird/teach-me-skill) with an `origin` provenance block, so imported notes never mix with teach-me's natively accumulated knowledge. See [docs/teach-me-bridge.md](docs/teach-me-bridge.md).
 - `deeporbit --vault . sync` — git sync for the current vault (pull, commit, push when needed). Use it directly or via `deeporbit cron`.
 
 - **Recipes** (`99_System/Recipes/*.md`) are the extension point: declarative `cli:` / `skill:` / `note:` steps composing DeepOrbit with any other skill. `deeporbit --vault . recipe run "Weekly Review"` resolves one into an execution plan. Prefer a recipe over new infrastructure.
 
-The tooling research behind these choices (PDF/Markdown/HTML processors, the Obsidian plugin ecosystem, community AI-note projects like kepano's obsidian-skills) is in [docs/tooling-landscape.md](docs/tooling-landscape.md).
+The tooling research behind these choices (PDF/Markdown/HTML processors, the Obsidian plugin ecosystem, community AI-note projects like kepano's obsidian-skills) is in [docs/tooling-landscape.md](docs/tooling-landscape.md); a wider survey of skill ecosystems and open-source NotebookLM alternatives is in [docs/skill-ecosystem-research.md](docs/skill-ecosystem-research.md). A runnable example vault lives in [examples/example-vault](examples/example-vault) and is mirrored at [dull-bird/deeporbit-example-vault](https://github.com/dull-bird/deeporbit-example-vault).
 
 ## Obsidian plugin
 
@@ -205,7 +207,7 @@ The stable block ID supports exact completion and stable iCalendar UIDs. ICS exp
 
 ## Skill catalog
 
-DeepOrbit 2.0 ships **29 `do.*` skills**. `skills/` is the single source of truth; every skill has paired Claude-style Markdown and Gemini TOML commands.
+DeepOrbit 2.0 ships **31 `do.*` skills**. `skills/` is the single source of truth; every skill has paired Claude-style Markdown and Gemini TOML commands.
 
 | Skill | Purpose |
 |---|---|
@@ -213,6 +215,8 @@ DeepOrbit 2.0 ships **29 `do.*` skills**. `skills/` is the single source of trut
 | `do.link` | Link external vaults and route requests to their workflows |
 | `do.mentor` | Coach on methods, tools, and recipes; diagnose vault health |
 | `do.dream` | Offline consolidation: promotions, connections, lifecycle nudges |
+| `do.teach-me` | Export vault knowledge into teach-me with provenance tagging |
+| `do.agent` | Detect and configure the local agent CLI (omp/claude/gemini/codex) |
 | `do.daily` | Daily planning, recap, news, and project context |
 | `do.todo` | Capture, list, and complete Markdown tasks |
 | `do.agenda` | Group overdue, today, upcoming, and unscheduled tasks |
