@@ -25,8 +25,11 @@ Before starting, verify that all required system tools are installed.
 - Read the original `.pdf` file to build a mental map.
 - **Modularization Strategy (Crucial for Reliability):**
     - If the main `.tex` file is large (>500 lines), **DO NOT use the `replace` tool for content translation.** It is prone to whitespace/encoding mismatches.
-    - Instead, write and run a Python script to split the monolithic `.tex` file into sub-files by `\section` (e.g., `sections/01_intro.tex`, `sections/02_related.tex`).
-    - Update the main `.tex` file to use `\input{sections/xxx.tex}`.
+    - Instead, run the bundled splitter to split the monolithic `.tex` file into sub-files by `\section` (e.g. `sections/01_intro.tex`, `sections/02_related.tex`) and rewrite the main file to use `\input{sections/xxx.tex}`:
+      ```bash
+      python3 <skill-dir>/scripts/split_tex.py main.tex --cjk-font "Noto Sans CJK SC"
+      ```
+      Pick the platform CJK font first (Windows: `Microsoft YaHei`; macOS: `PingFang SC`; Linux: `Noto Sans CJK SC`). The script is idempotent, never overwrites existing section files, and prints a JSON report — verify `sections` before translating. Use `--dry-run` to preview.
     - For small files, you may still use `replace` or directly overwrite the file with `write_file`.
 - **Terminology Glossary:** Create a local mental glossary of 5-10 core technical terms to ensure consistency.
 
@@ -66,6 +69,7 @@ Before starting, verify that all required system tools are installed.
 ## Rules
 
 - Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+- Set `author: ai` in frontmatter for every note you create; switch to `author: mixed` when substantially rewriting a human-authored note. Authorship lives in frontmatter only — never add visible badges.
 - **Missing Package — Install First, Never Remove:** If `xelatex` (or `pdflatex`) reports a missing `.sty` or `.cls` file, you MUST attempt to install the package using `tlmgr` **before** considering any source-code modification. The goal is to preserve the original paper's formatting as faithfully as possible. Only if installation is truly impossible (e.g., proprietary journal class not on CTAN) may you apply minimal source-level workarounds, and you must document the reason.
     - **Install workflow:**
       ```bash

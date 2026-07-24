@@ -48,3 +48,21 @@ jobs:
           test -f site/dist/index.html
           test -f site/dist/en/index.html
           test -f site/dist/docs/index.html
+
+  plugin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: plugin/package-lock.json
+      - run: npm ci
+        working-directory: plugin
+      - run: npx tsc --noEmit
+        working-directory: plugin
+      - run: npm test
+        working-directory: plugin
+      - run: npm run build
+        working-directory: plugin

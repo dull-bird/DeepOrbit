@@ -8,7 +8,32 @@ views:
       - file.name
       - type
       - area
+      - author
       - tags
+      - file.mtime
+    sort:
+      - property: file.mtime
+        direction: DESC
+  - type: table
+    name: AI generated
+    filters:
+      and:
+        - 'author == "ai"'
+    order:
+      - file.name
+      - type
+      - file.mtime
+    sort:
+      - property: file.mtime
+        direction: DESC
+  - type: table
+    name: Human written
+    filters:
+      and:
+        - 'author != "ai"'
+    order:
+      - file.name
+      - type
       - file.mtime
     sort:
       - property: file.mtime

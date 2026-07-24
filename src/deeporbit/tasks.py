@@ -39,9 +39,9 @@ def _task_files(config: Config):
 def parse_tasks(config: Config) -> list[Task]:
     tasks: list[Task] = []
     for path in sorted(set(_task_files(config))):
-        for line_no, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        for line_no, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
             match = TASK_RE.match(line)
-            if not match or "#task" not in match.group("body"):
+            if not match:
                 continue
             scheduled = due = None
             for date_match in DATE_RE.finditer(match.group("body")):

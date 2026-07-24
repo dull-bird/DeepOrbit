@@ -263,5 +263,6 @@ tags:
 ## Rules
 
 - Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+- Set `author: ai` in frontmatter for every note you create; switch to `author: mixed` when substantially rewriting a human-authored note. Authorship lives in frontmatter only — never add visible badges.
 - Use `do.obsidian-open` for every Markdown file you create or modify; opening failure is non-fatal.
 - Use `do.mermaid` skill for all diagram syntax. Do not inline Mermaid rules.

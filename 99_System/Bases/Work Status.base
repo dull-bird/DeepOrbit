@@ -1,0 +1,59 @@
+filters:
+  or:
+    - 'status == "active"'
+    - 'status == "paused"'
+    - 'status == "done"'
+    - 'status == "archived"'
+views:
+  - type: table
+    name: Active
+    filters:
+      and:
+        - 'status == "active"'
+    order:
+      - file.name
+      - type
+      - area
+      - author
+      - updated
+    sort:
+      - property: updated
+        direction: DESC
+  - type: table
+    name: Paused
+    filters:
+      and:
+        - 'status == "paused"'
+    order:
+      - file.name
+      - type
+      - area
+      - updated
+    sort:
+      - property: updated
+        direction: ASC
+  - type: table
+    name: Done — ready to archive
+    filters:
+      and:
+        - 'status == "done"'
+    order:
+      - file.name
+      - type
+      - area
+      - updated
+    sort:
+      - property: updated
+        direction: ASC
+  - type: table
+    name: Archived
+    filters:
+      and:
+        - 'status == "archived"'
+    order:
+      - file.name
+      - type
+      - archived
+    sort:
+      - property: archived
+        direction: DESC

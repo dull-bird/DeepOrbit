@@ -1,0 +1,14 @@
+filters:
+  and:
+    - 'file.inFolder("15_Writings")'
+views:
+  - type: table
+    name: 全部写作 All
+    order:
+      - file.name
+      - status
+      - author
+      - updated
+    sort:
+      - property: updated
+        direction: DESC

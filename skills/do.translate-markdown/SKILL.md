@@ -56,4 +56,5 @@ Continue while context allows. If interrupted, resume from the first unchecked i
 - Code blocks, formulas, URLs, and wikilink targets are unchanged.
 - No new claims or explanations were introduced.
 
+- Set `author: ai` in frontmatter for every note you create; switch to `author: mixed` when substantially rewriting a human-authored note. Authorship lives in frontmatter only — never add visible badges.
 Write output as `<name>_<LANG>.md` with translated title, source wikilink, language, translation date, and `translation` tag. Keep the manifest for audit unless the user requests cleanup. Open the output through `do.obsidian-open`; opening failure is non-fatal.

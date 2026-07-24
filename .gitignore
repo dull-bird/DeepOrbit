@@ -77,3 +77,8 @@ skills/*/data/
 tmp_test/
 *.tmp
 *.bak
+
+# Obsidian plugin build artifacts
+plugin/node_modules/
+plugin/main.js
+plugin/dist-test/

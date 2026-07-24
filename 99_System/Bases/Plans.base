@@ -1,0 +1,13 @@
+filters:
+  and:
+    - 'file.inFolder("90_Plans")'
+views:
+  - type: table
+    name: 计划 Plans
+    order:
+      - file.name
+      - status
+      - file.mtime
+    sort:
+      - property: file.mtime
+        direction: DESC

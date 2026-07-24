@@ -1,0 +1,14 @@
+filters:
+  and:
+    - 'file.inFolder("60_Notes")'
+views:
+  - type: table
+    name: 全部笔记 All
+    order:
+      - file.name
+      - type
+      - author
+      - file.mtime
+    sort:
+      - property: file.mtime
+        direction: DESC

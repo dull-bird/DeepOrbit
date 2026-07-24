@@ -4,7 +4,9 @@ import datetime as dt
 from pathlib import Path
 
 from .config import Config
+from .errors import PrivacyError
 from .privacy import sanitize_value
+from .privacy_scanner import effective_mode as privacy_effective_mode, file_level
 from .tasks import parse_tasks
 
 
@@ -22,15 +24,20 @@ def export_ics(config: Config, output: Path | None = None, *, privacy_mode: str 
         date = task.due or task.scheduled
         if task.done or not date:
             continue
+        task_path = config.vault / task.path
+        level = file_level(task_path) if task_path.exists() else "low"
+        command_mode = privacy_mode or config.privacy.get("outbound_mode", "allow")
+        mode = privacy_effective_mode(level, command_mode)
+        if mode == "block":
+            raise PrivacyError(f"Outbound privacy block for task from {task.path}")
         compact = date.replace("-", "")
-        effective_mode = privacy_mode or config.privacy.get("outbound_mode", "allow")
         summary = re_clean_task(task.text)
         summary = sanitize_value(
             summary,
-            mode=effective_mode,
+            mode=mode,
             rules=config.privacy.get("rules"),
         ).value
-        description = task.path if effective_mode == "allow" else "<VAULT_PATH>"
+        description = task.path if mode == "allow" else "<VAULT_PATH>"
         lines.extend([
             "BEGIN:VEVENT",
             f"UID:{task.id}@deeporbit.local",

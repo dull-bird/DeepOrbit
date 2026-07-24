@@ -36,14 +36,42 @@ mkdir -p .agents/skills
 cp -R /path/to/DeepOrbit/skills/do.* .agents/skills/
 ```
 
+## Claude Code
+
+Claude Code reads project `CLAUDE.md` files automatically. This repository's
+`CLAUDE.md` imports `DeepOrbitPrompt.md`, so the canonical context is loaded
+without relying on plugin installation.
+
+When the plugin is enabled, `hooks/hooks.json` also injects the same context on
+session startup, resume, and compaction, and marks the local index dirty after
+`Write`, `Edit`, or `Bash`.
+
+## OMP
+
+OMP discovers native TypeScript hooks under `.omp/hooks/pre/*.ts`. This
+repository's `.omp/hooks/pre/deeporbit.ts` injects `DeepOrbitPrompt.md` through
+the `before_agent_start` event. OMP also supports explicit `--hook` and
+`--append-system-prompt` overrides.
+
 ## Codex
 
-The repository includes `.codex-plugin/plugin.json`, Skills, MCP, and hooks. Standalone filesystem Skills remain the most portable installation path across Codex surfaces.
+Codex reads the repository `AGENTS.md` automatically. Full DeepOrbit context is
+added by either `.codex/hooks/hooks.json` for a trusted checkout or the
+plugin's `.codex-plugin/hooks/hooks.json` when the plugin is enabled and its
+hooks are trusted.
 
-For a checkout without a configured marketplace, expose the same source folders in
-the workspace or user Skill directory. The plugin manifest is for Codex plugin
-installations; it is not required to read or execute the portable Skills.
+- `SessionStart` emits the full `DeepOrbitPrompt.md` content plus vault status
+  through `hookSpecificOutput.additionalContext`.
+- `PostToolUse` marks `cache/dirty` after write/edit/shell actions and emits a
+  short created/modified/deleted file summary for tracked note files, so the
+  next local CLI run can refresh and the agent sees what changed.
+
+Codex plugin hook commands resolve from `${PLUGIN_ROOT}`; checkout hooks resolve
+from the Git root, so neither depends on the current working directory.
 
 ## Fallback behavior
 
-When a runtime lacks commands, invoke the Skill by name or natural language. When it lacks MCP, invoke the local CLI. When it lacks Goal or hooks, continue from the checkpoint file.
+When a runtime lacks commands, invoke the Skill by name or natural language.
+When it lacks MCP, invoke the local CLI. When it lacks automatic prompt loading,
+read `DeepOrbitPrompt.md` at session start and continue from Markdown checkpoints.
+

@@ -74,4 +74,5 @@ Before setting the plan to `status: complete`:
 - Output files exist at the planned paths.
 - Wikilinks resolve or are intentionally marked as future concepts.
 
+- Set `author: ai` in frontmatter for every note you create; switch to `author: mixed` when substantially rewriting a human-authored note. Authorship lives in frontmatter only — never add visible badges.
 Link the result from today's Daily Note. Open the main note using `do.obsidian-open`; inability to launch Obsidian is non-fatal.

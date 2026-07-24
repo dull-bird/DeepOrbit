@@ -54,10 +54,28 @@ class TaskCalendarTests(unittest.TestCase):
         self.assertIn("<PHONE>", text)
         self.assertIn("<VAULT_PATH>", text)
 
-    def test_ics_privacy_mode_blocks_sensitive_fields(self):
-        add_task(self.config, "Email jane.doe@example.com", scheduled="2026-07-14")
+    def test_ics_blocks_task_from_critical_file(self):
+        """Tasks from files with privacy_level critical should be blocked."""
+        task_path = self.config.vault / "00_Inbox" / "Critical.md"
+        task_path.write_text(
+            "---\nprivacy_level: critical\n---\n\n- [ ] Call mom about hospital visit #task 📅 2026-07-14 ^do-testcritical\n",
+            encoding="utf-8",
+        )
         with self.assertRaises(PrivacyError):
             export_ics(self.config, privacy_mode="block")
+
+    def test_ics_redacts_task_from_high_file(self):
+        """Tasks from files with privacy_level high should be redacted by default."""
+        task_path = self.config.vault / "00_Inbox" / "High.md"
+        task_path.write_text(
+            "---\nprivacy_level: high\n---\n\n- [ ] Email jane.doe@example.com #task 📅 2026-07-14 ^do-testhigh\n",
+            encoding="utf-8",
+        )
+        output, count = export_ics(self.config, privacy_mode="redact")
+        self.assertEqual(count, 1)
+        text = output.read_text(encoding="utf-8")
+        self.assertNotIn("jane.doe@example.com", text)
+        self.assertIn("<EMAIL>", text)
 
 
 if __name__ == "__main__":

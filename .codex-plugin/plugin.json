@@ -18,5 +18,6 @@
     "capabilities": ["skills", "mcp", "hooks"],
     "defaultPrompt": "Use DeepOrbit to work with this Obsidian vault."
   },
-  "mcpServers": "./.mcp.json"
+  "mcpServers": "./.mcp.json",
+  "hooks": "./hooks/hooks.json"
 }

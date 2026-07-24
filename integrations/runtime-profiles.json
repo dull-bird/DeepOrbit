@@ -31,13 +31,31 @@
       "hooks": true,
       "goal": "native"
     },
-    "codex": {
-      "manifest": ".codex-plugin/plugin.json",
+    "claude-code": {
+      "manifest": ".claude-plugin/plugin.json",
       "skills": true,
       "commands": true,
       "mcp": true,
       "hooks": true,
-      "goal": "native"
+      "prompt": "CLAUDE.md imports DeepOrbitPrompt.md",
+      "goal": "checkpoints"
+    },
+    "codex": {
+      "manifest": ".codex-plugin/plugin.json",
+      "skills": true,
+      "commands": false,
+      "mcp": true,
+      "hooks": true,
+      "prompt": ".codex/hooks or plugin hooks emit DeepOrbitPrompt.md",
+      "goal": "checkpoints"
+    },
+    "omp": {
+      "skills": true,
+      "commands": false,
+      "mcp": false,
+      "hooks": true,
+      "prompt": "Native .omp/hooks/pre/deeporbit.ts injects DeepOrbitPrompt.md",
+      "goal": "checkpoints"
     }
   }
 }

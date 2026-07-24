@@ -1,0 +1,19 @@
+filters:
+  and:
+    - 'file.inFolder("40_Wiki")'
+views:
+  - type: table
+    name: 最近更新 Recently maintained
+    order:
+      - file.name
+      - area
+      - author
+      - file.mtime
+    sort:
+      - property: file.mtime
+        direction: DESC
+  - type: cards
+    name: 概念卡片 Cards
+    order:
+      - file.name
+      - area

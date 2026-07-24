@@ -17,6 +17,7 @@ This skill enables accurate creation of Mermaid diagrams inside Obsidian Markdow
 4. **Indentation matters** in mindmaps and timelines — use spaces only, never `- ` or `* `.
 5. **Flowcharts default to `flowchart TD`** (top-down) unless the user asks otherwise.
 6. Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+- Set `author: ai` in frontmatter for every note you create; switch to `author: mixed` when substantially rewriting a human-authored note. Authorship lives in frontmatter only — never add visible badges.
 
 ## Diagram Selection Guide
 

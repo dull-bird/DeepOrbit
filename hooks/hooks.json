@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|compact|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/deeporbit_hook.py\" --runtime claude --event session-start",
+            "statusMessage": "Loading DeepOrbit context"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/deeporbit_hook.py\" --runtime claude --event file-change",
+            "statusMessage": "Refreshing DeepOrbit index state"
+          }
+        ]
+      }
+    ]
+  }
+}

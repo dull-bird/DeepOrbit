@@ -23,6 +23,9 @@ deeporbit = "deeporbit.cli:main"
 [tool.setuptools]
 package-dir = {"" = "src"}
 
+[tool.setuptools.package-data]
+deeporbit = ["dashboard.html"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 

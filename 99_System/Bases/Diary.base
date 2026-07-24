@@ -1,0 +1,13 @@
+filters:
+  and:
+    - 'file.inFolder("10_Diary")'
+views:
+  - type: table
+    name: 最近日记 Recent
+    order:
+      - file.name
+      - status
+      - file.mtime
+    sort:
+      - property: file.name
+        direction: DESC

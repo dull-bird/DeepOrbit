@@ -6,7 +6,7 @@ views:
     name: Active projects
     filters:
       and:
-        - 'status != "done"'
+        - 'status == "active"'
     order:
       - file.name
       - status
@@ -15,6 +15,18 @@ views:
     sort:
       - property: updated
         direction: DESC
+  - type: table
+    name: Paused projects
+    filters:
+      and:
+        - 'status == "paused"'
+    order:
+      - file.name
+      - area
+      - updated
+    sort:
+      - property: updated
+        direction: ASC
   - type: cards
     name: Project cards
     order:

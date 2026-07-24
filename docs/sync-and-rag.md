@@ -8,7 +8,7 @@ Sync the entire vault, including `deeporbit.json`, Markdown, `.base` files, temp
 
 ## Git
 
-Commit the vault's human-readable files. Pull before starting a session and resolve Markdown conflicts before asking an agent to reorganize or complete tasks. DeepOrbit does not automatically commit or push.
+Commit the vault's human-readable files. Pull before starting a session and resolve Markdown conflicts before asking an agent to reorganize or complete tasks. Use `deeporbit sync` for immediate Git sync, or schedule it with `deeporbit cron`; DeepOrbit does not auto-commit or auto-push unless you install the hook-based sync workflow.
 
 ## Obsidian Sync
 

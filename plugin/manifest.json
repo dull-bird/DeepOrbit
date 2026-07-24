@@ -1,0 +1,9 @@
+{
+  "id": "deeporbit",
+  "name": "DeepOrbit",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Work-status board and lifecycle commands for DeepOrbit vaults: active / paused / done / archived, with the same no-overwrite semantics as the deeporbit CLI.",
+  "author": "dullbird",
+  "isDesktopOnly": false
+}

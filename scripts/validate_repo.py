@@ -54,9 +54,22 @@ def main() -> int:
     if skills != md:
         fail(f"Skill/command mismatch: no-command={sorted(skills-md)}, no-skill={sorted(md-skills)}", errors)
 
-    for path in [ROOT / "package.json", ROOT / "gemini-extension.json", ROOT / "kimi.plugin.json", ROOT / ".codex-plugin" / "plugin.json", ROOT / "integrations" / "runtime-profiles.json"]:
+    json_paths = [
+        ROOT / "package.json",
+        ROOT / "gemini-extension.json",
+        ROOT / "kimi.plugin.json",
+        ROOT / ".claude-plugin" / "plugin.json",
+        ROOT / ".claude-plugin" / "marketplace.json",
+        ROOT / ".codex-plugin" / "plugin.json",
+        ROOT / ".codex-plugin" / "hooks" / "hooks.json",
+        ROOT / ".codex" / "hooks" / "hooks.json",
+        ROOT / "hooks" / "hooks.json",
+        ROOT / "integrations" / "runtime-profiles.json",
+    ]
+    documents: dict[Path, dict] = {}
+    for path in json_paths:
         try:
-            json.loads(path.read_text(encoding="utf-8"))
+            documents[path] = json.loads(path.read_text(encoding="utf-8"))
         except Exception as exc:
             fail(f"Invalid JSON {path.relative_to(ROOT)}: {exc}", errors)
 
@@ -78,7 +91,8 @@ def main() -> int:
         for error in errors:
             print(f"- {error}", file=sys.stderr)
         return 1
-    print(f"DeepOrbit contracts OK: {len(skills)} skills, {len(md)} paired commands, 4 runtime profiles")
+    runtime_profiles = documents.get(ROOT / "integrations" / "runtime-profiles.json", {}).get("runtimes", {})
+    print(f"DeepOrbit contracts OK: {len(skills)} skills, {len(md)} paired commands, {len(runtime_profiles)} runtime profiles")
     return 0
 
 

@@ -77,4 +77,5 @@ tags: [pdf-conversion]
 ---
 ```
 
+- Set `author: ai` in frontmatter for every note you create; switch to `author: mixed` when substantially rewriting a human-authored note. Authorship lives in frontmatter only — never add visible badges.
 Save beside the PDF, link relevant existing Wiki concepts when appropriate, and use `do.obsidian-open` to present the result. Failure to open the desktop app does not invalidate the conversion.

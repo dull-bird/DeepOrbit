@@ -56,5 +56,6 @@ Daily Note. Move the completed plan to `90_Plans/Archive/`. For an Inbox source,
 `status: processed` and `archived: YYYY-MM-DD`, then move it to
 `99_System/Archive/Inbox/YYYY/MM/` without overwriting an existing file.
 
+- Set `author: ai` in frontmatter for every note you create; switch to `author: mixed` when substantially rewriting a human-authored note. Authorship lives in frontmatter only — never add visible badges.
 Report created and moved paths plus the next concrete action. Opening a note through
 Obsidian is useful but never a condition for success.

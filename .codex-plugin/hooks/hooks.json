@@ -1,0 +1,30 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|compact|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${PLUGIN_ROOT}/scripts/hooks/deeporbit_hook.py\" --runtime codex --event session-start",
+            "statusMessage": "Loading DeepOrbit context",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${PLUGIN_ROOT}/scripts/hooks/deeporbit_hook.py\" --runtime codex --event file-change",
+            "statusMessage": "Refreshing DeepOrbit index state",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

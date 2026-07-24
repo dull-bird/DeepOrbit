@@ -1,0 +1,6 @@
+# Dream (DeepOrbit)
+
+description = "Consolidate the vault offline — promotions, connections, lifecycle nudges via do.dream"
+prompt = """
+Use the do.dream skill. {{args}}
+"""

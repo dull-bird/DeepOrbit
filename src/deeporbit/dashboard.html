@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeepOrbit Dashboard</title>
+<style>
+/* ---------- Apple-design foundations: type, material, motion ---------- */
+:root {
+  --bg: #0b0b0f;
+  --surface: rgba(255,255,255,0.06);
+  --surface-strong: rgba(255,255,255,0.10);
+  --chrome: rgba(16,16,22,0.72);
+  --text: #f5f5f7;
+  --text-2: rgba(245,245,247,0.64);
+  --text-3: rgba(245,245,247,0.38);
+  --accent: #0a84ff;
+  --green: #30d158;
+  --amber: #ffd60a;
+  --gray: #8e8e93;
+  --purple: #bf5af2;
+  --red: #ff453a;
+  --radius: 14px;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "PingFang SC", "Noto Sans CJK SC", sans-serif;
+}
+* { box-sizing: border-box; margin: 0; }
+html { font: 100%/1.5 var(--font); }
+body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+
+/* Motion: instant pointer-down feedback, compositor-only properties */
+.pressable { transition: transform 100ms ease-out, opacity 150ms ease-out, background-color 150ms ease-out; }
+.pressable:active { transform: scale(0.97); }
+.view { animation: fade 200ms ease-out; }
+@keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* ---------- Chrome: translucent sidebar, heavier material ---------- */
+nav {
+  width: 216px; flex-shrink: 0; height: 100vh; position: sticky; top: 0;
+  background: var(--chrome); backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  padding: 28px 14px; display: flex; flex-direction: column; gap: 2px;
+}
+.brand { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; padding: 0 10px 20px; }
+.brand span { color: var(--text-3); font-weight: 400; font-size: 0.72rem; display: block; letter-spacing: 0.04em; margin-top: 2px; }
+nav button {
+  text-align: left; padding: 8px 12px; border-radius: 8px; font-size: 0.86rem;
+  color: var(--text-2); font-weight: 500;
+}
+nav button:hover { background: var(--surface); color: var(--text); }
+nav button.active { background: var(--surface-strong); color: var(--text); }
+nav .foot { margin-top: auto; font-size: 0.68rem; color: var(--text-3); padding: 0 10px; letter-spacing: 0.02em; }
+
+main { flex: 1; min-width: 0; padding: 32px 36px 64px; max-width: 1180px; }
+header.page { margin-bottom: 26px; }
+header.page h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.022em; line-height: 1.1; }
+header.page p { color: var(--text-2); font-size: 0.84rem; margin-top: 4px; }
+
+/* ---------- Cards & stats ---------- */
+.grid { display: grid; gap: 14px; }
+.grid.cols-4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.card {
+  background: var(--surface); border-radius: var(--radius); padding: 18px 20px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.card h3 { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; }
+.stat .num { font-size: 2.1rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; }
+.stat .lbl { font-size: 0.78rem; color: var(--text-2); margin-top: 3px; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; }
+
+/* Status colors, muted Apple palette */
+.c-active { color: var(--green); } .c-paused { color: var(--amber); }
+.c-done { color: var(--accent); } .c-archived { color: var(--gray); }
+.c-other { color: var(--purple); }
+
+/* ---------- Heatmap ---------- */
+.heat { display: grid; grid-template-rows: repeat(7, 1fr); grid-auto-flow: column; gap: 3px; }
+.heat i { width: 11px; height: 11px; border-radius: 3px; background: var(--surface); }
+.heat i.l1 { background: rgba(10,132,255,0.25); } .heat i.l2 { background: rgba(10,132,255,0.45); }
+.heat i.l3 { background: rgba(10,132,255,0.7); } .heat i.l4 { background: var(--accent); }
+
+/* ---------- Suggestions ---------- */
+.sugg { border-left: 3px solid transparent; }
+.sugg.high { border-left-color: var(--red); }
+.sugg.medium { border-left-color: var(--amber); }
+.sugg.low { border-left-color: var(--gray); }
+.sugg .t { font-weight: 600; font-size: 0.92rem; letter-spacing: -0.005em; }
+.sugg .d { color: var(--text-2); font-size: 0.8rem; margin-top: 3px; }
+.sugg .a { color: var(--accent); font-size: 0.78rem; margin-top: 6px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
+/* ---------- Work table ---------- */
+.filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.chip {
+  padding: 5px 13px; border-radius: 999px; font-size: 0.78rem; font-weight: 500;
+  background: var(--surface); color: var(--text-2); border: 1px solid transparent;
+}
+.chip.on { background: var(--surface-strong); color: var(--text); border-color: rgba(255,255,255,0.12); }
+input[type="search"] {
+  background: var(--surface); border: 1px solid rgba(255,255,255,0.06); color: var(--text);
+  border-radius: 9px; padding: 6px 12px; font: inherit; font-size: 0.82rem; outline: none; min-width: 200px;
+}
+input[type="search"]:focus { border-color: var(--accent); }
+table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+th { text-align: left; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); font-weight: 600; padding: 8px 10px; }
+td { padding: 8px 10px; border-top: 1px solid rgba(255,255,255,0.05); }
+td.path { color: var(--text-3); font-size: 0.72rem; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+.badge { font-size: 0.68rem; padding: 2px 8px; border-radius: 999px; background: var(--surface-strong); font-weight: 600; letter-spacing: 0.02em; }
+.badge.ai { color: var(--purple); }
+.badge.ro { color: var(--amber); }
+.row-actions button { font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; background: var(--surface); color: var(--text-2); margin-left: 4px; }
+.row-actions button:hover { background: var(--surface-strong); color: var(--text); }
+
+/* ---------- Bars ---------- */
+.bar-row { display: flex; align-items: center; gap: 10px; margin: 7px 0; font-size: 0.8rem; }
+.bar-row .k { width: 130px; color: var(--text-2); flex-shrink: 0; }
+.bar { height: 8px; border-radius: 4px; background: var(--accent); min-width: 2px; transition: width 400ms ease-out; }
+.bar-row .v { color: var(--text-3); font-size: 0.74rem; margin-left: auto; font-variant-numeric: tabular-nums; }
+
+/* ---------- Agent chat ---------- */
+.chat { display: flex; flex-direction: column; gap: 10px; max-height: 46vh; overflow-y: auto; padding: 4px 2px; }
+.msg { max-width: 78%; padding: 10px 14px; border-radius: 16px; font-size: 0.86rem; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
+.msg.user { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 4px; }
+.msg.agent { align-self: flex-start; background: var(--surface-strong); border-bottom-left-radius: 4px; }
+.msg.sys { align-self: center; background: none; color: var(--text-3); font-size: 0.74rem; padding: 2px; }
+.composer { display: flex; gap: 10px; margin-top: 14px; }
+.composer input { flex: 1; }
+.btn {
+  background: var(--accent); color: white; font-weight: 600; font-size: 0.84rem;
+  padding: 8px 18px; border-radius: 10px;
+}
+.btn.ghost { background: var(--surface-strong); color: var(--text); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+
+.hidden { display: none; }
+.muted { color: var(--text-3); font-size: 0.78rem; }
+section.block { margin-bottom: 30px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .view { animation: none; }
+  .pressable, .pressable:active { transition: none; transform: none; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  nav { background: #101016; backdrop-filter: none; }
+}
+@media (max-width: 860px) {
+  nav { width: 64px; padding: 20px 8px; }
+  nav button { font-size: 0; padding: 10px; }
+  nav button::first-letter { font-size: 0.9rem; }
+  .brand { font-size: 0; } .brand::after { content: "DO"; font-size: 0.9rem; }
+  main { padding: 22px 18px 48px; }
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand">DeepOrbit<span id="vault-name">…</span></div>
+  <button data-view="overview" class="active pressable">总览 Overview</button>
+  <button data-view="work" class="pressable">工作 Work</button>
+  <button data-view="insights" class="pressable">洞察 Insights</button>
+  <button data-view="recipes" class="pressable">流程 Recipes</button>
+  <button data-view="agent" class="pressable">助手 Agent</button>
+  <button data-view="profile" class="pressable">画像 Profile</button>
+  <div class="foot">local · 127.0.0.1</div>
+</nav>
+
+<main>
+  <div id="view-overview" class="view">
+    <header class="page"><h1>总览</h1><p id="overview-sub">库状态一览</p></header>
+    <section class="block grid cols-4" id="stat-cards"></section>
+    <section class="block grid cols-2">
+      <div class="card"><h3>建议 Suggestions</h3><div id="suggestions" class="grid"></div></div>
+      <div class="card"><h3>近 14 周活跃 Activity</h3><div class="heat" id="heatmap"></div>
+        <p class="muted" style="margin-top:10px">按笔记修改时间统计</p></div>
+    </section>
+  </div>
+
+  <div id="view-work" class="view hidden">
+    <header class="page"><h1>工作</h1><p>全部工作项 — 暂停、恢复、完成、归档一键流转</p></header>
+    <div class="filters" id="work-filters"></div>
+    <div class="card"><table><thead><tr><th>标题</th><th>状态</th><th>更新</th><th>标记</th><th></th></tr></thead>
+      <tbody id="work-rows"></tbody></table></div>
+  </div>
+
+  <div id="view-insights" class="view hidden">
+    <header class="page"><h1>洞察</h1><p>状态分布、作者构成与目录热力</p></header>
+    <section class="block grid cols-2">
+      <div class="card"><h3>状态分布 Status</h3><div id="insight-status"></div></div>
+      <div class="card"><h3>作者构成 Authorship</h3><div id="insight-author"></div></div>
+    </section>
+    <section class="block grid cols-2">
+      <div class="card"><h3>目录分布 Directories</h3><div id="insight-dirs"></div></div>
+      <div class="card"><h3>检索 Search</h3>
+        <div class="composer" style="margin-top:0"><input type="search" id="rag-q" placeholder="在全库中检索…"><button class="btn ghost pressable" id="rag-go">搜索</button></div>
+        <div id="rag-out" style="margin-top:12px" class="grid"></div></div>
+    </section>
+  </div>
+
+  <div id="view-recipes" class="view hidden">
+    <header class="page"><h1>流程</h1><p>声明式 recipe 与定时任务</p></header>
+    <section class="block grid cols-2" id="recipe-cards"></section>
+    <section class="block card"><h3>定时任务 Cron</h3><div id="cron-list"></div></section>
+  </div>
+
+  <div id="view-agent" class="view hidden">
+    <header class="page"><h1>助手</h1><p id="agent-sub">通过 ACP 连接本地 agent</p></header>
+    <div class="card">
+      <div class="chat" id="chat"></div>
+      <div class="composer">
+        <input type="search" id="prompt" placeholder="让 agent 做点什么，比如：跑一次 do.dream 整理…">
+        <button class="btn pressable" id="send">发送</button>
+        <button class="btn ghost pressable" id="reset-agent">新会话</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-profile" class="view hidden">
+    <header class="page"><h1>画像</h1><p>知识库眼中的你</p></header>
+    <section class="block card"><h3>稳定事实 Facts</h3><div id="profile-fields"></div></section>
+  </div>
+</main>
+
+<script>
+const $ = (sel) => document.querySelector(sel);
+const api = async (path, opts) => (await fetch(path, opts)).json();
+let OVERVIEW = null;
+
+/* ---------- navigation ---------- */
+document.querySelectorAll("nav button[data-view]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".view").forEach(v => v.classList.add("hidden"));
+    $("#view-" + btn.dataset.view).classList.remove("hidden");
+  });
+});
+
+/* ---------- overview ---------- */
+const STATUS_COLOR = {active:"c-active", paused:"c-paused", done:"c-done", archived:"c-archived"};
+function statCard(label, value, cls="") {
+  return `<div class="card stat"><div class="num ${cls}">${value}</div><div class="lbl">${label}</div></div>`;
+}
+async function loadOverview() {
+  OVERVIEW = await api("/api/overview");
+  $("#vault-name").textContent = OVERVIEW.vault.split("/").pop();
+  $("#overview-sub").textContent = `${OVERVIEW.total} 个工作项 · ${OVERVIEW.readonly} 个只读 · ${OVERVIEW.dormant} 个休眠`;
+  const c = OVERVIEW.counts;
+  $("#stat-cards").innerHTML =
+    statCard("活跃 Active", c.active ?? 0, "c-active") +
+    statCard("暂停 Paused", c.paused ?? 0, "c-paused") +
+    statCard("完成 Done", c.done ?? 0, "c-done") +
+    statCard("已归档 Archived", c.archived ?? 0, "c-archived") +
+    statCard("休眠 >21天", OVERVIEW.dormant, "c-other") +
+    statCard("AI 创作占比", aiShare() + "%", "");
+  $("#suggestions").innerHTML = OVERVIEW.suggestions.length
+    ? OVERVIEW.suggestions.map(s => `<div class="card sugg ${s.priority}"><div class="t">${esc(s.title)}</div><div class="d">${esc(s.detail)}</div><div class="a">${esc(s.action)}</div></div>`).join("")
+    : `<p class="muted">一切就绪，没有待处理建议。</p>`;
+  renderHeatmap(OVERVIEW.activity);
+  renderInsights();
+  renderRecipes();
+  renderProfile();
+}
+function aiShare() {
+  const a = OVERVIEW.authors, total = (a.ai ?? 0) + (a.human ?? 0) + (a.mixed ?? 0);
+  return total ? Math.round((a.ai ?? 0) / total * 100) : 0;
+}
+function renderHeatmap(days) {
+  const max = Math.max(1, ...days.map(d => d.count));
+  $("#heatmap").innerHTML = days.map(d => {
+    const l = d.count === 0 ? 0 : Math.ceil(d.count / max * 4);
+    return `<i class="${l ? "l" + l : ""}" title="${d.day}: ${d.count}"></i>`;
+  }).join("");
+}
+
+/* ---------- work table ---------- */
+let workFilter = {status: "", author: "", q: ""};
+async function loadWork() {
+  const params = new URLSearchParams(Object.entries(workFilter).filter(([,v]) => v));
+  const items = await api("/api/items?" + params);
+  $("#work-rows").innerHTML = items.map(it => `
+    <tr>
+      <td><div>${esc(it.title)}</div><div class="path">${esc(it.path)}</div></td>
+      <td><span class="${STATUS_COLOR[it.status] ?? "c-other"}">● ${esc(it.status)}</span></td>
+      <td class="muted">${esc(it.updated || it.mtime || "")}</td>
+      <td>${it.author === "ai" ? '<span class="badge ai">AI</span>' : ""}${it.readonly ? ' <span class="badge ro">只读</span>' : ""}</td>
+      <td class="row-actions">${it.readonly ? "" : actionsFor(it)}</td>
+    </tr>`).join("") || `<tr><td colspan="5" class="muted">没有匹配项</td></tr>`;
+}
+function actionsFor(it) {
+  if (!["active", "paused", "done"].includes(it.status)) return "";
+  const acts = [];
+  if (it.status === "active") acts.push(["pause", "暂停"]);
+  if (it.status === "paused") acts.push(["resume", "恢复"]);
+  if (it.status !== "done" && it.status !== "archived") acts.push(["done", "完成"]);
+  if (it.status === "done") acts.push(["archive", "归档"]);
+  return acts.map(([a, l]) => `<button class="pressable" data-path="${esc(it.path)}" data-action="${a}">${l}</button>`).join("");
+}
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".row-actions button");
+  if (!btn) return;
+  btn.disabled = true;
+  const r = await api("/api/lifecycle", {method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({path: btn.dataset.path, action: btn.dataset.action})});
+  if (r.error) alert(r.message);
+  loadWork(); loadOverview();
+});
+function buildFilters() {
+  const statuses = ["", "active", "paused", "done", "archived"];
+  $("#work-filters").innerHTML =
+    statuses.map(s => `<button class="chip pressable ${workFilter.status === s ? "on" : ""}" data-s="${s}">${s || "全部"}</button>`).join("") +
+    `<button class="chip pressable ${workFilter.author === "ai" ? "on" : ""}" data-a="ai">AI 创作</button>` +
+    `<input type="search" id="work-q" placeholder="搜索标题或路径…" value="${esc(workFilter.q)}">`;
+  document.querySelectorAll("#work-filters .chip[data-s]").forEach(c => c.addEventListener("click", () => { workFilter.status = c.dataset.s; buildFilters(); loadWork(); }));
+  document.querySelector("#work-filters .chip[data-a]").addEventListener("click", () => { workFilter.author = workFilter.author ? "" : "ai"; buildFilters(); loadWork(); });
+  $("#work-q").addEventListener("input", (e) => { workFilter.q = e.target.value; loadWork(); });
+}
+
+/* ---------- insights ---------- */
+function bars(el, obj, color) {
+  const entries = Object.entries(obj).sort((a, b) => b[1] - a[1]).slice(0, 12);
+  const max = Math.max(1, ...entries.map(([,v]) => v));
+  el.innerHTML = entries.map(([k, v]) =>
+    `<div class="bar-row"><span class="k">${esc(k)}</span><div class="bar" style="width:${Math.round(v / max * 100)}%;background:${color}"></div><span class="v">${v}</span></div>`).join("");
+}
+function renderInsights() {
+  bars($("#insight-status"), OVERVIEW.counts, "var(--accent)");
+  bars($("#insight-author"), OVERVIEW.authors, "var(--purple)");
+  bars($("#insight-dirs"), OVERVIEW.dirs, "var(--green)");
+}
+$("#rag-go").addEventListener("click", async () => {
+  const q = $("#rag-q").value.trim(); if (!q) return;
+  const hits = await api("/api/rag?q=" + encodeURIComponent(q));
+  $("#rag-out").innerHTML = hits.map(h => `<div class="card sugg"><div class="t">${esc(h.path)}</div><div class="d">${esc((h.snippet || "").slice(0, 160))}</div></div>`).join("") || `<p class="muted">无结果</p>`;
+});
+
+/* ---------- recipes & cron ---------- */
+function renderRecipes() {
+  $("#recipe-cards").innerHTML = OVERVIEW.recipes.map(r =>
+    `<div class="card"><h3>${esc(r.schedule || "manual")}</h3><div class="t" style="font-weight:600">${esc(r.name)}</div>
+     <p class="muted">${r.steps} 个步骤</p></div>`).join("") || `<p class="muted">暂无 recipe</p>`;
+  $("#cron-list").innerHTML = OVERVIEW.cron.length
+    ? OVERVIEW.cron.map(j => `<div class="bar-row"><span class="k">${esc(j.name)}</span><span class="v">每 ${j.every_hours}h · ${esc(j.instruction.slice(0, 40))}</span></div>`).join("")
+    : `<p class="muted">暂无定时任务 — 用 <code>deeporbit cron add</code> 创建</p>`;
+}
+
+/* ---------- profile ---------- */
+function renderProfile() {
+  const f = OVERVIEW.profile;
+  $("#profile-fields").innerHTML = Object.entries(f).map(([k, v]) =>
+    `<div class="bar-row"><span class="k">${esc(k)}</span><span style="font-size:0.86rem">${esc(v || "—")}</span></div>`).join("");
+}
+
+/* ---------- agent chat ---------- */
+function addMsg(cls, text) {
+  const div = document.createElement("div");
+  div.className = "msg " + cls;
+  div.textContent = text;
+  $("#chat").appendChild(div);
+  $("#chat").scrollTop = $("#chat").scrollHeight;
+  return div;
+}
+async function sendPrompt() {
+  const text = $("#prompt").value.trim(); if (!text) return;
+  $("#prompt").value = ""; $("#send").disabled = true;
+  addMsg("user", text);
+  const bubble = addMsg("agent", "…");
+  try {
+    const resp = await fetch("/api/agent/prompt", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({text})});
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = "", acc = "";
+    bubble.textContent = "";
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, {stream: true});
+      const parts = buf.split("\n\n"); buf = parts.pop();
+      for (const part of parts) {
+        if (!part.startsWith("data: ")) continue;
+        const ev = JSON.parse(part.slice(6));
+        if (ev.type === "update") {
+          const u = ev.params.update ?? ev.params;
+          if (u.sessionUpdate === "agent_message_chunk" && u.content?.text) { acc += u.content.text; bubble.textContent = acc; $("#chat").scrollTop = $("#chat").scrollHeight; }
+          else if (u.sessionUpdate === "tool_call") { addMsg("sys", "⚙ " + (u.title ?? "tool call")); }
+        } else if (ev.type === "agent") { $("#agent-sub").textContent = "已连接 " + ev.agent; }
+        else if (ev.type === "error") { addMsg("sys", "⚠ " + ev.message); }
+        else if (ev.type === "done") { if (!acc) bubble.textContent = "（完成：" + ev.stopReason + "）"; reader.cancel(); return; }
+      }
+    }
+  } catch (err) { bubble.textContent = "连接失败：" + err.message; }
+  $("#send").disabled = false;
+}
+$("#send").addEventListener("click", sendPrompt);
+$("#prompt").addEventListener("keydown", (e) => { if (e.key === "Enter") sendPrompt(); });
+$("#reset-agent").addEventListener("click", async () => { await api("/api/agent/reset", {method: "POST"}); $("#chat").innerHTML = ""; addMsg("sys", "新会话已开始"); });
+
+function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+(async () => { await loadOverview(); buildFilters(); await loadWork(); })();
+</script>
+</body>
+</html>

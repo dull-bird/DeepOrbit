@@ -1,0 +1,6 @@
+# Mentor (DeepOrbit)
+
+description = "Coach on project and knowledge management, methods, tools, and recipes via do.mentor"
+prompt = """
+Use the do.mentor skill. {{args}}
+"""

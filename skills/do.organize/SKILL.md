@@ -40,6 +40,7 @@ Your primary goal is to ensure the actual vault perfectly matches the principles
 ```
 
 ### Step 1: Deterministic Structural Scan & Health Check
+0.5. **Lifecycle triage**: run `deeporbit --vault . status` to see every work item by `active | paused | done | archived`. Flag `done` items for `/do:archive` and long-dormant `active` items as pause candidates — do not treat them as taxonomy problems.
 1. Execute the analysis script: `python3 scripts/analyze_vault.py`.
 2. Wait for the script to output the JSON report.
 3. Read the JSON report to identify:
@@ -97,6 +98,7 @@ Present a comprehensive reorganization proposal, formatted as follows:
 ## IMPORTANT RULES
 
 * **NEVER execute structural changes without explicit user approval.** This vault is their digital brain.
+* **Read-only zones are off-limits**: folders in `readonly.directories` of `deeporbit.json` (e.g. weread-vault exports) are managed by an external sync — never move, merge, or "fix" them; they are not taxonomy problems.
 * When proposing taxonomy mergers, explain *why* (e.g., "80% similar notes").
 * Template alignment (Step 0) is always the first thing checked, every time.
 * Always wait for `python scripts/analyze_vault.py` output before proceeding.
@@ -104,4 +106,5 @@ Present a comprehensive reorganization proposal, formatted as follows:
 ## Rules
 
 - Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+- Set `author: ai` in frontmatter for every note you create; switch to `author: mixed` when substantially rewriting a human-authored note. Authorship lives in frontmatter only — never add visible badges.
 - Use `do.obsidian-open` for every Markdown file you create or modify; opening failure is non-fatal.

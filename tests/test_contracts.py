@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import re
 import unittest
@@ -24,6 +25,21 @@ class ContractTests(unittest.TestCase):
     def test_no_generated_installer_artifacts_are_tracked(self):
         forbidden = {".agents", ".cursor", ".roo", "skills-lock.json"}
         self.assertFalse(any(path.name in forbidden for path in ROOT.iterdir()))
+
+    def test_runtime_hook_manifests_use_current_schema(self):
+        for path in (ROOT / "hooks" / "hooks.json", ROOT / ".codex-plugin" / "hooks" / "hooks.json", ROOT / ".codex" / "hooks" / "hooks.json"):
+            document = json.loads(path.read_text(encoding="utf-8"))
+            for event in ("SessionStart", "PostToolUse"):
+                groups = document["hooks"][event]
+                self.assertTrue(groups)
+                handlers = groups[0]["hooks"]
+                self.assertEqual(handlers[0]["type"], "command")
+                self.assertIn("deeporbit_hook.py", handlers[0]["command"])
+
+    def test_claude_project_imports_shared_instructions(self):
+        text = (ROOT / "CLAUDE.md").read_text(encoding="utf-8")
+        self.assertIn("@AGENTS.md", text)
+        self.assertIn("@DeepOrbitPrompt.md", text)
 
 
 if __name__ == "__main__":

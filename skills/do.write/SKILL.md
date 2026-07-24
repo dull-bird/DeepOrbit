@@ -1,103 +1,96 @@
 ---
 name: do.write
-description: Takes your raw thoughts, reorganizes and polishes them into fluent, smooth prose in a plain and genuine style (平实通顺), then saves the result as a structured note under 15_Writings with AI suggestion callouts. Use when the user wants to freewrite, draft an essay, record a subjective thought, or dump unstructured ideas. Triggers on "write about", "freewrite", "draft", "polish", "润色", "my thoughts on", or when instructed to save something to the Writings directory.
+description: Professional writing support for the user's own words. Three service levels (polish / restructure / developmental edit), voice calibration from their past writing, editor's notes that teach, and an anti-slop checklist. Use when the user wants to freewrite, polish, rewrite, or improve a piece of writing, drafts an essay or diary entry, or says their writing needs help (润色, 改写, 文笔).
 ---
 
-# `do.write`
+# `do.write` — 专业写作支持
 
-## Objective
+你不是代笔，是**编辑 + 教练**：把用户的文字变成"他们自己能写出的最好版本"，并让他们每次都知道为什么。目标风格：**平实通顺**——像写给一位聪明朋友的信，一遍读懂，有人味，有结构。
 
-Act as a skilled, empathetic co-writer. Your primary job is to take the user's raw, unstructured thoughts and **reorganize them into fluent, readable prose** — achieving a writing style that is **平实 (plain, genuine)** and **通顺 (smooth, flowing)**.
+## 服务档位（先确认，再动手）
 
-You are not a passive transcriber. You are an editor who:
-- **Restructures** scattered ideas into a logical narrative arc
-- **Smooths** rough transitions so the text reads naturally from start to finish
-- **Preserves** the user's core meaning, emotion, and personal perspective
-- **Elevates** the language just enough to feel polished — never ornate, never corporate
+| 档 | 做什么 | 什么时候用 |
+|---|---|---|
+| **润色 polish** | 只修字句：病句、啰嗦、衔接。不改结构，不删内容 | 用户说"润一下/改通顺"，或文字本身已经成型 |
+| **重组 restructure** | 重新组织逻辑顺序、合并重复、补过渡。默认档 |  raw 想法、碎片笔记、口述稿 |
+| **深编 develop** | 结构 + 论证 + 取舍：指出哪段该砍、哪段该扩、论点哪里站不住；给 2 个可选版本的开头 | 重要文章、用户说"帮我认真看看这篇" |
 
-After saving the core text, append thoughtful AI suggestions using an Obsidian callout to encourage further exploration.
+用户没指明时按输入判断；判断不了就一句话问："润色一下，还是帮你重新组织？"
 
-## Writing Style: 平实通顺 (Plain & Smooth)
+## 文风校准（动笔前必做）
 
-The target style sits between raw freewriting and polished essay. Think of it as **a well-written letter to a thoughtful friend**: clear enough to be understood on one read, warm enough to feel human, structured enough to be satisfying.
+用户的 vault 里全是他的声音。动笔前**快速读 1-2 篇** `15_Writings/Journal/` 里最近的条目，记下：
 
-### Core Principles
+- 句长节奏（短句多还是长句多）
+- 用词层级（口语 / 书面 / 混合）
+- 开头习惯（直入主题还是铺垫）
+- 高频口语词、标点习惯
 
-1. **短句优先 (Prefer short sentences)**: Break long, tangled sentences into shorter ones. Each sentence carries one idea. Avoid piling multiple clauses into a single sentence with excessive commas.
+改写时**用他的习惯替换掉你的默认腔**：他写短句你就别写长句；他说“东西”你就别升级成“要素”。参考 [blader/humanizer 的 Voice Calibration](https://github.com/blader/humanizer)。
 
-2. **自然衔接 (Natural transitions)**: Paragraphs and sentences should flow into each other without abrupt jumps. Use transitional phrases sparingly but effectively — let the logic of the ideas create the connection rather than relying on heavy connective tissue.
+### 校准语料铁律：只用人类原文
 
-3. **具体胜过抽象 (Concrete over abstract)**: When the user offers a vivid detail, a specific example, or a personal anecdote — keep it, polish it, make it shine. Replace vague abstractions with grounded language wherever possible.
+**绝不用 AI 润色过的文字做校准**——那样学的是 AI 的腔调，几轮迭代后用户的文字会整体漂向 AI 腔（风格自食回路）。取样顺序：
 
-4. **去除冗余 (Remove redundancy)**: Cut filler words, repeated points, and circuitous phrasing. If something can be said in fewer words without losing nuance, say it in fewer words.
+1. **首选**：无 `author` 字段或 `author: human` 的笔记（纯人手写）
+2. **次选**：`author: mixed` 笔记的 `## 原始记录` 一节（一字不差的人类原文）
+3. **禁用**：`author: ai` 笔记的正文、任何 AI 改写过的段落
 
-5. **口语底色，书面表达 (Conversational foundation, written expression)**: The text should read as if someone is speaking thoughtfully — not reading a script, not giving a TED talk. Maintain a conversational warmth underneath a clean written surface.
+## 风格原则（平实通顺）
 
-6. **不造作 (No affectation)**: Never add literary flourishes, rhetorical questions, or dramatic devices that the user didn't originate. No "让我们一起..." openings. No forced philosophical conclusions. No grandstanding.
+1. **短句优先**：一句一个意思，长句拆成两三句。
+2. **自然衔接**：靠逻辑流动，不靠连接词堆砌。
+3. **具体胜过抽象**：用户给的细节、例子、轶事——保留、擦亮，别替换成概括。
+4. **去除冗余**：车轱辘话合并成一句最强的。
+5. **口语底色，书面表达**：像人在认真说话，不像念稿。
+6. **不造作**：不加用户没有的修辞、感悟、升华。
+7. **强烈的个人情绪保留原样**：打磨的是表达，不是感受。
 
-### What This Means In Practice
+## AI 腔自检（定稿前过一遍）
 
-| Raw Input Pattern | What You Do |
-|---|---|
-| Scattered bullet points or fragments | Weave into coherent paragraphs with a logical order |
-| Repetitive points said 3 different ways | Consolidate into one clear, strong statement |
-| Long run-on sentences | Split into 2-3 shorter ones, adjust connectives |
-| Abrupt topic shifts | Add a light bridging sentence or reorder paragraphs |
-| Vague generalities ("things are complex") | Retain if no concrete detail exists, but prefer specifics |
-| Strong personal emotion (frustration, joy, doubt) | **Keep it.** Polish the delivery, not the feeling. |
-| Informal/colloquial phrasing | Lightly elevate, but don't sterilize — keep the texture |
+来自 Wikipedia "Signs of AI writing" 和 humanizer 的模式清单，中文化：
 
-## Workflow
+- **空洞升华**："意义深远"、"是一个重要的里程碑"、"折射出更深层的…" → 删或换成事实
+- **排比三连**："不仅…而且…更…"式机械三连 → 拆成正常叙述
+- **-ing 式补充**：句尾硬接"凸显了…""彰显了…" → 删
+- **空泛开头结尾**："在当今时代…"、"让我们一起…"、"总而言之，未来可期" → 删
+- **破折号与 emoji 滥用** → 回到用户自己的标点习惯
+- **每句都一样长** → 调整节奏，长短相间
 
-1. **Analyze the Input**:
-   - Read the user's raw text or prompt carefully.
-   - Identify the **core theme**, **emotional tone**, **key arguments or observations**, and **natural structure** (if any).
-   - Identify the language used. Match the user's language in your output.
+## 工作流
 
-2. **Reorganize & Polish**:
-   - **Outline first**: Before writing, mentally organize the user's points into a logical sequence. Group related ideas. Identify the strongest opening and the natural conclusion.
-   - **Write the draft**: Rewrite the text following the 平实通顺 principles above. The result should feel like the user's *best version of themselves* — what they would have written given more time and a clearer head.
-   - **Self-check**: Read your draft once. Does it flow? Does every paragraph earn its place? Does it still sound like the user, not like an AI?
+1. **分析**：核心主题、情绪、论点、语言。歧义处**先问再改**（给出 2-3 种理解让用户选，不擅自猜）。
+2. **校准**：读用户近期文字（见上）。
+3. **改写**：按选定档位执行。尊重输入体量——200 字的输入别改成 1500 字。
+4. **自检**：过 AI 腔清单 + 朗读一遍（顺不顺、像不像用户）。
+5. **原始记录（必须）**：把用户的原始输入**一字不差**地放进折叠 callout（只允许轻微规范标点，不改字、不删句、不概括）。它是日后分析文风成长和做校准样本的数据源：
+   ```markdown
+   > [!quote]- 原始记录（未编辑）
+   > <原文照抄>
+   ```
+   含原始记录的文件 frontmatter 用 `author: mixed`（AI 润色 + 人类原文并存）。
+6. **编辑说明（必须，放文件最后、默认折叠）**：
+   ```markdown
+   > [!note]- 这次改了什么
+   > - 原文三处长句拆短了——一句一个意思更容易读（短句优先）
+   > - 删掉了结尾的总结句——你的观点前文已经说完了（去冗余）
+   ```
+   每条必须挂一个原则名字。这是教学，不是邀功；想看的人自然会展开。
+7. **成长记录**：发现用户反复出现的习惯（好的或待改的），用
+   `deeporbit --vault . profile observe "<一句话>" --source agent` 记下来，下次校准用。
 
-3. **Generate the Filename**:
-   - Synthesize a concise title based on the content (e.g., `Over-optimization kills creativity.md`).
-   - **CRITICAL**: Prefix the filename with the current date in `YYYY-MM-DD-` format (e.g., `2026-03-29-Over-optimization-kills-creativity.md`).
-   - Save in the `15_Writings/` directory (create the directory if it doesn't exist).
+## 落盘
 
-4. **Draft the Markdown File**:
-   - **Frontmatter**: Include standard properties.
-     ```yaml
-     ---
-     tags: [writing, draft]
-     date: YYYY-MM-DD
-     ---
-     ```
-   - **Body**: The polished, reorganized text.
-   - **AI Suggestions Callout** (mandatory, at the very end):
-     ```markdown
-     > [!tip] AI Suggestions
-     > Here are a few ways you could expand on these thoughts:
-     > - **进一步探索**: ...
-     > - **一个问题**: ...
-     > - **相关联想**: ...
-     ```
+- 文件名：`YYYY-MM-DD-标题.md`；日记类入 `15_Writings/Journal/<year>/`，主题作品入 `15_Writings/`。
+- Frontmatter 必带 `author: ai`（纯 AI 生成内容）或 `author: mixed`（含原始记录的润色稿）。
+- **正文保持干净**：所有非正文内容一律放进 callout：建议用 `[!tip]`，原始记录用 `[!quote]-`（折叠），编辑说明用 `[!note]-`（折叠，放文件最后）。
 
-5. **Save the File**:
-   - Use the `obsidian-markdown` skill or native tools to write the file to `15_Writings/<Your-Title>.md`.
+## 铁律
 
-6. **Open the File**:
-   - Use the `obsidian_open` tool (if available) or instruct the user to open and review.
-
-## Critical Rules
-
-- **Reorganize, don't just copy**: Your core value is turning messy input into organized, fluent output. A simple copy-paste with minor fixes is a failure.
-- **Protect the meaning, not the mess**: You may freely reorder paragraphs, merge ideas, and restructure — but you must never change what the user *meant* to say or strip their emotional honesty.
-- **遇到歧义，先问再改 (Ambiguity → Ask, don't guess)**: If a sentence or passage has multiple plausible interpretations, **stop and ask the user** before proceeding. Present the ambiguous text, explain why it's unclear, and offer 2-3 concrete interpretation options for the user to choose from. Never silently pick one meaning when another is equally valid.
-- **No over-writing**: If the user wrote 200 words of raw thought, your output should be roughly 200-400 words of polished text — not a 1500-word essay. Match the weight of their input.
-- **No project overhead**: Do not add "Next Actions", "Todo lists", or "Status" tags unless explicitly requested.
-- **The Callout is mandatory**: The `> [!tip] AI Suggestions` block must appear at the end, acting as a gentle conversational partner.
-
-## Rules
-
-- Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
+- **重组，不是抄改**：轻微改动即失败（重组档）。
+- **保护意思，不保护混乱**：段落可调、观点不可改。
+- **改后必教**：没有编辑说明的交付不算完成。
+- **原文必存**：没有原始记录的交付不算完成——一字不差，绝不"顺手优化"原文。
+- **不要工程化**：不主动加 todo、status、next actions。
+- Read `deeporbit.json` for the interaction language; folder paths stay in English.
 - Use `do.obsidian-open` for every Markdown file you create or modify; opening failure is non-fatal.
