@@ -15,7 +15,7 @@ npx skills add dull-bird/DeepOrbit --skill do.link --global --agent '*' --yes
 
 Do not install the entire DeepOrbit skill pack into every project by default. The vault copy under `99_System/DeepOrbit/skills/` is the project-level workflow catalog after `deeporbit init --source <repo>`.
 
-If the `deeporbit` executable is unavailable, run `PYTHONPATH=<repo>/src python -m deeporbit …` instead.
+If the `deeporbit` executable is unavailable, run `PYTHONPATH=<repo>/src python -m deeporbit …` instead. When you need commands beyond what this skill lists, run `deeporbit __schema` — it prints the complete machine-readable CLI surface (every command, argument, and default).
 
 ## 1. Link
 
@@ -54,7 +54,7 @@ Pass the vault to every CLI call as `--vault @<name>` (or the absolute path).
 1. Read `<vault>/99_System/DeepOrbit/skills-index.json` and match the user's intent to a workflow by its `description`.
 2. Read that workflow's `<vault>/99_System/DeepOrbit/skills/<name>/SKILL.md` — including its `reference/` or `scripts/` files when the skill points to them. The vault copy is the source of truth, version-pinned to that vault.
 3. Execute the workflow with `<vault>` as the workspace root: all file reads/writes use absolute paths inside `<vault>`; all CLI calls pass `--vault @<name>`.
-4. Vault has no materialized skills (initialized before this feature) → fall back to `<vault>/DeepOrbitPrompt.md` plus direct `deeporbit --vault @<name> <command>` calls, and suggest running `do.init` to materialize the workflows.
+4. Vault has no materialized skills (initialized before this feature) → fall back to `<vault>/DeepOrbitPrompt.md` plus direct `deeporbit --vault @<name> <command>` calls (discover them via `deeporbit __schema`), and suggest running `do.init` to materialize the workflows.
 
 ## 4. Keep descriptions learning
 
