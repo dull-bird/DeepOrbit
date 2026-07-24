@@ -103,6 +103,9 @@ def parser() -> argparse.ArgumentParser:
     cron_remove = cron_sub.add_parser("remove")
     cron_remove.add_argument("name")
     cron_sub.add_parser("run-due", help="Report jobs whose interval elapsed and stamp their last run")
+    cron_rundue = cron_sub.choices["run-due"] if hasattr(cron_sub, "choices") else None
+    if cron_rundue is not None:
+        cron_rundue.add_argument("--agent", action="store_true", help="Wrap each due job in a ready-to-run agent CLI handoff")
     for toggle in ("enable", "disable"):
         toggle_cmd = cron_sub.add_parser(toggle)
         toggle_cmd.add_argument("name")
@@ -269,7 +272,30 @@ def run(args: argparse.Namespace) -> int:
         elif args.cron_command == "remove":
             _print(asdict(remove_job(args.name)))
         elif args.cron_command == "run-due":
-            _print([asdict(job) for job in run_due()])
+            due = [asdict(job) for job in run_due()]
+            if args.agent:
+                from .agents import AGENTS
+
+                configured = config.agent or {}
+                name, mode = configured.get("name", ""), configured.get("mode", "")
+                spec = AGENTS.get(name)
+                for job in due:
+                    if spec and mode in spec.modes:
+                        argv = spec.modes[mode]
+                        if mode == "print":
+                            job["handoff"] = argv + [f"In vault {job['vault']}: {job['instruction']}"]
+                        else:
+                            job["handoff"] = argv
+                            job["handoff_note"] = (
+                                f"Start {name} in {mode} mode, then send: "
+                                f"In vault {job['vault']}: {job['instruction']}"
+                            )
+                    else:
+                        job["handoff_note"] = (
+                            "No agent configured — run: deeporbit --vault . agent detect "
+                            "then: deeporbit --vault . agent configure <name>"
+                        )
+            _print(due)
         elif args.cron_command in ("enable", "disable"):
             _print(asdict(set_enabled(args.name, args.cron_command == "enable")))
         else:

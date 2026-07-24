@@ -82,8 +82,8 @@ def load_recipe(config: Config, name: str) -> Recipe:
 def _validate_step(step: Step, config: Config) -> str | None:
     if step.kind == "cli":
         tokens = step.text.split()
-        if not tokens or tokens[0] != "deeporbit":
-            return f"cli step must start with 'deeporbit': {step.text}"
+        if not tokens or tokens[0] not in ("deeporbit", "bash", "powershell", "sh"):
+            return f"cli step must start with 'deeporbit' (or a shell script call): {step.text}"
     elif step.kind == "skill":
         skill = step.text.split()[0] if step.text.split() else ""
         if skill.startswith("do."):

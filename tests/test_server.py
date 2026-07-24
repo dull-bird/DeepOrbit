@@ -71,7 +71,7 @@ class ServerTests(unittest.TestCase):
         self.assertGreaterEqual(data["counts"]["active"], 4)  # shared vault: earlier tests may resume paused items
         self.assertIn("suggestions", data)
         self.assertEqual(len(data["activity"]), 99)
-        self.assertEqual(data["recipes"][0]["name"], "Weekly Review")
+        self.assertIn("Weekly Review", {recipe["name"] for recipe in data["recipes"]})
 
     def test_items_filter_and_lifecycle_roundtrip(self):
         items = get(self.port, "/api/items?status=active&author=ai")
