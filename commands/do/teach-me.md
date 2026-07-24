@@ -1,0 +1,5 @@
+---
+description: "Export vault knowledge into teach-me with provenance via do.teach-me"
+---
+
+Use the do.teach-me skill. $ARGUMENTS — export this vault's knowledge (default 40_Wiki, 60_Notes, 30_Research) into the user's Teach Me vault via `deeporbit --vault . teach-me export`, then distill knowledge points into teach-me capture/assess calls while passing the `origin` provenance block through verbatim.

@@ -164,6 +164,18 @@ def parser() -> argparse.ArgumentParser:
     privacy_apply = privacy_sub.add_parser("apply", help="Batch-apply privacy levels from a JSON decisions file")
     privacy_apply.add_argument("decisions", help="Path to JSON file: [{\"path\": ..., \"level\": ...}]")
     privacy_apply.add_argument("--dry-run", action="store_true", help="Show changes without writing")
+    teach_me = commands.add_parser("teach-me", help="Export vault knowledge into a Teach Me vault")
+    teach_me_sub = teach_me.add_subparsers(dest="teach_me_command", required=True)
+    teach_me_export = teach_me_sub.add_parser("export", help="Stage knowledge notes and run teach_me.py import")
+    teach_me_export.add_argument("--script", default=None, help="Path to teach_me.py (or set TEACH_ME_SCRIPT)")
+    teach_me_export.add_argument("--user", default=None, help="Teach Me user id")
+    teach_me_export.add_argument(
+        "--dirs",
+        nargs="+",
+        default=None,
+        help="Vault dirs to export (default: 40_Wiki 60_Notes 30_Research)",
+    )
+    teach_me_export.add_argument("--timeout", type=float, default=120.0)
     return root
 
 
@@ -399,6 +411,19 @@ def run(args: argparse.Namespace) -> int:
             agent=args.agent,
             privacy_mode=args.privacy_mode,
         )
+
+    elif args.command == "teach-me":
+        from .teachme import export_to_teach_me
+
+        result = export_to_teach_me(
+            config,
+            script=args.script,
+            dirs=args.dirs,
+            user=args.user,
+            timeout=args.timeout,
+        )
+        _print(result)
+        return 0
 
     return 0
 
