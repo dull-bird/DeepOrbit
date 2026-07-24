@@ -11,6 +11,14 @@ interface Props {
 const { title, description, lang = 'zh', alternate = lang === 'zh' ? 'en/' : '' } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const home = lang === 'zh' ? base : `${base}en/`;
+const zh = lang === 'zh';
+
+const footerLinks = [
+  { label: 'GitHub', href: 'https://github.com/dull-bird/DeepOrbit' },
+  { label: zh ? '示例 Vault' : 'Example Vault', href: 'https://github.com/dull-bird/deeporbit-example-vault' },
+  { label: 'teach-me', href: 'https://github.com/dull-bird/teach-me-skill' },
+  { label: zh ? '文档' : 'Docs', href: `${home}docs/` },
+];
 ---
 <!doctype html>
 <html lang={lang} data-theme="light">
@@ -40,10 +48,11 @@ const home = lang === 'zh' ? base : `${base}en/`;
           <span>DeepOrbit</span>
         </a>
         <nav aria-label="Primary navigation">
-          <a href={`${home}#capabilities`}>{lang === 'zh' ? '能做什么' : 'Capabilities'}</a>
-          <a href={`${home}docs/`}>{lang === 'zh' ? '文档' : 'Docs'}</a>
+          <a href={`${home}#capabilities`}>{zh ? '能力' : 'Capabilities'}</a>
+          <a href={`${home}#quickstart`}>{zh ? '快速开始' : 'Quickstart'}</a>
+          <a href={`${home}docs/`}>{zh ? '文档' : 'Docs'}</a>
           <a href="https://github.com/dull-bird/DeepOrbit">GitHub</a>
-          <a class="lang" href={`${base}${alternate}`}>{lang === 'zh' ? 'EN' : '中'}</a>
+          <a class="lang" href={`${base}${alternate}`}>{zh ? 'EN' : '中'}</a>
           <button id="theme" type="button" aria-label="Toggle color theme">◐</button>
         </nav>
       </div>
@@ -51,8 +60,13 @@ const home = lang === 'zh' ? base : `${base}en/`;
     <main><slot /></main>
     <footer>
       <div class="container footer-inner">
-        <span>DeepOrbit · dull-bird</span>
-        <span>{lang === 'zh' ? '知识留在你的文件里。' : 'Your knowledge stays in your files.'}</span>
+        <div class="footer-brand">
+          <span class="footer-name">DeepOrbit · dull-bird</span>
+          <span class="footer-tagline">{zh ? '知识留在你的文件里，成长留在你身上。' : 'Knowledge stays in your files; the growth stays with you.'}</span>
+        </div>
+        <nav class="footer-links" aria-label="Footer navigation">
+          {footerLinks.map((link) => <a href={link.href}>{link.label}</a>)}
+        </nav>
       </div>
     </footer>
     <script is:inline>
@@ -66,13 +80,49 @@ const home = lang === 'zh' ? base : `${base}en/`;
 </html>
 
 <style>
-  .header { position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(14px); }
-  .header-inner, .footer-inner { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
-  .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.02em; }
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--paper) 86%, transparent);
+    backdrop-filter: blur(14px);
+  }
+  .header-inner { min-height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -0.02em; }
   .brand svg { color: var(--accent); }
-  nav { display: flex; align-items: center; gap: 20px; font-size: .9rem; }
-  nav button { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; color: var(--ink); background: transparent; cursor: pointer; }
+  nav { display: flex; align-items: center; gap: 20px; font-size: 0.9rem; }
+  nav a { color: var(--body); transition: color var(--dur) var(--ease); }
+  nav a:hover { color: var(--ink); }
+  nav button {
+    width: 36px; height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    color: var(--ink);
+    background: transparent;
+    cursor: pointer;
+    transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  nav button:hover { border-color: var(--muted); transform: rotate(15deg); }
   .lang { color: var(--muted); }
-  footer { margin-top: 100px; border-top: 1px solid var(--line); color: var(--muted); font-size: .86rem; }
-  @media (max-width: 640px) { nav a:not(.lang) { display: none; } }
+
+  footer { margin-top: var(--space-10); border-top: 1px solid var(--line); }
+  .footer-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    min-height: 96px;
+    padding-block: var(--space-5);
+    font-size: 0.86rem;
+  }
+  .footer-brand { display: grid; gap: 4px; }
+  .footer-name { font-weight: 600; color: var(--ink); }
+  .footer-tagline { color: var(--muted); }
+  .footer-links { display: flex; flex-wrap: wrap; gap: 18px; font-size: 0.86rem; }
+
+  @media (max-width: 720px) {
+    nav a:not(.lang) { display: none; }
+    .footer-inner { flex-direction: column; align-items: flex-start; gap: 14px; }
+  }
 </style>

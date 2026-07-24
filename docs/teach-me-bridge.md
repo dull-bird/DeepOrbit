@@ -32,11 +32,11 @@ deeporbit --vault . teach-me export --dirs 40_Wiki 60_Notes 30_Research 15_Writi
 
 | 层 | 标注 |
 |----|------|
-| 笔记 frontmatter | `origin: import`、`imported_from`、`origin_source_path`、`import_id`（保留 `type: teach-me/*`，再导入过滤不受影响） |
+| 笔记 frontmatter | 专门的外部知识库块：`external: true`、`external_vault`、`external_vault_path`、`source_path`（精确到源笔记）、`source_created`/`source_updated`、`import_id`（保留 `type: teach-me/*`，再导入过滤不受影响） |
 | 概念状态 / 知识树节点 | `origin` 块，first-wins：后来的学习事件永不覆盖 |
-| teach-me 配置 | `linked_vaults` 记录来源 vault |
+| teach-me 配置 | 专门的 `obsidian_vault_path`（`configure --obsidian-vault` 或首次导入自动填入）+ `linked_vaults` 历史 |
 
 只读区（如 `60_Notes/微信读书`）与 `70_Family` 默认不导出；导出只读
 vault，不写入任何内容。重复导入安全：teach-me 跳过自己的笔记并按标题合并。
 
-技能入口：`/do:teach-me`。要求 teach-me-skill ≥ 1a8b9e2。
+技能入口：`/do:teach-me`。要求 teach-me-skill ≥ 3332704。

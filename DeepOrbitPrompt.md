@@ -201,3 +201,6 @@ Setup and presentation: `/do:init`, `/do:link`, `/do:refresh-prompt`, `/do:obsid
 `/do:mermaid`.
 
 Guidance and rhythm: `/do:mentor`, `/do:dream`.
+
+Integrations: `/do:teach-me` (export vault knowledge into teach-me with
+provenance), `/do:agent` (detect and configure the local agent CLI).

@@ -5,311 +5,621 @@ const zh = lang === 'zh';
 const base = import.meta.env.BASE_URL;
 const home = zh ? base : `${base}en/`;
 
-const capabilities = zh ? [
-  ['01', '把碎片变成可连接的知识', '收集网页、PDF、想法和临时笔记；将它们整理为带 Properties、双链与来源的研究、Wiki 或写作。', 'do.research · do.note-summary · do.write'],
-  ['02', '在自己的笔记里可靠检索', '默认使用本地 SQLite FTS；需要概念检索时可加 Chroma。每次查询只重建变化内容，也会删除失效条目。', 'do.rag · do.search · deeporbit index'],
-  ['03', '把计划和项目推进下去', '从 Inbox 想法生成可审阅的计划与 C.A.P. 项目笔记；进度可以由任何 Agent 的 Goal/Tracker 增强，但不被它锁定。', 'do.kickoff · 90_Plans · 20_Projects'],
-  ['04', '管理今天和未来的行动', '任务是标准 Markdown checkbox，能写入 Inbox、Daily Note 或项目；Agenda 汇总逾期与即将到期，ICS 导出连接日历。', 'do.todo · do.agenda · do.calendar'],
-  ['05', '让 Obsidian 本身也更有用', '提供 Properties 模板、Projects/Research/Task Bases、Graph 指引和 Daily Note；Tasks、Dataview、Calendar 都只是可选增强。', 'Bases · Graph · Backlinks · Daily Notes'],
-  ['06', '换电脑、换模型也不断档', 'Git 或 Obsidian Sync 同步 Markdown；每台电脑自行重建本地索引。Kimi、OpenClaw、Gemini 和 Codex 读取同一套 Skills。', 'Markdown source of truth · local cache']
+const stats = zh ? [
+  ['31', 'do.* 工作流技能'],
+  ['11', '语义化目录'],
+  ['5', 'Agent 运行时'],
+  ['0', '云端账号'],
 ] : [
-  ['01', 'Turn fragments into connected knowledge', 'Capture links, PDFs, ideas, and rough notes; shape them into research, Wiki notes, or writing with Properties, links, and provenance.', 'do.research · do.note-summary · do.write'],
-  ['02', 'Retrieve your own notes reliably', 'SQLite FTS is the default. Add Chroma for conceptual retrieval. Each query only reconciles changed files and removes deleted ones.', 'do.rag · do.search · deeporbit index'],
-  ['03', 'Move plans and projects forward', 'Turn an Inbox idea into a reviewable plan and a C.A.P. project note. A runtime Goal or Tracker can help, but never owns the progress.', 'do.kickoff · 90_Plans · 20_Projects'],
-  ['04', 'Manage today and the next action', 'Tasks are standard Markdown checkboxes in Inbox, Daily Notes, or projects. Agenda groups what is overdue; ICS export connects dated work to a calendar.', 'do.todo · do.agenda · do.calendar'],
-  ['05', 'Make Obsidian useful on its own', 'Get Properties templates, Projects/Research/Task Bases, graph guidance, and Daily Notes. Tasks, Dataview, and Calendar remain optional views.', 'Bases · Graph · Backlinks · Daily Notes'],
-  ['06', 'Change computers or models without losing flow', 'Git or Obsidian Sync carries Markdown; every computer rebuilds its local retrieval cache. Kimi, OpenClaw, Gemini, and Codex read the same Skills.', 'Markdown source of truth · local cache']
+  ['31', 'do.* workflow skills'],
+  ['11', 'semantic directories'],
+  ['5', 'agent runtimes'],
+  ['0', 'cloud accounts'],
 ];
 
-const runtimes = ['Kimi Code', 'OpenClaw', 'Gemini / Antigravity', 'Codex'];
-const installOptions = zh ? [
-  {
-    name: '通用安装',
-    context: '克隆仓库并安装本地 Core；适用于任何 Agent。',
-    prompt: '请帮我安装 DeepOrbit：克隆 https://github.com/dull-bird/DeepOrbit.git，进入目录后执行 python3 -m pip install -e .。然后为我的 Obsidian vault 运行 deeporbit --vault <VAULT_PATH> init 和 doctor，并报告可用能力。',
-    command: 'git clone https://github.com/dull-bird/DeepOrbit.git\ncd DeepOrbit\npython3 -m pip install -e .'
-  },
-  {
-    name: 'Gemini / Antigravity',
-    context: '链接本地 Extension，启用命令、MCP 与 hooks。',
-    prompt: '请在本机安装并链接 DeepOrbit 的 Gemini Extension。若仓库未克隆，先克隆 https://github.com/dull-bird/DeepOrbit.git；然后执行 gemini extensions link <DEEPORBIT_PATH>，验证 extension，并说明如何为我的 vault 运行 deeporbit init。',
-    command: 'gemini extensions link /path/to/DeepOrbit'
-  },
-  {
-    name: 'Kimi Code',
-    context: '直接加载标准 Agent Skills，不依赖插件市场。',
-    prompt: '请为 Kimi Code 启用 DeepOrbit。克隆 https://github.com/dull-bird/DeepOrbit.git（如尚未存在），安装 Python Core，并以 kimi --skills-dir <DEEPORBIT_PATH>/skills 启动。请确认 do.todo、do.rag 和 do.calendar 可以被发现。',
-    command: 'kimi --skills-dir /path/to/DeepOrbit/skills'
-  },
-  {
-    name: 'OpenClaw',
-    context: '把 portable Skills 放入当前工作区的 .agents/skills。',
-    prompt: '请为当前 OpenClaw 工作区安装 DeepOrbit。克隆 https://github.com/dull-bird/DeepOrbit.git（如尚未存在），将其中每个 skills/do.* 文件夹复制或软链接到当前工作区 .agents/skills/，安装 Python Core，并运行 openclaw skills check 验证。',
-    command: 'mkdir -p .agents/skills\ncp -R /path/to/DeepOrbit/skills/do.* .agents/skills/'
-  },
-  {
-    name: 'Codex',
-    context: '安装 portable Skills；插件与 MCP 作为可选增强。',
-    prompt: '请为 Codex 安装 DeepOrbit。使用 npx skills add dull-bird/DeepOrbit 或克隆 https://github.com/dull-bird/DeepOrbit.git 后加载 skills/。安装 Python Core，初始化我的 Obsidian vault，并在可用时启用 .codex-plugin 与 mcp/deeporbit_rag/server.py。请验证 todo、rag、agenda 和 calendar 命令。',
-    command: 'npx skills add dull-bird/DeepOrbit'
-  }
+const problems = zh ? [
+  ['任务散落', '待办躺在聊天记录、便签和五个 App 里。没有任何一个地方，称得上“事实”。'],
+  ['项目烂尾', '开始总是雄心勃勃；两周之后，没人记得进行到了哪一步，也没人敢翻旧账。'],
+  ['知识不沉淀', '做过的研究、读过的论文、想通的道理，随着对话窗口关闭一起消失。'],
 ] : [
-  {
-    name: 'Universal',
-    context: 'Clone the repository and install the local Core for any agent.',
-    prompt: 'Install DeepOrbit for me: clone https://github.com/dull-bird/DeepOrbit.git, enter the directory, and run python3 -m pip install -e .. Then run deeporbit --vault <VAULT_PATH> init and doctor for my Obsidian vault, and report available capabilities.',
-    command: 'git clone https://github.com/dull-bird/DeepOrbit.git\ncd DeepOrbit\npython3 -m pip install -e .'
-  },
-  {
-    name: 'Gemini / Antigravity',
-    context: 'Link the local Extension to enable commands, MCP, and hooks.',
-    prompt: 'Install and link the DeepOrbit Gemini Extension locally. Clone https://github.com/dull-bird/DeepOrbit.git if needed, run gemini extensions link <DEEPORBIT_PATH>, validate the extension, and explain how to run deeporbit init for my vault.',
-    command: 'gemini extensions link /path/to/DeepOrbit'
-  },
-  {
-    name: 'Kimi Code',
-    context: 'Load standard Agent Skills directly, without a plugin marketplace.',
-    prompt: 'Enable DeepOrbit for Kimi Code. Clone https://github.com/dull-bird/DeepOrbit.git if needed, install the Python Core, and start Kimi with kimi --skills-dir <DEEPORBIT_PATH>/skills. Confirm that do.todo, do.rag, and do.calendar are discoverable.',
-    command: 'kimi --skills-dir /path/to/DeepOrbit/skills'
-  },
-  {
-    name: 'OpenClaw',
-    context: 'Place portable Skills in the current workspace .agents/skills directory.',
-    prompt: 'Install DeepOrbit for my current OpenClaw workspace. Clone https://github.com/dull-bird/DeepOrbit.git if needed, copy or symlink each skills/do.* folder into the current workspace .agents/skills/, install the Python Core, and run openclaw skills check to verify it.',
-    command: 'mkdir -p .agents/skills\ncp -R /path/to/DeepOrbit/skills/do.* .agents/skills/'
-  },
-  {
-    name: 'Codex',
-    context: 'Install portable Skills; plugin and MCP are optional enhancements.',
-    prompt: 'Install DeepOrbit for Codex. Use npx skills add dull-bird/DeepOrbit, or clone https://github.com/dull-bird/DeepOrbit.git and load skills/. Install the Python Core, initialize my Obsidian vault, and enable .codex-plugin and mcp/deeporbit_rag/server.py if available. Verify todo, rag, agenda, and calendar.',
-    command: 'npx skills add dull-bird/DeepOrbit'
-  }
+  ['Scattered tasks', 'Todos live in chat logs, sticky notes, and five different apps. Nowhere counts as the truth.'],
+  ['Stalled projects', 'Every project starts with ambition. Two weeks later, nobody remembers where it stopped.'],
+  ['Knowledge that evaporates', 'Research done, papers read, lessons learned — all gone the moment the chat window closes.'],
+];
+
+const icons = {
+  vault: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l8-4 8 4v8l-8 4-8-4V8z"/><path d="M4 8l8 4 8-4"/><path d="M12 12v8"/></svg>',
+  skills: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/><path d="M3 17.5l9 5 9-5" opacity=".45"/></svg>',
+  lifecycle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 13.6-5.7"/><path d="M20 12a8 8 0 0 1-13.6 5.7"/><path d="M17.5 3v3.3h-3.3"/><path d="M6.5 21v-3.3h3.3"/></svg>',
+  growth: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M12 10c0-4 3-7 8-7 0 4-3 7-8 7z"/><path d="M12 14c0-3-2.5-5.5-6.5-5.5 0 3.5 2.5 5.5 6.5 5.5z"/></svg>',
+  privacy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 5-3 8.5-7 10-4-1.5-7-5-7-10V6l7-3z"/><path d="M9 11.5l2 2 4-4.5"/></svg>',
+} as const;
+
+type IconKey = keyof typeof icons;
+
+const capabilities: Array<[IconKey, string, string, string]> = zh ? [
+  ['vault', '便携 Markdown 知识库', 'Vault 即事实：纯文本、可 Git 同步、无厂商锁定。换电脑、换工具、换模型，知识原样带走。', '00_Inbox → 99_System'],
+  ['skills', '31 个 do.* 工作流技能', 'daily、todo、agenda、research、recap、dream、mentor……同一套技能，在五个运行时里行为一致。', 'do.todo · do.research · do.dream'],
+  ['lifecycle', '工作生命周期', '每份工作都有状态：active | paused | done | archived。deeporbit serve 打开本地仪表盘，进展一目了然。', 'deeporbit status · serve'],
+  ['growth', '与 teach-me 联动', '沉淀的知识导出为学习者画像：你掌握什么、卡在哪里，系统越用越懂你。', 'do.teach-me · learner profile'],
+  ['privacy', '本地优先，隐私自控', '只读区、隐私阀门、Cron 与 Recipe 自动化——全部运行在你自己的机器上，不需要任何账号。', 'readonly zones · cron · recipes'],
+] : [
+  ['vault', 'A portable Markdown vault', 'The vault is the source of truth: plain text, Git-syncable, zero vendor lock-in. Change computers, tools, or models — knowledge travels as-is.', '00_Inbox → 99_System'],
+  ['skills', '31 do.* workflow skills', 'daily, todo, agenda, research, recap, dream, mentor… The same skills behave the same across five runtimes.', 'do.todo · do.research · do.dream'],
+  ['lifecycle', 'A lifecycle for work', 'Every piece of work carries a status: active | paused | done | archived. deeporbit serve opens a local dashboard that keeps progress visible.', 'deeporbit status · serve'],
+  ['growth', 'Linked with teach-me', 'Distilled knowledge exports into a learner profile — what you have mastered, where you are stuck. A system that knows you better over time.', 'do.teach-me · learner profile'],
+  ['privacy', 'Local-first, privacy on your terms', 'Read-only zones, privacy valves, cron and recipe automation — everything runs on your own machine. No account required.', 'readonly zones · cron · recipes'],
+];
+
+const vaultLanes = zh ? [
+  ['捕捉', '想法与任务的第一站', ['00_Inbox']],
+  ['记录', '日常、写作与生活', ['10_Diary', '15_Writings', '70_Family']],
+  ['推进', '项目与可审阅的计划', ['20_Projects', '90_Plans']],
+  ['沉淀', '研究、概念与资料', ['30_Research', '40_Wiki', '50_Resources', '60_Notes']],
+  ['系统', '模板、Bases 与归档', ['99_System']],
+] : [
+  ['Capture', 'First stop for ideas and tasks', ['00_Inbox']],
+  ['Record', 'Diary, writing, and life', ['10_Diary', '15_Writings', '70_Family']],
+  ['Act', 'Projects and reviewable plans', ['20_Projects', '90_Plans']],
+  ['Distill', 'Research, concepts, resources', ['30_Research', '40_Wiki', '50_Resources', '60_Notes']],
+  ['System', 'Templates, Bases, and archives', ['99_System']],
+];
+
+const dashboardPoints = zh ? [
+  ['全库状态总览', '进行中、已暂停、已完成、待归档——一张图回答“我在做什么”。'],
+  ['一键流转', '暂停、恢复、完成、归档，都由 CLI 安全执行，从不覆盖文件。'],
+  ['建议与 ACP 面板', '基于 vault 状态给出下一步建议，也可以直接让 Agent 接手。'],
+] : [
+  ['Vault-wide overview', 'Active, paused, done, ready to archive — one picture answers “what am I doing”.'],
+  ['One-click transitions', 'Pause, resume, complete, archive — every transition runs through the safe CLI and never overwrites a file.'],
+  ['Suggestions & ACP panel', 'Next steps derived from vault state, with an agent panel ready to take over.'],
+];
+
+const loopSteps = zh ? [
+  ['完成工作', '任务、项目与日常都在 vault 里留下真实轨迹。'],
+  ['提炼学习', 'teach-me 把轨迹提炼成概念、掌握度与薄弱点。'],
+  ['更新画像', '学习者画像随每次工作持续生长，始终留在本地。'],
+  ['更懂你', 'Agent 按画像调整教学与协作——你再带着它出发。'],
+] : [
+  ['Do the work', 'Tasks, projects, and daily notes leave a real trail in the vault.'],
+  ['Distill the learning', 'teach-me turns that trail into concepts, mastery, and weak spots.'],
+  ['Grow the profile', 'Your learner profile compounds with every session, always local.'],
+  ['Know you better', 'Agents teach and collaborate from the profile — and off you go again.'],
+];
+
+const runtimes = ['Claude Code', 'Codex', 'Gemini', 'OMP', 'OpenClaw'];
+
+const quickstart = zh ? [
+  ['安装技能', '把 portable Skills 装进你正在用的 Agent 运行时。', 'npx skills add dull-bird/DeepOrbit'],
+  ['初始化 vault', '生成目录模型、模板、Bases 与技能索引；已有笔记原样保留。', 'deeporbit --vault ~/MyVault init'],
+  ['打开仪表盘', '本地仪表盘即刻呈现工作状态：active、paused、done、archived。', 'deeporbit --vault ~/MyVault serve --open'],
+] : [
+  ['Add the skills', 'Install the portable Skills into the agent runtime you already use.', 'npx skills add dull-bird/DeepOrbit'],
+  ['Initialize a vault', 'Materializes the directory model, templates, Bases, and skill index — existing notes are preserved.', 'deeporbit --vault ~/MyVault init'],
+  ['Open the dashboard', 'A local dashboard shows the state of your work: active, paused, done, archived.', 'deeporbit --vault ~/MyVault serve --open'],
 ];
 ---
+
+<!-- ============ Hero ============ -->
 <section class="hero container">
-  <div class="hero-title">
-    <div class="eyebrow">Local first · Agent native · Obsidian</div>
-    <h1>{zh ? <>不是又一个<br /><span>AI 笔记应用。</span></> : <>Not another<br /><span>AI notes app.</span></>}</h1>
-  </div>
   <div class="hero-copy">
-    <p class="reading-copy">{zh ? 'DeepOrbit 把你的 Obsidian vault 变成一个可研究、可检索、可行动的个人系统：知识留在 Markdown，任何 Agent 都能继续你的工作。' : 'DeepOrbit turns an Obsidian vault into a personal system for research, retrieval, and action. Knowledge stays in Markdown; any agent can carry the work forward.'}</p>
+    <div class="eyebrow">DeepOrbit 2.0 · {zh ? '本地优先的 Agent Skills 套件' : 'Local-first Agent Skills'}</div>
+    <h1>{zh ? <>你的任务、项目和知识，<br />应该长成<span class="accent">同一个系统。</span></> : <>Your tasks, projects, and knowledge should grow into <span class="accent">one system.</span></>}</h1>
+    <p class="hero-sub">{zh ? 'DeepOrbit 把 Obsidian vault 变成任务、项目与知识管理系统：31 个可移植的工作流技能，跨 Claude Code、Codex、Gemini、OMP 与 OpenClaw 复用——知识留在 Markdown，成长留给你。' : 'DeepOrbit turns an Obsidian vault into a system for tasks, projects, and knowledge: 31 portable workflow skills across Claude Code, Codex, Gemini, OMP, and OpenClaw. Knowledge stays in Markdown; the growth stays with you.'}</p>
     <div class="actions">
-      <a class="button primary" href="#capabilities">{zh ? '看它能做什么' : 'See what it does'}</a>
-      <a class="button" href={`${home}docs/`}>{zh ? '三分钟上手' : 'Start in three minutes'}</a>
+      <a class="button primary" href={`${home}docs/`}>{zh ? '开始使用' : 'Get started'} <span class="arrow" aria-hidden="true">→</span></a>
+      <a class="button" href="https://github.com/dull-bird/DeepOrbit">GitHub</a>
     </div>
   </div>
-  <div class="orbit" aria-hidden="true"><i></i><b></b><span></span></div>
+  <div class="asset hero-asset" data-asset="hero" role="img" aria-label={zh ? '主视觉插图占位' : 'Hero illustration placeholder'}>
+    <span>{zh ? '主视觉：hero' : 'Illustration: hero'}</span>
+  </div>
 </section>
 
-<section class="proof container" aria-label={zh ? 'DeepOrbit 的工作方式' : 'How DeepOrbit works'}>
-  <div><span class="proof-number">Markdown</span><p>{zh ? '人类可读、可被 Git 和 Obsidian Sync 同步的权威来源。' : 'The readable source of truth for Git and Obsidian Sync.'}</p></div>
-  <div><span class="proof-number">26 skills</span><p>{zh ? '研究、整理、检索、写作、项目和日常行动的一套可组合工作流。' : 'Composable workflows for research, organization, retrieval, writing, projects, and daily action.'}</p></div>
-  <div><span class="proof-number">4 runtimes</span><p>{zh ? '同一套方法可在不同模型与终端 Agent 之间迁移。' : 'One system that moves across terminal agents and models.'}</p></div>
+<section class="stats container" aria-label={zh ? '关键数字' : 'Key numbers'}>
+  {stats.map(([num, label]) => (
+    <div class="stat"><span class="stat-num">{num}</span><span class="stat-label">{label}</span></div>
+  ))}
 </section>
 
-<section id="capabilities" class="container section">
+<!-- ============ Problems ============ -->
+<section class="container section problems-section">
   <div class="section-head">
-    <div class="eyebrow">Capabilities</div>
-    <div>
-      <h2>{zh ? '从一条念头，到可复用的知识与下一步行动。' : 'From one thought to reusable knowledge and the next action.'}</h2>
-      <p class="section-intro">{zh ? 'DeepOrbit 不是替你生成更多文本；它给每一类信息一个能被人和 Agent 长期维护的位置。' : 'DeepOrbit does not simply generate more text. It gives each kind of information a place people and agents can maintain over time.'}</p>
-    </div>
+    <div class="eyebrow">{zh ? '三个老问题' : 'Three old problems'}</div>
+    <h2>{zh ? '你不是不努力，是系统不支持你。' : 'You are not unproductive. Your system does not support you.'}</h2>
   </div>
-  <div class="capability-list">
-    {capabilities.map(([number, title, text, tools]) => (
-      <article class="capability">
-        <span class="capability-number">{number}</span>
-        <div><h3>{title}</h3><p>{text}</p></div>
-        <code>{tools}</code>
+  <div class="problems-grid">
+    {problems.map(([title, text], i) => (
+      <article class="problem">
+        <span class="problem-num">0{i + 1}</span>
+        <h3>{title}</h3>
+        <p>{text}</p>
       </article>
     ))}
   </div>
 </section>
 
-<section class="well">
-  <div class="container section system-grid">
-    <div class="system-copy">
-      <div class="eyebrow">A concrete day</div>
-      <h2>{zh ? '你说一句话，系统留下可继续的轨迹。' : 'One sentence leaves a trail you can continue.'}</h2>
-      <p class="reading-copy">{zh ? '它不要求你迁移到专有数据库，也不要求永远使用同一个模型。你能看见、编辑并带走每一步。' : 'It does not require a proprietary database or one permanent model. You can inspect, edit, and carry every step with you.'}</p>
-    </div>
-    <ol class="day-flow">
-      <li><span>01</span><div><strong>{zh ? '捕捉' : 'Capture'}</strong><p>{zh ? '“把这篇论文加到今天，并研究它和我之前的 RAG 笔记有什么关系。”' : '“Add this paper to today and compare it with my earlier RAG notes.”'}</p></div></li>
-      <li><span>02</span><div><strong>{zh ? '检索与研究' : 'Retrieve & research'}</strong><p>{zh ? 'Agent 先读取相关 vault 内容，再输出有来源的研究 checkpoint。' : 'The agent retrieves related vault context, then writes a sourced research checkpoint.'}</p></div></li>
-      <li><span>03</span><div><strong>{zh ? '沉淀' : 'Make it durable'}</strong><p>{zh ? '结论进入 Research 或 Wiki，任务进入 Daily Note 或项目，而不是消失在聊天记录里。' : 'Findings enter Research or Wiki; tasks enter a Daily Note or project instead of disappearing into chat.'}</p></div></li>
-      <li><span>04</span><div><strong>{zh ? '明天继续' : 'Continue tomorrow'}</strong><p>{zh ? 'Agenda、Base 和日历把未完成事项重新带到眼前；换电脑后检索自动恢复。' : 'Agenda, Bases, and calendar bring unfinished work back; retrieval rebuilds on the next computer.'}</p></div></li>
-    </ol>
-  </div>
-</section>
-
-<section class="container section command-section">
-  <div class="section-head">
-    <div class="eyebrow">No black box</div>
-    <div><h2>{zh ? '你可以直接运行，也可以自然语言交给 Agent。' : 'Run it directly, or ask an agent naturally.'}</h2><p class="section-intro">{zh ? 'Python Core 做需要精确性的事；Skills 告诉不同 Agent 何时采用哪一种工作流。' : 'The Python Core handles operations that need exactness; Skills tell different agents when to use which workflow.'}</p></div>
-  </div>
-  <div class="command-grid">
-    <div class="terminal" aria-label="DeepOrbit command example">
-      <div class="terminal-head"><span></span><span></span><span></span><b>your-vault</b></div>
-      <pre><code>$ deeporbit --vault ~/Vault init
-$ deeporbit --vault ~/Vault todo add "Review paper" --today
-$ deeporbit --vault ~/Vault rag "retrieval strategy"
-$ deeporbit --vault ~/Vault agenda
-$ deeporbit --vault ~/Vault calendar export</code></pre>
-    </div>
-    <div class="command-notes">
-      <p><b>{zh ? '没有 Obsidian CLI？' : 'No Obsidian CLI?'}</b> {zh ? '打开笔记时依次回退到 obsidian URI 和普通路径。' : 'Opening a note falls back to an obsidian URI, then a regular path.'}</p>
-      <p><b>{zh ? '没有 Chroma 或 MCP？' : 'No Chroma or MCP?'}</b> {zh ? 'SQLite FTS 与 CLI 继续可用。' : 'SQLite FTS and the CLI continue to work.'}</p>
-      <p><b>{zh ? '没有 Tasks/Dataview？' : 'No Tasks/Dataview?'}</b> {zh ? '任务仍然是可读、可同步的 Markdown。' : 'Tasks remain readable, syncable Markdown.'}</p>
-      <a class="text-link" href={`${home}docs/`}>{zh ? '查看安装、同步和任务文档' : 'Read installation, sync, and task docs'} <span aria-hidden="true">→</span></a>
-    </div>
-  </div>
-</section>
-
-<section id="install" class="well install-section">
+<!-- ============ Capabilities ============ -->
+<section id="capabilities" class="well">
   <div class="container section">
     <div class="section-head">
-      <div class="eyebrow">Install prompts</div>
-      <div><h2>{zh ? '选一个运行时，复制一条能执行的安装提示词。' : 'Choose a runtime. Copy one prompt an agent can execute.'}</h2><p class="section-intro">{zh ? '这些按钮复制的是完整安装请求：它会要求 Agent 克隆、安装、验证，并且不把缓存或密钥写入你的 vault。命令行用户也可以直接复制右侧命令。' : 'Each button copies a complete request: clone, install, validate, and keep caches and secrets out of the vault. Terminal users can copy the direct command at right.'}</p></div>
+      <div class="eyebrow">{zh ? '核心能力' : 'Core capabilities'}</div>
+      <div>
+        <h2>{zh ? '一个 vault，管好任务、项目与知识。' : 'One vault for tasks, projects, and knowledge.'}</h2>
+        <p class="section-intro">{zh ? '不是替你生成更多文本，而是给每一类信息一个人和 Agent 都能长期维护的位置。' : 'Not more generated text — a durable place for every kind of information, maintained by you and your agents.'}</p>
+      </div>
     </div>
-    <div class="install-list">
-      {installOptions.map((option) => (
-        <article class="install-row">
-          <div><h3>{option.name}</h3><p>{option.context}</p></div>
-          <pre><code>{option.command}</code></pre>
-          <div class="install-actions">
-            <button class="copy-button" type="button" data-copy={option.prompt} data-label={zh ? '复制安装提示词' : 'Copy install prompt'}>{zh ? '复制安装提示词' : 'Copy install prompt'}</button>
-            <button class="copy-command" type="button" data-copy={option.command} data-label={zh ? '复制命令' : 'Copy command'}>{zh ? '复制命令' : 'Copy command'}</button>
-          </div>
+    <div class="capability-grid">
+      {capabilities.map(([icon, title, text, meta]) => (
+        <article class="capability-card">
+          <span class="card-icon" set:html={icons[icon]} />
+          <h3>{title}</h3>
+          <p>{text}</p>
+          <code>{meta}</code>
         </article>
       ))}
+      <article class="capability-card example-card">
+        <span class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>
+        </span>
+        <h3>{zh ? '先逛逛示例 Vault' : 'Tour the example vault'}</h3>
+        <p>{zh ? '不想先装东西？克隆 deeporbit-example-vault，直接看一个活着的 DeepOrbit 知识库长什么样。' : 'Not ready to install? Clone deeporbit-example-vault and see what a living DeepOrbit vault looks like.'}</p>
+        <a class="text-link" href="https://github.com/dull-bird/deeporbit-example-vault">dull-bird/deeporbit-example-vault <span aria-hidden="true">→</span></a>
+      </article>
     </div>
-    <p id="copy-status" class="copy-status" aria-live="polite"></p>
   </div>
 </section>
 
-<section class="container section runtime-section">
-  <div class="section-head"><div class="eyebrow">One portable contract</div><div><h2>{zh ? '选择你的 Agent，而不是被 Agent 选择。' : 'Choose your agent. Do not be chosen by one.'}</h2><p class="section-intro">{zh ? '运行时的 hooks、MCP 和 Goal 只提升体验；计划、任务和知识都留在任何工具可读的文件中。' : 'Runtime hooks, MCP, and Goals improve the experience; plans, tasks, and knowledge stay in files every tool can read.'}</p></div></div>
-  <div class="runtime-list">
-    {runtimes.map((runtime, index) => <div class="runtime-row"><span>0{index + 1}</span><h3>{runtime}</h3><p>{zh ? '读取相同的 Agent Skills、Markdown checkpoints 与设备本地检索缓存。' : 'Reads the same Agent Skills, Markdown checkpoints, and device-local retrieval cache.'}</p></div>)}
+<!-- ============ Vault model ============ -->
+<section class="container section">
+  <div class="section-head">
+    <div class="eyebrow">{zh ? '工作方式' : 'How it works'}</div>
+    <div>
+      <h2>{zh ? '从一条念头，到可复用的知识。' : 'From a passing thought to reusable knowledge.'}</h2>
+      <p class="section-intro">{zh ? '十一个语义化目录，五条流向。每一条信息都有去处，每一份工作都有状态。' : 'Eleven semantic directories, five lanes. Every piece of information has a destination; every piece of work has a state.'}</p>
+    </div>
+  </div>
+  <div class="vault-flow" role="list" aria-label={zh ? 'Vault 目录模型' : 'Vault directory model'}>
+    {vaultLanes.map(([lane, desc, folders], i) => (
+      <div class="lane" role="listitem">
+        <div class="lane-head">
+          <span class="lane-dot" data-lane={i}></span>
+          <strong>{lane}</strong>
+        </div>
+        <div class="lane-folders">
+          {(folders as string[]).map((folder) => <code class="folder">{folder}</code>)}
+        </div>
+        <p class="lane-desc">{desc}</p>
+      </div>
+    ))}
   </div>
 </section>
 
+<!-- ============ Dashboard ============ -->
+<section class="well">
+  <div class="container section dashboard-grid">
+    <div class="dashboard-copy">
+      <div class="eyebrow">{zh ? '本地仪表盘' : 'Local dashboard'}</div>
+      <h2>{zh ? <><code class="inline-cmd">deeporbit serve</code>：你的工作，一眼看清。</> : <><code class="inline-cmd">deeporbit serve</code>: your work at a glance.</>}</h2>
+      <ul class="dashboard-list">
+        {dashboardPoints.map(([title, text]) => (
+          <li><strong>{title}</strong><p>{text}</p></li>
+        ))}
+      </ul>
+    </div>
+    <div class="asset dashboard-asset" data-asset="dashboard" role="img" aria-label={zh ? '仪表盘插图占位' : 'Dashboard illustration placeholder'}>
+      <span>{zh ? '插图：dashboard' : 'Illustration: dashboard'}</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Growth loop ============ -->
+<section class="container section">
+  <div class="section-head">
+    <div class="eyebrow sage">{zh ? '成长闭环' : 'The growth loop'}</div>
+    <div>
+      <h2>{zh ? '不止管理，更是沉淀与成长。' : 'More than management — a loop that compounds.'}</h2>
+      <p class="section-intro">{zh ? 'DeepOrbit 管事，teach-me 管人。每一次完成任务，都让系统更懂你一点。' : 'DeepOrbit manages the work; teach-me understands the worker. Every finished task makes the system know you better.'}</p>
+    </div>
+  </div>
+  <div class="loop-grid">
+    <ol class="loop-steps">
+      {loopSteps.map(([title, text], i) => (
+        <li>
+          <span class="loop-num">{i + 1}</span>
+          <div><strong>{title}</strong><p>{text}</p></div>
+          {i === loopSteps.length - 1 && <span class="loop-back" aria-hidden="true">↻</span>}
+        </li>
+      ))}
+    </ol>
+    <div class="asset loop-asset" data-asset="learner-profile" role="img" aria-label={zh ? '学习者画像插图占位' : 'Learner profile illustration placeholder'}>
+      <span>{zh ? '插图：learner-profile' : 'Illustration: learner-profile'}</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Runtimes ============ -->
+<section class="well runtime-well">
+  <div class="container section runtime-section">
+    <div class="section-head">
+      <div class="eyebrow">{zh ? '跨运行时' : 'Cross-runtime'}</div>
+      <div>
+        <h2>{zh ? '选择你的 Agent，而不是被 Agent 选择。' : 'Choose your agent. Do not be chosen by one.'}</h2>
+        <p class="section-intro">{zh ? '同一套 skills/，同一份 Markdown。换一个运行时，只是换一扇窗。' : 'The same skills/ directory, the same Markdown. Switching runtimes is just switching windows.'}</p>
+      </div>
+    </div>
+    <ul class="runtime-badges" aria-label={zh ? '支持的运行时' : 'Supported runtimes'}>
+      {runtimes.map((runtime) => <li class="badge"><span class="badge-dot" aria-hidden="true"></span>{runtime}</li>)}
+    </ul>
+  </div>
+</section>
+
+<!-- ============ Quickstart ============ -->
+<section id="quickstart" class="container section">
+  <div class="section-head">
+    <div class="eyebrow">{zh ? '快速开始' : 'Quickstart'}</div>
+    <div>
+      <h2>{zh ? '三分钟，跑起来。' : 'Running in three minutes.'}</h2>
+      <p class="section-intro">{zh ? '三条命令：装技能、初始化、打开仪表盘。之后的一切，都可以交给自然语言。' : 'Three commands: add the skills, initialize, open the dashboard. Everything after that is natural language.'}</p>
+    </div>
+  </div>
+  <ol class="quickstart-list">
+    {quickstart.map(([title, text, command], i) => (
+      <li class="quickstart-step">
+        <div class="step-head"><span class="step-num">0{i + 1}</span><div><h3>{title}</h3><p>{text}</p></div></div>
+        <div class="step-cmd">
+          <pre><code>{command}</code></pre>
+          <button class="copy-btn" type="button" data-copy={command} aria-label={zh ? '复制命令' : 'Copy command'}>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+            <span class="copy-label">{zh ? '复制' : 'Copy'}</span>
+          </button>
+        </div>
+      </li>
+    ))}
+  </ol>
+  <p class="copy-status" aria-live="polite"></p>
+</section>
+
+<!-- ============ CTA ============ -->
 <section class="cta container">
-  <div><div class="eyebrow">Start local</div><h2>{zh ? '先创建一个你的 vault。' : 'Start with a vault you own.'}</h2></div>
-  <div><p>{zh ? '三分钟安装、初始化并创建第一条可检索任务。之后，它会随着你的研究与项目一起生长。' : 'Install, initialize, and create a first retrievable task in three minutes. From there, it grows with your work.'}</p><a class="button primary" href={`${home}docs/`}>{zh ? '开始使用 DeepOrbit' : 'Start using DeepOrbit'}</a></div>
+  <div>
+    <div class="eyebrow">{zh ? '现在开始' : 'Start now'}</div>
+    <h2>{zh ? '从今天的 Inbox 开始。' : 'Start with today’s Inbox.'}</h2>
+  </div>
+  <div>
+    <p>{zh ? '三分钟安装、初始化，并创建第一条可检索的任务。之后，它会随你的研究与项目一起生长。' : 'Install, initialize, and capture your first retrievable task in three minutes. From there, it grows with your research and projects.'}</p>
+    <div class="actions">
+      <a class="button primary" href={`${home}docs/`}>{zh ? '阅读文档' : 'Read the docs'} <span class="arrow" aria-hidden="true">→</span></a>
+      <a class="button ghost" href="https://github.com/dull-bird/DeepOrbit">GitHub</a>
+    </div>
+  </div>
 </section>
 
 <style>
-  .hero { position: relative; min-height: calc(100dvh - 72px); display: grid; grid-template-columns: 1.12fr .88fr; align-items: center; gap: 64px; padding-block: 80px; overflow: hidden; }
-  .hero-title { position: relative; z-index: 1; }
-  .hero h1 { margin-top: 18px; max-width: 760px; }
-  .hero h1 span { color: var(--accent); }
-  .hero-copy { position: relative; z-index: 1; align-self: end; padding-bottom: 12vh; max-width: 560px; }
-  .actions { display: flex; gap: 12px; margin-top: 30px; flex-wrap: wrap; }
-  .orbit { position: absolute; width: min(52vw, 650px); aspect-ratio: 1; border: 1px solid var(--line); border-radius: 50%; right: -22%; top: -18%; opacity: .8; animation: drift 12s ease-in-out infinite alternate; }
-  .orbit::after { content: ''; position: absolute; inset: 18%; border: 1px solid var(--line); border-radius: 50%; }
-  .orbit i, .orbit b, .orbit span { position: absolute; display: block; border-radius: 50%; background: var(--accent); }
-  .orbit i { width: 14px; height: 14px; left: 13%; top: 27%; }
-  .orbit b { width: 8px; height: 8px; right: 14%; bottom: 32%; }
-  .orbit span { width: 5px; height: 5px; left: 47%; bottom: 18%; }
-  .proof { display: grid; grid-template-columns: repeat(3, 1fr); border-block: 1px solid var(--line); }
-  .proof > div { padding: 28px 28px 30px 0; border-right: 1px solid var(--line); }
-  .proof > div + div { padding-left: 28px; }
-  .proof > div:last-child { border-right: 0; }
-  .proof-number { display: block; font-size: clamp(1.25rem, 2vw, 1.7rem); font-weight: 700; letter-spacing: -.03em; }
-  .proof p, .capability p, .runtime-row p, .command-notes p, .day-flow p { margin: 8px 0 0; color: var(--body); }
-  .section { padding-block: 120px; }
-  .section-head { display: grid; grid-template-columns: .62fr 1.38fr; gap: 32px; align-items: start; margin-bottom: 64px; }
-  .section-intro { max-width: 660px; margin: 18px 0 0; color: var(--body); font-family: var(--reading); font-size: 1.08rem; line-height: 1.85; }
-  .capability-list { border-top: 1px solid var(--line); }
-  .capability { display: grid; grid-template-columns: 80px minmax(0, 1fr) minmax(160px, .55fr); gap: 32px; align-items: start; padding: 34px 0; border-bottom: 1px solid var(--line); }
-  .capability h3 { font-size: clamp(1.25rem, 2.4vw, 1.75rem); }
-  .capability-number { color: var(--accent-ink); font-size: .85rem; font-weight: 700; padding-top: 5px; }
-  .capability code { align-self: center; color: var(--muted); font-size: .8rem; line-height: 1.55; white-space: normal; }
+  /* ---------- hero ---------- */
+  .hero {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    align-items: center;
+    gap: clamp(40px, 6vw, 88px);
+    padding-block: clamp(64px, 10vh, 120px) var(--space-8);
+  }
+  .hero h1 {
+    margin-top: var(--space-4);
+    font-size: clamp(2.3rem, 4.4vw, 3.5rem);
+    line-height: 1.28;
+    word-break: keep-all;
+  }
+  .hero h1 .accent { color: var(--accent); }
+  .hero-sub {
+    max-width: 560px;
+    margin: var(--space-5) 0 0;
+    font-size: 1.08rem;
+    line-height: 1.85;
+  }
+  .actions { display: flex; gap: 12px; margin-top: var(--space-6); flex-wrap: wrap; }
+  .hero-asset { aspect-ratio: 4 / 3.2; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-block: 1px solid var(--line);
+  }
+  .stat { padding: var(--space-5) var(--space-5) var(--space-5) 0; border-right: 1px solid var(--line); }
+  .stat + .stat { padding-left: var(--space-5); }
+  .stat:last-child { border-right: 0; }
+  .stat-num {
+    display: block;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-label { color: var(--muted); font-size: 0.86rem; }
+
+  /* ---------- shared section scaffolding ---------- */
+  .section { padding-block: var(--space-9); }
+  .section-head {
+    display: grid;
+    grid-template-columns: 0.62fr 1.38fr;
+    gap: 32px;
+    align-items: start;
+    margin-bottom: var(--space-7);
+  }
+  .section-head h2 { max-width: 720px; }
+  .section-intro {
+    max-width: 640px;
+    margin: var(--space-4) 0 0;
+    color: var(--body);
+    font-family: var(--reading);
+    font-size: 1.06rem;
+    line-height: 1.85;
+  }
   .well { background: var(--surface); border-block: 1px solid var(--line); }
-  .system-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 100px; align-items: start; }
-  .system-copy h2 { margin: 18px 0 26px; }
-  .day-flow { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
-  .day-flow li { display: grid; grid-template-columns: 54px 1fr; gap: 18px; padding: 25px 0; border-bottom: 1px solid var(--line); }
-  .day-flow span { color: var(--accent-ink); font-size: .8rem; padding-top: 3px; }
-  .day-flow strong { font-size: 1.15rem; }
-  .command-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 48px; align-items: stretch; }
-  .terminal { overflow: hidden; background: #1c1b19; border: 1px solid #34322e; border-radius: 14px; color: #efede6; }
-  .terminal-head { display: flex; align-items: center; gap: 7px; min-height: 42px; padding: 0 15px; border-bottom: 1px solid #34322e; color: #aaa59b; font-size: .78rem; }
-  .terminal-head span { width: 8px; height: 8px; border-radius: 50%; background: #7d786f; }
-  .terminal-head b { margin-left: 7px; font-weight: 500; }
-  .terminal pre { margin: 0; padding: 24px; border: 0; border-radius: 0; background: transparent; color: inherit; white-space: pre-wrap; }
-  .terminal code { padding: 0; background: transparent; color: inherit; line-height: 1.9; }
-  .command-notes { display: grid; align-content: center; gap: 20px; }
-  .command-notes p { margin: 0; line-height: 1.75; }
-  .command-notes b { color: var(--ink); }
-  .text-link { margin-top: 6px; color: var(--accent-ink); font-weight: 700; }
-  .text-link span { display: inline-block; transition: transform .18s ease; }
+  .text-link { color: var(--accent-ink); font-weight: 700; font-size: 0.92rem; }
+  .text-link span { display: inline-block; transition: transform var(--dur) var(--ease); }
   .text-link:hover span { transform: translateX(4px); }
-  .runtime-list { border-top: 1px solid var(--line); }
-  .runtime-row { display: grid; grid-template-columns: 80px minmax(160px, .55fr) 1.45fr; gap: 32px; padding: 26px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
-  .runtime-row > span { color: var(--accent-ink); font-size: .82rem; }
-  .runtime-row p { margin: 0; }
-  .install-section { border-block: 1px solid var(--line); }
-  .install-list { border-top: 1px solid var(--line); }
-  .install-row { display: grid; grid-template-columns: minmax(180px, .7fr) minmax(250px, 1fr) auto; gap: 28px; align-items: center; padding: 25px 0; border-bottom: 1px solid var(--line); }
-  .install-row h3 { font-size: 1.12rem; }
-  .install-row p { margin: 7px 0 0; color: var(--body); font-size: .92rem; }
-  .install-row pre { margin: 0; padding: 14px; border-radius: 9px; font-size: .78rem; line-height: 1.6; }
-  .install-row pre code { padding: 0; background: transparent; white-space: pre-wrap; }
-  .install-actions { display: grid; gap: 8px; justify-items: stretch; }
-  .copy-button, .copy-command { min-height: 38px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--ink); cursor: pointer; font: inherit; font-size: .8rem; font-weight: 700; white-space: nowrap; transition: transform .18s ease, background .18s ease; }
-  .copy-button { color: var(--paper); background: var(--ink); border-color: var(--ink); }
-  .copy-button:hover, .copy-command:hover { transform: translateY(-1px); }
-  .copy-button:active, .copy-command:active { transform: scale(.98); }
-  .copy-status { min-height: 1.5em; margin: 18px 0 0; color: var(--accent-ink); font-size: .88rem; }
-  .cta { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; margin-block: 40px 120px; padding: 56px; background: var(--ink); color: var(--paper); }
+
+  /* ---------- problems ---------- */
+  .problems-section { padding-bottom: var(--space-9); }
+  .problems-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+  .problem {
+    padding: var(--space-6) var(--space-5);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    background: var(--paper);
+    transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .problem:hover { border-color: var(--line-strong); box-shadow: var(--shadow-m); transform: translateY(-3px); }
+  .problem-num { color: var(--accent-ink); font-family: var(--mono); font-size: 0.8rem; }
+  .problem h3 { margin-top: var(--space-3); }
+  .problem p { margin: var(--space-3) 0 0; }
+
+  /* ---------- capabilities ---------- */
+  .capability-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+  .capability-card {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-6) var(--space-5);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    background: var(--paper);
+    transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .capability-card:hover { border-color: var(--line-strong); box-shadow: var(--shadow-m); transform: translateY(-3px); }
+  .card-icon {
+    display: inline-flex;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+  }
+  .card-icon svg { width: 21px; height: 21px; }
+  .capability-card h3 { margin-top: var(--space-4); font-size: 1.12rem; }
+  .capability-card p { margin: var(--space-3) 0 var(--space-4); font-size: 0.94rem; flex: 1; }
+  .capability-card code { align-self: flex-start; color: var(--muted); font-size: 0.76rem; }
+  .example-card { background: transparent; border-style: dashed; }
+  .example-card .card-icon { background: var(--sage-soft); color: var(--sage-ink); }
+
+  /* ---------- vault flow ---------- */
+  .vault-flow {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--space-4);
+  }
+  .lane {
+    position: relative;
+    padding: var(--space-5) var(--space-4);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    background: var(--paper);
+    transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .lane:hover { border-color: var(--line-strong); box-shadow: var(--shadow-s); }
+  .lane:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: calc(-1 * var(--space-4));
+    top: var(--space-5);
+    width: var(--space-4);
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .lane-head { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+  .lane-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .lane-dot[data-lane="1"] { background: color-mix(in srgb, var(--accent) 72%, var(--sage)); }
+  .lane-dot[data-lane="2"] { background: color-mix(in srgb, var(--accent) 45%, var(--sage)); }
+  .lane-dot[data-lane="3"] { background: color-mix(in srgb, var(--accent) 20%, var(--sage)); }
+  .lane-dot[data-lane="4"] { background: var(--sage); }
+  .lane-folders { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--space-4); }
+  .folder {
+    padding: 3px 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-size: 0.72rem;
+    color: var(--body);
+  }
+  .lane-desc { margin: var(--space-4) 0 0; font-size: 0.82rem; color: var(--muted); }
+
+  /* ---------- dashboard ---------- */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: clamp(40px, 6vw, 88px);
+    align-items: center;
+  }
+  .dashboard-copy h2 { margin-top: var(--space-4); }
+  .inline-cmd { font-size: 0.62em; padding: 0.2em 0.45em; vertical-align: 0.12em; }
+  .dashboard-list { list-style: none; margin: var(--space-6) 0 0; padding: 0; border-top: 1px solid var(--line); }
+  .dashboard-list li { padding: var(--space-4) 0; border-bottom: 1px solid var(--line); }
+  .dashboard-list strong { font-size: 1.02rem; }
+  .dashboard-list p { margin: 6px 0 0; font-size: 0.92rem; }
+  .dashboard-asset { aspect-ratio: 4 / 3; }
+
+  /* ---------- growth loop ---------- */
+  .loop-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: clamp(40px, 6vw, 88px);
+    align-items: center;
+  }
+  .loop-steps { list-style: none; margin: 0; padding: 0; counter-reset: step; }
+  .loop-steps li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    gap: var(--space-4);
+    align-items: start;
+    padding: var(--space-5) 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .loop-steps li:first-child { border-top: 1px solid var(--line); }
+  .loop-num {
+    display: inline-flex;
+    width: 34px;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    color: var(--sage-ink);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    background: var(--sage-soft);
+  }
+  .loop-steps strong { font-size: 1.05rem; }
+  .loop-steps p { margin: 6px 0 0; font-size: 0.92rem; }
+  .loop-back { color: var(--sage-ink); font-size: 1.3rem; line-height: 1; padding-top: 6px; }
+  .loop-asset { aspect-ratio: 1 / 1.1; }
+
+  /* ---------- runtimes ---------- */
+  .runtime-section { padding-block: var(--space-8); }
+  .runtime-section .section-head { margin-bottom: var(--space-6); }
+  .runtime-badges {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 18px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-full);
+    background: var(--paper);
+    font-weight: 600;
+    font-size: 0.92rem;
+    transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .badge:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow-s); }
+  .badge-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--sage); }
+
+  /* ---------- quickstart ---------- */
+  .quickstart-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-5); }
+  .quickstart-step {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+    align-items: center;
+    padding: var(--space-5) var(--space-6);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    background: var(--paper);
+  }
+  .step-head { display: grid; grid-template-columns: 44px 1fr; gap: var(--space-4); align-items: start; }
+  .step-num { color: var(--accent-ink); font-family: var(--mono); font-size: 0.85rem; padding-top: 4px; }
+  .step-head p { margin: 6px 0 0; font-size: 0.92rem; }
+  .step-cmd { position: relative; }
+  .step-cmd pre { margin: 0; padding: 14px 100px 14px 16px; background: var(--ink); border-color: var(--ink); border-radius: var(--radius-s); }
+  .step-cmd pre code { padding: 0; background: transparent; color: var(--paper); font-size: 0.82rem; white-space: pre-wrap; word-break: break-all; }
+  .copy-btn {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid color-mix(in srgb, var(--paper) 25%, transparent);
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: color-mix(in srgb, var(--paper) 80%, transparent);
+    font: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+  .copy-btn:hover { background: color-mix(in srgb, var(--paper) 12%, transparent); color: var(--paper); }
+  .copy-status { min-height: 1.5em; margin: var(--space-4) 0 0; color: var(--sage-ink); font-size: 0.88rem; }
+
+  /* ---------- CTA ---------- */
+  .cta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-8);
+    margin-top: var(--space-6);
+    padding: clamp(40px, 5vw, 64px);
+    border-radius: var(--radius-l);
+    background: var(--ink);
+    color: var(--paper);
+  }
   .cta .eyebrow { color: var(--accent); }
-  .cta h2 { margin-top: 16px; }
-  .cta p { color: color-mix(in srgb, var(--paper) 76%, transparent); max-width: 480px; margin: 0 0 28px; font-family: var(--reading); line-height: 1.8; }
-  .cta .primary { color: var(--ink); background: var(--paper); border-color: var(--paper); }
-  @keyframes drift { to { transform: translate(-24px, 18px) rotate(8deg); } }
-  @media (max-width: 760px) {
-    .hero, .section-head, .system-grid, .command-grid, .cta { grid-template-columns: 1fr; }
-    .hero { min-height: auto; gap: 30px; padding-block: 82px; }
-    .hero-copy { padding: 0; }
-    .orbit { opacity: .35; }
-    .proof { grid-template-columns: 1fr; }
-    .proof > div, .proof > div + div { padding: 22px 0; border-right: 0; border-bottom: 1px solid var(--line); }
-    .proof > div:last-child { border-bottom: 0; }
-    .section { padding-block: 80px; }
-    .capability, .runtime-row { grid-template-columns: 54px 1fr; gap: 14px; }
-    .capability code { grid-column: 2; }
-    .runtime-row p { grid-column: 2; }
-    .install-row { grid-template-columns: 1fr; gap: 14px; }
-    .install-actions { grid-template-columns: 1fr 1fr; }
-    .system-grid { gap: 52px; }
-    .cta { margin-inline: 0; padding: 40px 28px; gap: 32px; }
+  .cta h2 { margin-top: var(--space-4); color: var(--paper); }
+  .cta p { color: color-mix(in srgb, var(--paper) 74%, transparent); max-width: 460px; margin: 0; font-family: var(--reading); line-height: 1.8; }
+  .cta .actions { margin-top: var(--space-5); }
+  .cta .button.primary { color: var(--ink); background: var(--paper); border-color: var(--paper); }
+  .cta .button.ghost { color: var(--paper); border-color: color-mix(in srgb, var(--paper) 30%, transparent); }
+  .cta .button.ghost:hover { background: color-mix(in srgb, var(--paper) 10%, transparent); border-color: color-mix(in srgb, var(--paper) 55%, transparent); }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 960px) {
+    .hero, .dashboard-grid, .loop-grid { grid-template-columns: 1fr; }
+    .hero-asset { order: -1; aspect-ratio: 16 / 9; }
+    .capability-grid { grid-template-columns: repeat(2, 1fr); }
+    .vault-flow { grid-template-columns: repeat(2, 1fr); }
+    .lane:not(:last-child)::after { display: none; }
+    .quickstart-step { grid-template-columns: 1fr; gap: var(--space-4); }
+    .cta { grid-template-columns: 1fr; gap: var(--space-6); }
+  }
+  @media (max-width: 700px) {
+    .section { padding-block: var(--space-8); }
+    .section-head { grid-template-columns: 1fr; gap: 12px; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stat:nth-child(2) { border-right: 0; }
+    .stat:nth-child(3), .stat:nth-child(4) { border-top: 1px solid var(--line); }
+    .problems-grid, .capability-grid, .vault-flow { grid-template-columns: 1fr; }
+    .cta { margin-inline: 0; padding: var(--space-7) var(--space-6); }
   }
 </style>
 
 <script>
-  const status = document.querySelector<HTMLParagraphElement>('#copy-status');
-  const copy = async (value: string) => {
-    if (!navigator.clipboard) throw new Error('Clipboard API unavailable');
-    await navigator.clipboard.writeText(value);
-  };
-
-  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((button) => {
+  const status = document.querySelector<HTMLParagraphElement>('.copy-status');
+  document.querySelectorAll<HTMLButtonElement>('.copy-btn').forEach((button) => {
     button.addEventListener('click', async () => {
+      const zh = document.documentElement.lang === 'zh';
       try {
-        await copy(button.dataset.copy || '');
+        await navigator.clipboard.writeText(button.dataset.copy || '');
       } catch {
-        if (status) status.textContent = button.dataset.label?.includes('复制')
-          ? '浏览器未允许剪贴板访问，请直接选择并复制右侧命令。'
+        if (status) status.textContent = zh
+          ? '浏览器未允许剪贴板访问，请直接选择并复制命令。'
           : 'Clipboard access is unavailable. Select and copy the command directly.';
         return;
       }
-      const label = button.dataset.label || 'Copied';
-      const original = button.textContent;
-      button.textContent = label.includes('复制') ? '已复制' : 'Copied';
-      if (status) status.textContent = label.includes('复制') ? '已复制到剪贴板。' : 'Copied to the clipboard.';
-      window.setTimeout(() => { button.textContent = original; }, 1600);
+      const label = button.querySelector<HTMLSpanElement>('.copy-label');
+      const original = label?.textContent || '';
+      if (label) label.textContent = zh ? '已复制' : 'Copied';
+      if (status) status.textContent = zh ? '已复制到剪贴板。' : 'Copied to the clipboard.';
+      window.setTimeout(() => { if (label) label.textContent = original; }, 1600);
     });
   });
 </script>
