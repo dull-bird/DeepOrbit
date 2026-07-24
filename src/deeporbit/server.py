@@ -197,6 +197,10 @@ def make_handler(config: Config, session: AgentSession, *, privacy_mode: str = "
                     self._send_json(run_plan(config, query.get("name", [""])[0]))
                 elif route == "/api/agent/status":
                     self._send_json(session.status())
+                elif route == "/api/agent/config":
+                    from .agents import status_payload
+
+                    self._send_json(status_payload(config.agent))
                 else:
                     self._send_json({"error": "not found"}, status=404)
             except (DeepOrbitError, RuntimeError, ValueError) as exc:
@@ -222,6 +226,33 @@ def make_handler(config: Config, session: AgentSession, *, privacy_mode: str = "
                 elif route == "/api/agent/reset":
                     session.reset()
                     self._send_json(session.status())
+                elif route == "/api/agent/config":
+                    from datetime import datetime, timezone
+
+                    from .agents import resolve, status_payload
+                    from .config import save_agent
+
+                    payload = self._body()
+                    name = str(payload.get("name", "")).strip()
+                    if not name:
+                        save_agent(config.vault, None)
+                        config.agent.clear()
+                        session.preference = "auto"
+                        session.reset()
+                    else:
+                        mode = payload.get("mode") or None
+                        resolved_name, resolved_mode, _argv = resolve(name, mode)
+                        entry = {
+                            "name": resolved_name,
+                            "mode": resolved_mode,
+                            "updated": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                        }
+                        save_agent(config.vault, entry)
+                        config.agent.clear()
+                        config.agent.update(entry)
+                        session.preference = resolved_name
+                        session.reset()
+                    self._send_json(status_payload(config.agent))
                 elif route == "/api/agent/prompt":
                     self._stream_agent(self._body().get("text", ""))
                 else:

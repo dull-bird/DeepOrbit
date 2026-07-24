@@ -204,6 +204,11 @@ section.block { margin-bottom: 30px; }
 
   <div id="view-agent" class="view hidden">
     <header class="page"><h1>助手</h1><p id="agent-sub">通过 ACP 连接本地 agent</p></header>
+    <div class="card" id="agent-config">
+      <h3>Agent 配置</h3>
+      <p class="muted" id="agent-current">正在探测本机 agent…</p>
+      <div id="agent-list" class="grid"></div>
+    </div>
     <div class="card">
       <div class="chat" id="chat"></div>
       <div class="composer">
@@ -393,6 +398,36 @@ async function sendPrompt() {
 $("#send").addEventListener("click", sendPrompt);
 $("#prompt").addEventListener("keydown", (e) => { if (e.key === "Enter") sendPrompt(); });
 $("#reset-agent").addEventListener("click", async () => { await api("/api/agent/reset", {method: "POST"}); $("#chat").innerHTML = ""; addMsg("sys", "新会话已开始"); });
+
+/* ---------- agent configuration ---------- */
+async function loadAgentConfig() {
+  const cfg = await api("/api/agent/config");
+  $("#agent-current").textContent = cfg.configured
+    ? `当前配置：${cfg.name}（${cfg.mode} 模式）${cfg.available ? "" : " — ⚠ 本机未安装"}`
+    : "尚未配置 agent — 从下方探测到的 agent 中选择一个。";
+  const list = $("#agent-list");
+  list.innerHTML = "";
+  cfg.detected.forEach(a => {
+    const row = document.createElement("div");
+    row.className = "card";
+    const modes = a.modes.map(m => `<option value="${m}" ${cfg.name===a.name&&cfg.mode===m?"selected":""}>${m}</option>`).join("");
+    row.innerHTML = `<strong>${a.name}</strong> <span class="muted">${a.installed ? a.path : "未安装"}</span><br>
+      <span class="muted">${a.description||""}</span><br>
+      ${a.installed ? `<select id="mode-${a.name}">${modes}</select>
+      <button class="btn ghost pressable" data-agent="${a.name}">设为默认</button>` : ""}`;
+    list.appendChild(row);
+  });
+  list.querySelectorAll("button[data-agent]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const name = btn.dataset.agent;
+      const mode = $("#mode-" + name).value;
+      await api("/api/agent/config", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({name, mode})});
+      addMsg("sys", `已配置 ${name}（${mode}）`);
+      await loadAgentConfig();
+    });
+  });
+}
+loadAgentConfig();
 
 function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 

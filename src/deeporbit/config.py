@@ -35,6 +35,7 @@ class Config:
     readonly_dirs: list[str] = field(default_factory=list)
     host: str = ""
     privacy: dict = field(default_factory=dict)
+    agent: dict = field(default_factory=dict)
 
     @property
     def cache_dir(self) -> Path:
@@ -72,7 +73,21 @@ def _normalized_payload(raw: dict) -> dict:
             "directories": raw.get("readonly", {}).get("directories", []),
         },
         "privacy": _normalize_privacy(raw.get("privacy", {})),
+        "agent": _normalize_agent(raw.get("agent", {})),
     }
+
+
+def _normalize_agent(raw: dict) -> dict:
+    if not isinstance(raw, dict):
+        return {}
+    entry = {}
+    if raw.get("name"):
+        entry["name"] = str(raw["name"])
+    if raw.get("mode"):
+        entry["mode"] = str(raw["mode"])
+    if raw.get("updated"):
+        entry["updated"] = str(raw["updated"])
+    return entry
 
 
 def _normalize_privacy(raw: dict) -> dict:
@@ -132,7 +147,23 @@ def load_config(vault: Path | str, *, create: bool = False) -> Config:
         readonly_dirs=list(payload["readonly"]["directories"]),
         host=payload["host"],
         privacy=payload["privacy"],
+        agent=dict(payload["agent"]),
     )
+
+
+def save_agent(vault: Path | str, agent: dict | None) -> None:
+    """Persist (or clear, when None) the agent CLI choice in deeporbit.json."""
+    root = Path(vault).expanduser().resolve()
+    path = root / CONFIG_NAME
+    raw: dict = {}
+    if path.exists():
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise ConfigError(f"Invalid {CONFIG_NAME}: {exc}") from exc
+    payload = _normalized_payload(raw)
+    payload["agent"] = dict(agent) if agent else {}
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def save_readonly_dirs(vault: Path | str, directories: list[str]) -> None:

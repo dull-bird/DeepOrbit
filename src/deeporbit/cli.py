@@ -176,6 +176,15 @@ def parser() -> argparse.ArgumentParser:
         help="Vault dirs to export (default: 40_Wiki 60_Notes 30_Research)",
     )
     teach_me_export.add_argument("--timeout", type=float, default=120.0)
+    agent = commands.add_parser("agent", help="Detect and configure the local agent CLI")
+    agent_sub = agent.add_subparsers(dest="agent_command", required=True)
+    agent_detect = agent_sub.add_parser("detect", help="Probe installed agent CLIs and their modes")
+    agent_detect.add_argument("--versions", action="store_true", help="Also probe --version (slower)")
+    agent_sub.add_parser("status", help="Show the configured agent and live detection")
+    agent_configure = agent_sub.add_parser("configure", help="Choose the agent CLI and mode")
+    agent_configure.add_argument("name", help="Agent name (omp, claude, gemini, codex)")
+    agent_configure.add_argument("--mode", choices=["acp", "rpc", "print"], default=None)
+    agent_sub.add_parser("clear", help="Remove the agent configuration")
     return root
 
 
@@ -403,12 +412,18 @@ def run(args: argparse.Namespace) -> int:
     elif args.command == "serve":
         from .server import serve as serve_dashboard
 
+        preference = args.agent
+        if preference == "auto":
+            configured = config.agent.get("name", "")
+            if configured:
+                preference = configured
+
         return serve_dashboard(
             config,
             host=args.host,
             port=args.port,
             open_browser=args.open,
-            agent=args.agent,
+            agent=preference,
             privacy_mode=args.privacy_mode,
         )
 
@@ -423,6 +438,30 @@ def run(args: argparse.Namespace) -> int:
             timeout=args.timeout,
         )
         _print(result)
+        return 0
+
+    elif args.command == "agent":
+        from datetime import datetime, timezone
+
+        from .agents import detect, resolve, status_payload
+        from .config import save_agent
+
+        if args.agent_command == "detect":
+            _print([asdict(entry) for entry in detect(with_version=args.versions)])
+        elif args.agent_command == "status":
+            _print(status_payload(config.agent))
+        elif args.agent_command == "configure":
+            name, mode, argv = resolve(args.name, args.mode)
+            entry = {
+                "name": name,
+                "mode": mode,
+                "updated": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            }
+            save_agent(config.vault, entry)
+            _print({"saved": entry, "argv": argv})
+        elif args.agent_command == "clear":
+            save_agent(config.vault, None)
+            _print({"saved": {}})
         return 0
 
     return 0
