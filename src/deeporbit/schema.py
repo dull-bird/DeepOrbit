@@ -48,13 +48,14 @@ _METADATA: dict[tuple[str, ...], dict] = {
     },
     ("todo",): {"summary": "Capture, list, and complete Markdown tasks"},
     ("todo", "add"): {
-        "summary": "Add a task to the inbox, today, or a project",
+        "summary": "Add a task to the inbox, today, or a project; natural-language time is parsed from the text and explicit flags override it",
         "tags": ["write"],
         "intent": {"destructive": False, "idempotent": False, "scope": "directory"},
         "output": _JSON_OUTPUT,
+        "examples": ["deeporbit --vault @main todo add \"今晚七点跟丽丽吃饭\""],
     },
     ("todo", "list"): {
-        "summary": "List all parsed tasks",
+        "summary": "List all parsed tasks (flat/board/timeline/progress views; --md renders Markdown tables)",
         "tags": ["read"],
         "intent": {"destructive": False, "idempotent": True, "scope": "directory"},
         "output": _JSON_OUTPUT,
@@ -63,6 +64,31 @@ _METADATA: dict[tuple[str, ...], dict] = {
         "summary": "Complete a task by its stable ^do-* block ID",
         "tags": ["write"],
         "intent": {"destructive": False, "idempotent": True, "scope": "file"},
+        "output": _JSON_OUTPUT,
+    },
+    ("todo", "set"): {
+        "summary": "Update status/due/time/priority/recurrence of an existing task",
+        "tags": ["write"],
+        "intent": {"destructive": False, "idempotent": True, "scope": "file"},
+        "output": _JSON_OUTPUT,
+    },
+    ("todo", "attach"): {
+        "summary": "Copy a file into 90_Attachments and append a ![[...]] embed to the task",
+        "tags": ["write"],
+        "intent": {"destructive": False, "idempotent": False, "scope": "file"},
+        "output": _JSON_OUTPUT,
+    },
+    ("remind",): {"summary": "Due-task reminders: launchd polling plus alerter/osascript delivery"},
+    ("remind", "check"): {
+        "summary": "List due reminders as JSON; --deliver sends notifications and records state",
+        "tags": ["read"],
+        "intent": {"destructive": False, "idempotent": True, "scope": "directory"},
+        "output": _JSON_OUTPUT,
+    },
+    ("remind", "install"): {
+        "summary": "Install the launchd agent (StartInterval 60) that runs remind check --deliver",
+        "tags": ["write"],
+        "intent": {"destructive": False, "idempotent": True, "scope": "global"},
         "output": _JSON_OUTPUT,
     },
     ("agenda",): {
@@ -152,10 +178,11 @@ _METADATA: dict[tuple[str, ...], dict] = {
     },
     ("cron",): {"summary": "Schedule recurring DeepOrbit workflows (device-local registry)"},
     ("cron", "add"): {
-        "summary": "Register a recurring natural-language workflow for a vault",
+        "summary": "Register a recurring (--every) or one-shot (--at) natural-language workflow for a vault",
         "tags": ["write"],
         "intent": {"destructive": False, "idempotent": True, "scope": "global"},
         "output": _JSON_OUTPUT,
+        "examples": ["deeporbit --vault @main cron add weekly-report \"提醒我写周报并先给我草稿\" --at 2026-07-25T19:00"],
     },
     ("cron", "list"): {
         "summary": "List scheduled jobs",
@@ -396,6 +423,11 @@ def build_schema(parser: argparse.ArgumentParser, *, version: str = __version__)
                 {
                     "path": "~/.config/deeporbit/links.json",
                     "description": "Device-local registry of linked vaults used by `@name` resolution",
+                    "required": False,
+                },
+                {
+                    "path": "~/.config/deeporbit/reminders.json",
+                    "description": "Device-local reminder delivery state (reminded/snooze records)",
                     "required": False,
                 },
             ],

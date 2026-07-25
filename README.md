@@ -19,28 +19,25 @@ DeepOrbit keeps research, projects, writing, tasks, and retrieval in ordinary lo
 
 ## Three-minute tutorial
 
-### 1. Install only the connector globally
+### 1. Install with one prompt
 
-DeepOrbit's recommended cross-project install is **one global connector skill**:
+Paste this prompt to your agent (Claude Code, Kimi Code, OpenClaw, Codex, …) and it will perform the whole install:
 
-```bash
-npx skills add dull-bird/DeepOrbit --skill do.link --global --agent '*' --yes
+```text
+Install DeepOrbit on this machine:
+
+1. Clone the repository: `git clone https://github.com/dull-bird/DeepOrbit.git ~/src/DeepOrbit`
+   (if ~/src/DeepOrbit already exists, run `git -C ~/src/DeepOrbit pull --ff-only` instead).
+2. Install the deterministic CLI: `python3 -m pip install -e ~/src/DeepOrbit`.
+3. Verify the CLI: run `deeporbit __schema` and confirm it prints the machine-readable
+   command surface. If the executable is not on PATH, fall back to
+   `PYTHONPATH=~/src/DeepOrbit/src python -m deeporbit __schema`.
+4. Install the global connector skill:
+   `npx skills add dull-bird/DeepOrbit --skill do.link --global --agent '*' --yes`.
+5. Report what was installed and any errors you encountered.
 ```
 
-Install the deterministic CLI once on the machine:
-
-```bash
-git clone https://github.com/dull-bird/DeepOrbit.git ~/src/DeepOrbit
-python3 -m pip install -e ~/src/DeepOrbit
-deeporbit __schema
-```
-
-`deeporbit __schema` prints the full machine-readable CLI surface for agents.
-If the executable is unavailable from a checkout, use:
-
-```bash
-PYTHONPATH=~/src/DeepOrbit/src python -m deeporbit __schema
-```
+The result is **one global connector skill** plus the deterministic CLI. `deeporbit __schema` prints the full machine-readable CLI surface for agents.
 
 ### 2. Initialize or take over a vault
 
@@ -66,7 +63,7 @@ manifests) while excluding `.git`, virtualenvs, caches, build outputs,
 ### 3. Use it
 
 ```bash
-deeporbit --vault ~/Documents/MyVault todo add "Review the paper" --today --due 2026-07-15
+deeporbit --vault ~/Documents/MyVault todo add "Dinner with Lily tomorrow at 7pm"   # NL time parsing: text, date, and time split out automatically
 deeporbit --vault ~/Documents/MyVault agenda
 deeporbit --vault ~/Documents/MyVault rag "index tracking"
 deeporbit --vault ~/Documents/MyVault calendar export
@@ -200,14 +197,15 @@ Obsidian CLI is preferred for opening generated notes. DeepOrbit falls back to `
 Tasks remain portable Markdown:
 
 ```markdown
-- [ ] Review DeepOrbit architecture #task ⏳ 2026-07-13 📅 2026-07-15 ^do-20260713120000-a1b2c3
+- [ ] Review DeepOrbit architecture 🔼 ⏳ 2026-07-13 📅 2026-07-15 ⏰ 14:00 ^do-20260713120000-a1b2c3
+- [ ] Weekly report 🔁 every week on Friday 📅 2026-07-31 ^do-20260724100000-d4e5f6
 ```
 
-The stable block ID supports exact completion and stable iCalendar UIDs. ICS export is a local snapshot with alarms; it does not claim two-way Google or Apple Calendar synchronization. See [Tasks and calendar](docs/todo-calendar.md).
+`todo add` parses Chinese and English natural-language times ("明晚七点", "every Friday") out of the text; tasks support priority, `⏰` exact times, recurrence, subtasks with derived `[n/m]` progress, dependencies, and attachments. `deeporbit remind install` delivers local macOS notifications for timed tasks. `99_System/Todo Dashboard.md` renders the same lines through Tasks-plugin query blocks (optional). The stable block ID supports exact completion and stable iCalendar UIDs. ICS export is a local snapshot — timed tasks become one-hour events, date-only tasks all-day events; it does not claim two-way Google or Apple Calendar synchronization. See [Tasks and calendar](docs/todo-calendar.md).
 
 ## Skill catalog
 
-DeepOrbit 2.0 ships **31 `do.*` skills**. `skills/` is the single source of truth; every skill has paired Claude-style Markdown and Gemini TOML commands.
+DeepOrbit 2.0 ships **32 `do.*` skills**. `skills/` is the single source of truth; every skill has paired Claude-style Markdown and Gemini TOML commands.
 
 | Skill | Purpose |
 |---|---|
@@ -218,9 +216,10 @@ DeepOrbit 2.0 ships **31 `do.*` skills**. `skills/` is the single source of trut
 | `do.teach-me` | Export vault knowledge into teach-me with provenance tagging |
 | `do.agent` | Detect and configure the local agent CLI (omp/claude/gemini/codex) |
 | `do.daily` | Daily planning, recap, news, and project context |
-| `do.todo` | Capture, list, and complete Markdown tasks |
+| `do.todo` | Capture and manage Markdown tasks with natural-language time parsing |
 | `do.agenda` | Group overdue, today, upcoming, and unscheduled tasks |
 | `do.calendar` | Export dated tasks to portable ICS |
+| `do.remind` | Install local notifications for timed tasks (launchd + alerter/osascript) |
 | `do.kickoff` | Turn an idea into a structured project |
 | `do.write` | Polish raw thoughts into personal writing |
 | `do.research` | Checkpointed evidence-based deep research |

@@ -9,7 +9,7 @@ from deeporbit.openers import open_note
 class OpenerTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
-        self.note = Path(self.temp.name) / "A note.md"
+        self.note = Path(self.temp.name).resolve() / "A note.md"
         self.note.write_text("# note", encoding="utf-8")
 
     def tearDown(self):

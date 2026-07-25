@@ -54,7 +54,7 @@ class SchemaTests(unittest.TestCase):
 
     def test_namespaces_contain_subcommands(self):
         todo = _namespace(self.doc, "todo")
-        self.assertEqual({cmd["name"] for cmd in todo["commands"]}, {"add", "list", "done"})
+        self.assertEqual({cmd["name"] for cmd in todo["commands"]}, {"add", "list", "done", "set", "attach"})
         link = _namespace(self.doc, "link")
         self.assertEqual({cmd["name"] for cmd in link["commands"]}, {"add", "list", "route", "remove", "default", "describe"})
         remove = _command(link["commands"], "remove")
@@ -64,6 +64,8 @@ class SchemaTests(unittest.TestCase):
         self.assertEqual({cmd["name"] for cmd in profile["commands"]}, {"show", "set", "observe", "focus", "compact"})
         cron = _namespace(self.doc, "cron")
         self.assertEqual({cmd["name"] for cmd in cron["commands"]}, {"add", "list", "remove", "run-due", "enable", "disable"})
+        remind = _namespace(self.doc, "remind")
+        self.assertEqual({cmd["name"] for cmd in remind["commands"]}, {"check", "install"})
 
     def test_parameter_roles_and_enums(self):
         open_cmd = _command(self.doc["commands"], "open")

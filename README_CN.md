@@ -19,28 +19,25 @@ DeepOrbit 将研究、项目、写作、待办和检索保存在普通本地文�
 
 ## 三分钟教程
 
-### 1. 全局只安装连接器
+### 1. 一段提示词完成安装
 
-DeepOrbit 推荐的跨项目安装方式是**全局只安装一个连接器 skill**：
+把下面这段提示词发给你的 Agent（Claude Code、Kimi Code、OpenClaw、Codex……），它会自动完成全部安装：
 
-```bash
-npx skills add dull-bird/DeepOrbit --skill do.link --global --agent '*' --yes
+```text
+在这台机器上安装 DeepOrbit：
+
+1. 克隆仓库：`git clone https://github.com/dull-bird/DeepOrbit.git ~/src/DeepOrbit`
+   （如果 ~/src/DeepOrbit 已存在，改为执行 `git -C ~/src/DeepOrbit pull --ff-only`）。
+2. 安装确定性 CLI：`python3 -m pip install -e ~/src/DeepOrbit`。
+3. 验证 CLI：运行 `deeporbit __schema`，确认能输出机器可读的命令说明。
+   如果 PATH 中没有 deeporbit 可执行文件，改用
+   `PYTHONPATH=~/src/DeepOrbit/src python -m deeporbit __schema`。
+4. 全局安装连接器技能：
+   `npx skills add dull-bird/DeepOrbit --skill do.link --global --agent '*' --yes`。
+5. 汇报安装了哪些内容，以及遇到的任何报错。
 ```
 
-然后在这台机器上安装一次确定性的 CLI：
-
-```bash
-git clone https://github.com/dull-bird/DeepOrbit.git ~/src/DeepOrbit
-python3 -m pip install -e ~/src/DeepOrbit
-deeporbit __schema
-```
-
-`deeporbit __schema` 会输出完整的机器可读 CLI 表面，供 agent 查看详细命令能力。
-如果 checkout 中没有 `deeporbit` 可执行文件，可用：
-
-```bash
-PYTHONPATH=~/src/DeepOrbit/src python -m deeporbit __schema
-```
+安装结果是**一个全局连接器 skill** 加上确定性 CLI。`deeporbit __schema` 会输出完整的机器可读 CLI 表面，供 agent 查看详细命令能力。
 
 ### 2. 初始化或接手一个 vault
 
@@ -61,7 +58,7 @@ deeporbit link add main ~/Documents/MyVault --description "个人研究与写作
 ### 3. 开始使用
 
 ```bash
-deeporbit --vault ~/Documents/MyVault todo add "阅读论文" --today --due 2026-07-15
+deeporbit --vault ~/Documents/MyVault todo add "明晚七点跟丽丽吃饭"   # 自然语言时间解析：自动剥离正文、日期与时刻
 deeporbit --vault ~/Documents/MyVault agenda
 deeporbit --vault ~/Documents/MyVault rag "指数跟踪"
 deeporbit --vault ~/Documents/MyVault calendar export
@@ -195,14 +192,15 @@ DeepOrbit 在 `99_System/Bases/` 提供项目、研究、包含任务的笔记�
 任务保持为可移植 Markdown：
 
 ```markdown
-- [ ] 审阅 DeepOrbit 架构 #task ⏳ 2026-07-13 📅 2026-07-15 ^do-20260713120000-a1b2c3
+- [ ] 审阅 DeepOrbit 架构 🔼 ⏳ 2026-07-13 📅 2026-07-15 ⏰ 14:00 ^do-20260713120000-a1b2c3
+- [ ] 每周五写周报 🔁 every week on Friday 📅 2026-07-31 ^do-20260724100000-d4e5f6
 ```
 
-稳定 block ID 用于精确完成任务和生成稳定的 iCalendar UID。ICS 导出是带提醒的本地快照，不声称支持 Google 或 Apple Calendar 双向同步。参见[待办与日历](docs/todo-calendar.md)。
+`todo add` 能从文本中解析中英文自然语言时间（「明晚七点」、"every Friday"）；任务支持优先级、`⏰` 精确时刻、重复周期、自动推导 `[n/m]` 进度的子任务、依赖与附件。`deeporbit remind install` 为带时刻的任务提供 macOS 本地通知。`99_System/Todo Dashboard.md` 通过 Tasks 插件查询块渲染同样的任务行（可选）。稳定 block ID 用于精确完成任务和生成稳定的 iCalendar UID。ICS 导出是本地快照——带时刻的任务导出为一小时定时事件，纯日期任务为全天事件；不声称支持 Google 或 Apple Calendar 双向同步。参见[待办与日历](docs/todo-calendar.md)。
 
 ## 技能一览
 
-DeepOrbit 2.0 内置 **31 个 `do.*` 技能**。`skills/` 是唯一事实来源；每个技能都有配对的 Markdown 与 Gemini TOML 命令。
+DeepOrbit 2.0 内置 **32 个 `do.*` 技能**。`skills/` 是唯一事实来源；每个技能都有配对的 Markdown 与 Gemini TOML 命令。
 
 | 技能 | 用途 |
 |---|---|
@@ -213,9 +211,10 @@ DeepOrbit 2.0 内置 **31 个 `do.*` 技能**。`skills/` 是唯一事实来源�
 | `do.teach-me` | 把 vault 知识带来源标注导出到 teach-me |
 | `do.agent` | 探测并配置本机 agent CLI（omp/claude/gemini/codex） |
 | `do.daily` | 日常计划、回顾、新闻和项目上下文 |
-| `do.todo` | 捕捉、列出和完成 Markdown 任务 |
+| `do.todo` | 用自然语言时间解析捕捉和管理 Markdown 任务 |
 | `do.agenda` | 汇总逾期、今天、未来和未排期任务 |
 | `do.calendar` | 将带日期任务导出为 ICS |
+| `do.remind` | 为带时刻的任务安装本地通知（launchd + alerter/osascript） |
 | `do.kickoff` | 将想法转化为结构化项目 |
 | `do.write` | 将原始想法整理为个人写作 |
 | `do.research` | 可断点恢复的证据型深度研究 |

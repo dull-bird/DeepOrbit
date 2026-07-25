@@ -28,10 +28,11 @@ class CronError(DeepOrbitError):
 class CronJob:
     name: str
     vault: str
-    every_hours: int
+    every_hours: int | None
     instruction: str
     last_run: str
     enabled: bool = True
+    at: str | None = None
 
 
 def registry_path() -> Path:
@@ -81,29 +82,43 @@ def _to_job(name: str, entry: dict) -> CronJob:
     return CronJob(
         name=name,
         vault=entry["vault"],
-        every_hours=entry["every_hours"],
+        every_hours=entry.get("every_hours"),
         instruction=entry["instruction"],
         last_run=entry.get("last_run", ""),
         enabled=entry.get("enabled", True),
+        at=entry.get("at"),
     )
 
 
-def add_job(name: str, vault: Path | str, instruction: str, every: str) -> CronJob:
+def add_job(name: str, vault: Path | str, instruction: str, every: str | None = "daily", at: str | None = None) -> CronJob:
+    """Register a recurring (`every`) or one-shot (`at`, ISO date/datetime) job."""
     if not name or "/" in name:
         raise CronError(f"Invalid job name: {name!r}")
     path = Path(vault).expanduser().resolve()
     if not path.is_dir():
         raise CronError(f"Vault does not exist: {path}")
-    data = _load()
-    data["jobs"][name] = {
+    entry: dict = {
         "vault": str(path),
-        "every_hours": parse_every(every),
         "instruction": instruction,
         "last_run": "",
         "enabled": True,
     }
+    if at is not None:
+        try:
+            target = datetime.fromisoformat(at.strip())
+        except ValueError as exc:
+            raise CronError(f"Invalid --at datetime {at!r}; use ISO like 2026-07-25T19:00") from exc
+        entry["at"] = target.isoformat()
+        entry["every_hours"] = None
+    else:
+        if every is None:
+            raise CronError("Recurring job needs --every; one-shot job needs --at")
+        entry["every_hours"] = parse_every(every)
+        entry["at"] = None
+    data = _load()
+    data["jobs"][name] = entry
     _save(data)
-    return _to_job(name, data["jobs"][name])
+    return _to_job(name, entry)
 
 
 def list_jobs() -> list[CronJob]:
@@ -130,12 +145,32 @@ def set_enabled(name: str, enabled: bool) -> CronJob:
 
 
 def run_due(now: datetime | None = None) -> list[CronJob]:
-    """Return enabled jobs whose interval elapsed; stamps their last_run."""
+    """Return enabled jobs whose interval elapsed; stamps their last_run.
+
+    One-shot `at` jobs fire once at/after their target time and are then
+    auto-disabled (the record is kept for audit).
+    """
     now = now or datetime.now(timezone.utc)
     data = _load()
     due: list[CronJob] = []
     for name, entry in sorted(data["jobs"].items()):
         if not entry.get("enabled", True):
+            continue
+        at = entry.get("at")
+        if at:
+            try:
+                target = datetime.fromisoformat(at)
+            except ValueError:
+                continue
+            if target.tzinfo is None:
+                reference = now.replace(tzinfo=None)
+            else:
+                reference = now if now.tzinfo else now.replace(tzinfo=timezone.utc)
+            if target > reference:
+                continue
+            entry["last_run"] = now.isoformat(timespec="seconds")
+            entry["enabled"] = False  # one-shot: fire once, keep the record
+            due.append(_to_job(name, entry))
             continue
         last = entry.get("last_run", "")
         elapsed: timedelta | None = None

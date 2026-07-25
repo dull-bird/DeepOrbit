@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
+import shutil
 import sys
 from dataclasses import asdict
 from pathlib import Path
 
+from . import nltime
 from .config import load_config
 from .doctor import diagnose
-from .errors import DeepOrbitError
+from .errors import DeepOrbitError, TaskNotFoundError
 from .frontmatter import write_fields
 from .links import add_link, describe_link, list_links, remove_link, resolve_vault, route_link, set_default
 from .profile import observe as profile_observe
@@ -33,7 +36,7 @@ from .schema import build_schema
 from .search import SearchIndex
 from .semantic import ChromaIndex
 from .suggest import suggest as build_suggestions
-from .tasks import add_task, agenda, complete_task, parse_tasks
+from .tasks import _destination_path, add_task, agenda, complete_task, parse_tasks, progress, update_task
 from .vault import initialize
 
 
@@ -84,9 +87,25 @@ def parser() -> argparse.ArgumentParser:
     add.add_argument("--project")
     add.add_argument("--scheduled")
     add.add_argument("--due")
-    todo_sub.add_parser("list")
+    add.add_argument("--time", help="Reminder clock time HH:MM (⏰)")
+    add.add_argument("--priority", choices=["highest", "high", "medium", "low", "lowest"])
+    add.add_argument("--recur", help="Recurrence rule, e.g. 'every week on Friday' (🔁)")
+    add.add_argument("--parent", help="Parent task line number or ^do-* block ID")
+    list_cmd = todo_sub.add_parser("list")
+    list_cmd.add_argument("--view", choices=["flat", "board", "timeline", "progress"], default="flat")
+    list_cmd.add_argument("--md", action="store_true", help="Render Markdown tables instead of JSON")
     done = todo_sub.add_parser("done")
     done.add_argument("id")
+    set_cmd = todo_sub.add_parser("set", help="Update fields of an existing task")
+    set_cmd.add_argument("id")
+    set_cmd.add_argument("--status", choices=["todo", "doing", "done", "cancelled"])
+    set_cmd.add_argument("--due")
+    set_cmd.add_argument("--time")
+    set_cmd.add_argument("--priority", choices=["highest", "high", "medium", "low", "lowest"])
+    set_cmd.add_argument("--recur", help="Recurrence rule (🔁)")
+    attach = todo_sub.add_parser("attach", help="Copy a file into 90_Attachments and link it on the task")
+    attach.add_argument("id")
+    attach.add_argument("file")
     commands.add_parser("agenda")
     commands.add_parser("status", help="Overview of every work item by lifecycle status")
     commands.add_parser("suggest", help="Prioritized suggestions from vault state")
@@ -98,7 +117,9 @@ def parser() -> argparse.ArgumentParser:
     cron_add = cron_sub.add_parser("add")
     cron_add.add_argument("name")
     cron_add.add_argument("instruction")
-    cron_add.add_argument("--every", default="daily", help="hourly | daily | weekly | <N>h | <N>d")
+    cron_schedule = cron_add.add_mutually_exclusive_group()
+    cron_schedule.add_argument("--every", default=None, help="hourly | daily | weekly | <N>h | <N>d (default: daily)")
+    cron_schedule.add_argument("--at", default=None, help="One-shot ISO date/datetime, e.g. 2026-07-25T19:00")
     cron_sub.add_parser("list")
     cron_remove = cron_sub.add_parser("remove")
     cron_remove.add_argument("name")
@@ -109,6 +130,11 @@ def parser() -> argparse.ArgumentParser:
     for toggle in ("enable", "disable"):
         toggle_cmd = cron_sub.add_parser(toggle)
         toggle_cmd.add_argument("name")
+    remind = commands.add_parser("remind", help="Check and deliver due-task reminders (launchd-driven)")
+    remind_sub = remind.add_subparsers(dest="remind_command", required=True)
+    remind_check = remind_sub.add_parser("check", help="List due reminders as JSON")
+    remind_check.add_argument("--deliver", action="store_true", help="Actually deliver notifications (alerter/osascript)")
+    remind_sub.add_parser("install", help="Install the launchd agent for minute-polling reminders")
     recipe = commands.add_parser("recipe", help="List and resolve composable workflow recipes")
     recipe_sub = recipe.add_subparsers(dest="recipe_command", required=True)
     recipe_sub.add_parser("list")
@@ -198,6 +224,100 @@ def _link_dict(link) -> dict:
     return payload
 
 
+def _task_date(task) -> str | None:
+    return task.due or task.scheduled
+
+
+def _timeline(tasks) -> dict:
+    today = dt.date.today().isoformat()
+    groups: dict = {"overdue": [], "today": [], "upcoming": {}, "unscheduled": []}
+    for task in tasks:
+        if task.done:
+            continue
+        date = _task_date(task)
+        if not date:
+            groups["unscheduled"].append(task)
+        elif date < today:
+            groups["overdue"].append(task)
+        elif date == today:
+            groups["today"].append(task)
+        else:
+            groups["upcoming"].setdefault(date, []).append(task)
+    return groups
+
+
+def _view_payload(tasks, view: str):
+    if view == "board":
+        return {status: [asdict(t) for t in tasks if t.status == status] for status in ("todo", "doing", "done", "cancelled")}
+    if view == "timeline":
+        groups = _timeline(tasks)
+        return {
+            "overdue": [asdict(t) for t in groups["overdue"]],
+            "today": [asdict(t) for t in groups["today"]],
+            "upcoming": {date: [asdict(t) for t in items] for date, items in sorted(groups["upcoming"].items())},
+            "unscheduled": [asdict(t) for t in groups["unscheduled"]],
+        }
+    if view == "progress":
+        return progress(tasks)
+    return [asdict(t) for t in tasks]
+
+
+def _md_cell(value) -> str:
+    return str(value or "").replace("|", "\\|").replace("\n", " ")
+
+
+def _md_task_table(tasks) -> list[str]:
+    lines = ["| ID | 状态 | 内容 | 截止 | 时间 | 优先级 |", "| --- | --- | --- | --- | --- | --- |"]
+    for task in tasks:
+        lines.append(
+            "| " + " | ".join([
+                _md_cell(task.id),
+                _md_cell(task.status),
+                _md_cell(task.text),
+                _md_cell(_task_date(task)),
+                _md_cell(task.time),
+                _md_cell(task.priority),
+            ]) + " |"
+        )
+    return lines
+
+
+def _render_tasks_md(tasks, view: str) -> str:
+    if view == "board":
+        lines: list[str] = []
+        for status in ("todo", "doing", "done", "cancelled"):
+            group = [t for t in tasks if t.status == status]
+            if group:
+                lines += [f"## {status}", ""] + _md_task_table(group) + [""]
+        return "\n".join(lines).strip()
+    if view == "timeline":
+        groups = _timeline(tasks)
+        lines = []
+        for title, items in [("Overdue", groups["overdue"]), ("Today", groups["today"])]:
+            if items:
+                lines += [f"## {title}", ""] + _md_task_table(items) + [""]
+        for date, items in sorted(groups["upcoming"].items()):
+            lines += [f"## {date}", ""] + _md_task_table(items) + [""]
+        if groups["unscheduled"]:
+            lines += ["## 未排期", ""] + _md_task_table(groups["unscheduled"]) + [""]
+        return "\n".join(lines).strip()
+    if view == "progress":
+        stats = progress(tasks)
+        lines = ["## 项目进度", "", "| 项目 | 完成 | 总数 | 进度 |", "| --- | --- | --- | --- |"]
+        for name, bucket in sorted(stats["projects"].items()):
+            total = bucket["total"]
+            pct = f"{round(bucket['done'] / total * 100)}%" if total else "-"
+            lines.append(f"| {_md_cell(name)} | {bucket['done']} | {total} | {pct} |")
+        if stats["subtasks"]:
+            by_id = {t.id: t for t in tasks}
+            lines += ["", "## 子任务进度", "", "| 任务 | 进度 |", "| --- | --- |"]
+            for parent, bucket in sorted(stats["subtasks"].items()):
+                label = by_id[parent].text if parent in by_id else parent
+                lines.append(f"| {_md_cell(label)} | [{bucket['done']}/{bucket['total']}] |")
+        return "\n".join(lines)
+    return "\n".join(_md_task_table(tasks))
+
+
 def run(args: argparse.Namespace) -> int:
     if args.command == "link":
         if args.link_command == "add":
@@ -253,11 +373,85 @@ def run(args: argparse.Namespace) -> int:
     elif args.command == "todo":
         if args.todo_command == "add":
             destination = "today" if args.today else f"project:{args.project}" if args.project else "inbox"
-            _print(asdict(add_task(config, args.text, destination=destination, scheduled=args.scheduled, due=args.due)))
+            parsed = nltime.parse(args.text)
+            parent_line = None
+            if args.parent:
+                if args.parent.isdigit():
+                    parent_line = int(args.parent)
+                else:
+                    parent = next((t for t in parse_tasks(config) if t.id == args.parent), None)
+                    if parent is None:
+                        raise TaskNotFoundError(f"Parent task not found: {args.parent}")
+                    expected = _destination_path(config, destination).relative_to(config.vault).as_posix()
+                    if parent.path != expected:
+                        raise DeepOrbitError(f"Parent task lives in {parent.path}, not {expected}; pass --today/--project to match")
+                    parent_line = parent.line
+            task = add_task(
+                config,
+                parsed["text"] or args.text,
+                destination=destination,
+                scheduled=args.scheduled,
+                due=args.due or parsed["date"],
+                time=args.time or parsed["time"],
+                priority=args.priority or parsed["priority"],
+                recurrence=args.recur or parsed["recurrence"],
+                parent_line=parent_line,
+            )
+            payload = asdict(task)
+            payload["parsed"] = parsed
+            _print(payload)
         elif args.todo_command == "list":
-            _print([asdict(x) for x in parse_tasks(config)])
+            tasks = parse_tasks(config)
+            if args.md:
+                print(_render_tasks_md(tasks, args.view))
+            else:
+                _print(_view_payload(tasks, args.view))
+        elif args.todo_command == "set":
+            updates: dict = {}
+            if args.status:
+                updates["status"] = args.status
+            if args.due:
+                updates["due"] = args.due
+            if args.time:
+                updates["time"] = args.time
+            if args.priority:
+                updates["priority"] = args.priority
+            if args.recur:
+                updates["recurrence"] = args.recur
+            if not updates:
+                raise DeepOrbitError("todo set requires at least one of --status/--due/--time/--priority/--recur")
+            _print(asdict(update_task(config, args.id, **updates)))
+        elif args.todo_command == "attach":
+            source = Path(args.file).expanduser()
+            if not source.is_file():
+                raise DeepOrbitError(f"Attachment not found: {source}")
+            task = next((t for t in parse_tasks(config) if t.id == args.id), None)
+            if task is None:
+                raise TaskNotFoundError(f"Task not found: {args.id}")
+            attachments_dir = config.vault / "90_Attachments"
+            attachments_dir.mkdir(parents=True, exist_ok=True)
+            target = attachments_dir / source.name
+            if target.exists():
+                stamp = dt.datetime.now().strftime("%Y%m%d%H%M%S")
+                target = attachments_dir / f"{source.stem}-{stamp}{source.suffix}"
+            shutil.copy2(source, target)
+            rel = f"90_Attachments/{target.name}"
+            updated = update_task(config, args.id, text=f"{task.text} ![[{rel}]]")
+            _print({"path": rel, "task": asdict(updated)})
         else:
             _print(asdict(complete_task(config, args.id)))
+    elif args.command == "remind":
+        from . import remind as reminders
+
+        if args.remind_command == "install":
+            _print(reminders.install(config))
+        elif args.deliver:
+            _print([
+                {"task": asdict(task), "delivery": reminders.deliver(config, task)}
+                for task in reminders.check(config)
+            ])
+        else:
+            _print([asdict(task) for task in reminders.check(config)])
     elif args.command == "agenda":
         _print({key: [asdict(x) for x in value] for key, value in agenda(config).items()})
     elif args.command == "status":
@@ -268,7 +462,7 @@ def run(args: argparse.Namespace) -> int:
         _print(work_sweep(config, days=args.days, dry_run=args.dry_run))
     elif args.command == "cron":
         if args.cron_command == "add":
-            _print(asdict(add_job(args.name, config.vault, args.instruction, args.every)))
+            _print(asdict(add_job(args.name, config.vault, args.instruction, every=args.every or "daily", at=args.at)))
         elif args.cron_command == "remove":
             _print(asdict(remove_job(args.name)))
         elif args.cron_command == "run-due":

@@ -52,13 +52,42 @@ answer. Lexical SQLite FTS is the dependency-free baseline; semantic Chroma retr
 is optional. Run `deeporbit --vault . index` after bulk changes or when the status says
 the local index is stale. Exact text and metadata searches may use `/do:search`.
 
+## Intent routing
+
+Never require slash commands. When the user's utterance clearly expresses one of
+these intents, invoke the matching skill directly — keywords like "todo" or
+"提醒我" are enough:
+
+| Utterance pattern | Skill |
+|---|---|
+| "todo", "待办", "记一下", "add this", any sentence pairing a time with something to do ("今晚七点跟某人吃饭", "明天上午10点看医生") | `do.todo` |
+| "提醒我", "到点叫我", "N点后叫我", "remind me" | `do.remind` (capture the task via `do.todo` first if none exists yet) |
+| "今天做什么", "有什么逾期", "这周安排", "进度怎么样", "所有任务" | `do.agenda` / `do.todo` report flow |
+| "导出日历", "同步到日历" | `do.calendar` |
+
+Time expressions are parsed deterministically by the CLI (`nltime`); always echo
+the parsed date/time back before relying on it.
+
 ## Tasks and calendar
 
-Tasks are standard Markdown checkboxes with stable `^do-*` block IDs. Use `/do:todo`
-to capture or complete them and `/do:agenda` for overdue, today, upcoming, and
-unscheduled views. `/do:calendar` exports dated tasks to ICS. ICS export is one-way
-unless the user deliberately publishes and subscribes to the refreshed file; never
-claim two-way calendar or Reminders synchronization.
+Tasks are standard Markdown checkboxes with stable `^do-*` block IDs and inline
+fields: 📅 due, ⏰ time-of-day, ⏳ scheduled, 🔺⏫🔼🔽⏬ priority, 🔁 recurrence,
+indented subtasks (progress derived as [n/m]). Capture is natural language:
+`deeporbit --vault . todo add "今晚七点跟丽丽吃饭"` parses Chinese and English
+time expressions — no rigid syntax required from the user.
+
+Use `do.todo` to capture, split, polish, and report; `do.agenda` for overdue /
+today / upcoming / unscheduled views; `todo list --view board|timeline|progress
+--md` when a rendered table helps. `99_System/Todo Dashboard.md` gives a standing
+Tasks-plugin board when that plugin is installed.
+
+`do.calendar` exports dated tasks to ICS — timed events when ⏰ is present,
+all-day otherwise. Export is one-way unless the user deliberately publishes and
+subscribes to the refreshed file; never claim two-way calendar or Reminders
+synchronization. Treat ICS as calendar *visibility*, not a reminder channel:
+local timed reminders fire via `deeporbit --vault . remind install` (`do.remind`),
+and one-shot agent-run reminders use `deeporbit cron add <name> "<instruction>"
+--at <ISO-datetime>` (fires once, then auto-disables).
 
 ## External repos and attachments
 

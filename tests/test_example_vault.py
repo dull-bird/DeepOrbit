@@ -53,7 +53,7 @@ def run_cli(*argv: str) -> tuple[int, object]:
 class ExampleVaultTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory()
-        self.vault = Path(self.temp.name) / "example-vault"
+        self.vault = Path(self.temp.name).resolve() / "example-vault"
         shutil.copytree(EXAMPLE_VAULT, self.vault)
         self.addCleanup(self.temp.cleanup)
 

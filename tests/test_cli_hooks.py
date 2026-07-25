@@ -24,7 +24,7 @@ class CliHookTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.env = mock.patch.dict(os.environ, {"XDG_CONFIG_HOME": str(Path(self.temp.name) / "config")})
         self.env.start()
-        self.vault = Path(self.temp.name)
+        self.vault = Path(self.temp.name).resolve()
         initialize(self.vault)
 
     def tearDown(self):

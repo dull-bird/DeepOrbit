@@ -1,5 +1,5 @@
 ---
-description: "Capture, list, or complete portable Markdown tasks via do.todo"
+description: "Capture, refine, split, and report Markdown tasks with NL time parsing via do.todo"
 ---
 
 Use the do.todo skill.

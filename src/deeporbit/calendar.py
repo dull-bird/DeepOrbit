@@ -38,17 +38,27 @@ def export_ics(config: Config, output: Path | None = None, *, privacy_mode: str 
             rules=config.privacy.get("rules"),
         ).value
         description = task.path if mode == "allow" else "<VAULT_PATH>"
+        if task.time:
+            # Timed event: floating local time, one-hour block, 10-minute alert.
+            start = dt.datetime.combine(dt.date.fromisoformat(date), dt.time.fromisoformat(task.time))
+            dtstart = f"DTSTART;VALUE=DATE-TIME:{start.strftime('%Y%m%dT%H%M%S')}"
+            dtend = f"DTEND;VALUE=DATE-TIME:{(start + dt.timedelta(hours=1)).strftime('%Y%m%dT%H%M%S')}"
+            trigger = "TRIGGER;RELATED=START:-PT10M"
+        else:
+            dtstart = f"DTSTART;VALUE=DATE:{compact}"
+            dtend = f"DTEND;VALUE=DATE:{(dt.date.fromisoformat(date) + dt.timedelta(days=1)).strftime('%Y%m%d')}"
+            trigger = "TRIGGER;RELATED=START:PT9H"
         lines.extend([
             "BEGIN:VEVENT",
             f"UID:{task.id}@deeporbit.local",
             f"DTSTAMP:{now}",
-            f"DTSTART;VALUE=DATE:{compact}",
-            f"DTEND;VALUE=DATE:{(dt.date.fromisoformat(date) + dt.timedelta(days=1)).strftime('%Y%m%d')}",
+            dtstart,
+            dtend,
             f"SUMMARY:{_escape(summary)}",
             f"DESCRIPTION:{_escape(description)}",
             "BEGIN:VALARM",
             "ACTION:DISPLAY",
-            "TRIGGER;RELATED=START:PT9H",
+            trigger,
             f"DESCRIPTION:{_escape(summary)}",
             "END:VALARM",
             "END:VEVENT",
@@ -64,4 +74,7 @@ def re_clean_task(text: str) -> str:
 
     text = re.sub(r"\s+#task\b", "", text)
     text = re.sub(r"\s+[⏳📅]\s*\d{4}-\d{2}-\d{2}", "", text)
-    return text.strip()
+    text = re.sub(r"\s*!\[\[[^\]]+\]\]", "", text)  # attachments don't belong in calendar summaries
+    text = re.sub(r"\[\[[^\]|]+\|([^\]]+)\]\]", r"\1", text)  # [[target|alias]] → alias
+    text = re.sub(r"\[\[([^\]]+)\]\]", lambda m: m.group(1).rsplit("/", 1)[-1], text)  # [[path/Note]] → Note
+    return re.sub(r"\s+", " ", text).strip()
