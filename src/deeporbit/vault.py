@@ -18,6 +18,7 @@ SYSTEM_DIRS = [
     "99_System/Archive",
     "99_System/Bases",
     "99_System/Calendar",
+    "99_System/Rules",
 ]
 
 MIGRATIONS = {

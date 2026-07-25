@@ -19,6 +19,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .config import Config
+from .cron import add_job, list_jobs, parse_every
 from .errors import DeepOrbitError
 from .frontmatter import read_fields
 
@@ -105,3 +106,40 @@ def run_plan(config: Config, name: str) -> dict:
         "steps": [{"kind": step.kind, "text": step.text} for step in recipe.steps],
         "warnings": warnings,
     }
+
+
+def schedule_recipe(config: Config, name: str) -> dict:
+    """Idempotently register a cron job from the recipe's `schedule:` frontmatter.
+
+    Job name is `recipe-<name>`; an existing job with that name is reported
+    and left untouched. The instruction points the executing agent at
+    `deeporbit recipe run` so the recipe file stays the single source of truth.
+    """
+    recipe = load_recipe(config, name)
+    if not recipe.schedule:
+        raise RecipeError(
+            f"Recipe '{recipe.name}' has no `schedule:` frontmatter; "
+            "add e.g. `schedule: daily` or `schedule: weekly` to schedule it"
+        )
+    every = recipe.schedule.strip().lower()
+    parse_every(every)  # validates (daily/weekly/hourly/<N>h/<N>d); raises CronError with guidance
+    job_name = f"recipe-{recipe.name}"
+    for job in list_jobs():
+        if job.name == job_name:
+            return {
+                "job": job_name,
+                "recipe": recipe.name,
+                "every": every,
+                "created": False,
+                "note": "cron job already exists; skipped",
+            }
+    job = add_job(
+        job_name,
+        config.vault,
+        instruction=(
+            f'Run recipe "{recipe.name}": resolve it with '
+            f'`deeporbit recipe run "{recipe.name}"` and execute the plan'
+        ),
+        every=every,
+    )
+    return {"job": job.name, "recipe": recipe.name, "every": every, "created": True}

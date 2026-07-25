@@ -7,6 +7,8 @@ advice. Every suggestion carries the concrete action that resolves it.
 
 from __future__ import annotations
 
+import json
+import os
 from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
@@ -15,11 +17,14 @@ from .config import Config
 from .hygiene import scan_hygiene
 from .profile import show as profile_show
 from .search import SearchIndex
+from .tasks import parse_tasks
 from .work import scan
 
 DORMANT_DAYS = 21
+STALLED_DAYS = 7
 STALE_PAUSED_DAYS = 60
 INBOX_LIMIT = 10
+FEEDBACK_NAME = "suggest_feedback.json"
 
 
 @dataclass(slots=True)
@@ -48,6 +53,7 @@ def suggest(
     *,
     today: date | None = None,
     dormant_days: int = DORMANT_DAYS,
+    stalled_days: int = STALLED_DAYS,
     stale_paused_days: int = STALE_PAUSED_DAYS,
     inbox_limit: int = INBOX_LIMIT,
 ) -> list[Suggestion]:
@@ -77,6 +83,35 @@ def suggest(
         and (updated := _activity_date(item)) is not None
         and (today - updated) > timedelta(days=dormant_days)
     ]
+    # stalled-project (7d next-action nudge) and pause-dormant (21d pause
+    # review) are layered, never stacked: dormant items are already covered
+    # by the aggregate pause-dormant report below, so stalled skips them.
+    # The reverse choice (stalled wins) would silently retire pause-dormant,
+    # because 21d dormancy always implies the 7d stalled condition.
+    dormant_paths = {item.path for item in dormant}
+    open_task_paths = {task.path for task in parse_tasks(config) if task.status in ("todo", "doing")}
+    for item in work_items:
+        if item.status != "active" or item.path in dormant_paths:
+            continue
+        updated = _activity_date(item)
+        inactive = updated is not None and (today - updated) > timedelta(days=stalled_days)
+        no_next_action = item.path not in open_task_paths
+        if not (inactive or no_next_action):
+            continue
+        reasons = []
+        if inactive:
+            reasons.append(f"no activity for {(today - updated).days} days")
+        if no_next_action:
+            reasons.append("no open todo in the note")
+        out.append(
+            Suggestion(
+                id="stalled-project",
+                priority="medium",
+                title=f"Stalled: {item.title}",
+                detail=f"{item.path}: {'; '.join(reasons)}",
+                action=f"Set a concrete next action for {item.path} with /do:todo, or pause it",
+            )
+        )
     if dormant:
         out.append(
             Suggestion(
@@ -202,3 +237,62 @@ def hygiene_suggestions(config: Config) -> list[Suggestion]:
             )
         )
     return out
+
+
+# --- suggestion feedback (device-local counters) ---------------------------
+#
+# Minimal feedback loop: the CLI counts, the agent judges. Counters live on
+# the device (not in the vault — they are machine state, not knowledge) and
+# feed the heartbeat context pack as per-rule acceptance rates. Corrupt or
+# missing state is always treated as empty; feedback must never crash a run.
+
+
+def feedback_path() -> Path:
+    if os.name == "nt":
+        root = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
+    else:
+        root = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+    return root / "deeporbit" / FEEDBACK_NAME
+
+
+def load_feedback() -> dict:
+    path = feedback_path()
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def record_feedback(rule_id: str, outcome: str) -> dict:
+    """Accumulate one accepted/dismissed data point for a rule id."""
+    if outcome not in ("accepted", "dismissed"):
+        raise ValueError(f"outcome must be accepted|dismissed, got {outcome!r}")
+    data = load_feedback()
+    entry = data.setdefault(rule_id, {"accepted": 0, "dismissed": 0})
+    if not isinstance(entry, dict):
+        entry = data[rule_id] = {"accepted": 0, "dismissed": 0}
+    entry[outcome] = int(entry.get(outcome, 0) or 0) + 1
+    path = feedback_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {"rule_id": rule_id, "accepted": int(entry.get("accepted", 0) or 0), "dismissed": int(entry.get("dismissed", 0) or 0)}
+
+
+def acceptance_rates() -> dict:
+    """Per-rule counters plus acceptance rate, for the heartbeat context pack."""
+    rates: dict = {}
+    for rule_id, entry in sorted(load_feedback().items()):
+        if not isinstance(entry, dict):
+            continue
+        accepted = int(entry.get("accepted", 0) or 0)
+        dismissed = int(entry.get("dismissed", 0) or 0)
+        total = accepted + dismissed
+        rates[rule_id] = {
+            "accepted": accepted,
+            "dismissed": dismissed,
+            "acceptance_rate": round(accepted / total, 3) if total else None,
+        }
+    return rates

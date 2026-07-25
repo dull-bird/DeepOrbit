@@ -109,6 +109,7 @@ deeporbit --vault ~/Documents/MyVault trash 00_Inbox/stale.md             # 可�
 - `/do:mentor` —— 教练而非助手：基于 `status` + `suggest` + 画像做诊断，一次只教一个方法切片（GTD 管承诺、PARA 管归档位置、卡片笔记管知识复利、原子习惯管节奏——边界研究见 [docs/methodology.md](docs/methodology.md)，已物化进每个 vault），最后只留一个下一步动作。
 - `/do:dream` —— 知识库的离线“做梦”：把反复出现的主题提升为 Wiki 原子笔记、发现隐藏连接、推动生命周期决策、沉淀画像观察。它只提议，你来批准。
 - `deeporbit cron add dream "Run the do.dream consolidation workflow" --every daily` —— 设备本地调度；`cron run-due --agent` 报告到期任务并包成已配置 agent CLI 的交接命令。
+- `/do:heartbeat` —— 批量主动巡检：`deeporbit heartbeat` 汇总上下文包（suggest 建议、状态概览、到期提醒、与昨日快照的 delta），agent 对照 `99_System/Rules/` 中的 WHEN 规则评估，只有命中时你才收到一次批量简报——默认沉默，所有动作提议待批准。用 `deeporbit cron add heartbeat ... --every daily` 排程。
 - `/do:agent` —— 探测本机已安装的 agent CLI（omp/claude/gemini/codex），用 ask 表单选择一个，把执行交给它（ACP/RPC/print）。见 [docs/agent-cli.md](docs/agent-cli.md)。
 - `/do:teach-me` —— 把 vault 知识导出到 [teach-me](https://github.com/dull-bird/teach-me-skill)，附带 `origin` 来源标注块，导入的知识不会与 teach-me 自动积累的知识混淆。见 [docs/teach-me-bridge.md](docs/teach-me-bridge.md)。
 - `deeporbit --vault . sync` —— 当前 vault 的 Git 同步（按需 pull / commit / push）。可直接运行，也可交给 `deeporbit cron`。
@@ -200,7 +201,7 @@ DeepOrbit 在 `99_System/Bases/` 提供项目、研究、包含任务的笔记�
 
 ## 技能一览
 
-DeepOrbit 2.0 内置 **32 个 `do.*` 技能**。`skills/` 是唯一事实来源；每个技能都有配对的 Markdown 与 Gemini TOML 命令。
+DeepOrbit 2.0 内置 **33 个 `do.*` 技能**。`skills/` 是唯一事实来源；每个技能都有配对的 Markdown 与 Gemini TOML 命令。
 
 | 技能 | 用途 |
 |---|---|
@@ -215,6 +216,7 @@ DeepOrbit 2.0 内置 **32 个 `do.*` 技能**。`skills/` 是唯一事实来源�
 | `do.agenda` | 汇总逾期、今天、未来和未排期任务 |
 | `do.calendar` | 将带日期任务导出为 ICS |
 | `do.remind` | 为带时刻的任务安装本地通知（launchd + alerter/osascript） |
+| `do.heartbeat` | 批量主动巡检——默认沉默、提议待批准 |
 | `do.kickoff` | 将想法转化为结构化项目 |
 | `do.write` | 将原始想法整理为个人写作 |
 | `do.research` | 可断点恢复的证据型深度研究 |

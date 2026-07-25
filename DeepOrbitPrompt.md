@@ -63,10 +63,86 @@ these intents, invoke the matching skill directly — keywords like "todo" or
 | "todo", "待办", "记一下", "add this", any sentence pairing a time with something to do ("今晚七点跟某人吃饭", "明天上午10点看医生") | `do.todo` |
 | "提醒我", "到点叫我", "N点后叫我", "remind me" | `do.remind` (capture the task via `do.todo` first if none exists yet) |
 | "今天做什么", "有什么逾期", "这周安排", "进度怎么样", "所有任务" | `do.agenda` / `do.todo` report flow |
+| "今天该干什么", "帮我看看有什么要做的", "巡检一下" | `do.heartbeat` |
 | "导出日历", "同步到日历" | `do.calendar` |
 
 Time expressions are parsed deterministically by the CLI (`nltime`); always echo
 the parsed date/time back before relying on it.
+
+## Skill graph / 技能关系图
+
+<!-- skills-graph:start -->
+```mermaid
+flowchart TD
+  subgraph rhythm[节律层]
+    do_daily["do.daily 每日规划与回顾"]
+    do_heartbeat["do.heartbeat 主动巡检与批量简报"]
+    do_remind["do.remind 定时提醒"]
+    do_agenda["do.agenda 任务日程总览"]
+    do_calendar["do.calendar 任务导出 ICS 日历"]
+  end
+  subgraph perception[感知层]
+    do_rag["do.rag 语义检索"]
+    do_rag_index["do.rag-index 本地索引构建"]
+    do_search["do.search 精确文本搜索"]
+    do_recap["do.recap 周期内容回顾"]
+  end
+  subgraph judgment[判断层]
+    do_mentor["do.mentor 方法教练"]
+    do_dream["do.dream 离线整理与模式提升"]
+    do_brainstorm["do.brainstorm 头脑风暴"]
+    do_ask["do.ask 快速问答"]
+  end
+  subgraph action[行动层]
+    do_todo["do.todo 任务捕获与管理"]
+    do_research["do.research 深度研究"]
+    do_write["do.write 写作"]
+    do_kickoff["do.kickoff 项目立项"]
+    do_archive["do.archive 归档"]
+    do_organize["do.organize 库整理与去重"]
+    do_parse_knowledge["do.parse-knowledge 文本解析入库"]
+    do_fix_links["do.fix-links 补齐缺失链接笔记"]
+    do_note_summary["do.note-summary 外部内容摘要"]
+    do_pdf_to_markdown["do.pdf-to-markdown PDF 转 Markdown"]
+    do_translate["do.translate 文档智能翻译"]
+    do_translate_markdown["do.translate-markdown Markdown 翻译"]
+    do_arxiv_translator["do.arxiv-translator arXiv 论文翻译"]
+    do_mermaid["do.mermaid 图表生成"]
+    do_obsidian_open["do.obsidian-open 在 Obsidian 打开笔记"]
+    do_init["do.init 库初始化"]
+    do_link["do.link 仓库指针笔记"]
+    do_refresh_prompt["do.refresh-prompt 提示词安全更新"]
+    do_teach_me["do.teach-me 教学画像导出"]
+    do_agent["do.agent 本地 agent 配置"]
+  end
+  cron["cron 定时调度"]
+  status["status 生命周期"]
+  suggest["suggest 建议引擎"]
+  profile["profile 用户画像"]
+  recipes["recipes 配方"]
+  rules["rules WHEN 规则"]
+  cron -->|定时唤醒| do_daily
+  cron -->|定时唤醒| do_heartbeat
+  status -->|vault 状态| suggest
+  rules -->|状态谓词预筛| do_heartbeat
+  suggest -->|建议上下文| do_heartbeat
+  suggest -->|建议| do_mentor
+  suggest -->|建议| do_dream
+  do_heartbeat -->|提议待批准| do_todo
+  do_dream -->|观察学习| profile
+  profile -->|画像| do_mentor
+  recipes -->|编排| do_research
+  do_rag_index -->|本地索引| do_rag
+  do_todo -->|到期任务| do_remind
+  rhythm -->|定时唤醒| perception
+  perception -->|vault 状态| judgment
+  judgment -->|提议待批准| action
+  action -->|新笔记与任务| perception
+```
+
+> 图的规范源是 `99_System/DeepOrbit/skills_graph.yaml`；修改技能后运行
+> `python3 scripts/render_skill_graph.py` 重新生成，`scripts/validate_repo.py` 校验一致性。
+<!-- skills-graph:end -->
 
 ## Tasks and calendar
 

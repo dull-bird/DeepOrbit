@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -85,6 +86,39 @@ def main() -> int:
         text = readme.read_text(encoding="utf-8")
         if str(expected) not in text:
             fail(f"{readme.name} does not mention current skill count {expected}", errors)
+
+    # Skill graph consistency: the mermaid block in DeepOrbitPrompt.md must be
+    # exactly what render_skill_graph.py generates from skills_graph.yaml, and
+    # the YAML must cover exactly the on-disk do.* skills.
+    spec_path = ROOT / "99_System" / "DeepOrbit" / "skills_graph.yaml"
+    if not spec_path.exists():
+        fail(f"Missing {spec_path.relative_to(ROOT)}", errors)
+    else:
+        try:
+            graph = yaml.safe_load(spec_path.read_text(encoding="utf-8"))
+            graph_skills = {
+                skill["name"]
+                for layer in graph["layers"].values()
+                for skill in layer["skills"]
+            }
+            disk_skills = {f"do.{name}" for name in skills}
+            if graph_skills != disk_skills:
+                fail(
+                    "Skill graph coverage mismatch: "
+                    f"not-on-disk={sorted(graph_skills - disk_skills)}, "
+                    f"not-in-graph={sorted(disk_skills - graph_skills)}",
+                    errors,
+                )
+        except Exception as exc:
+            fail(f"Invalid {spec_path.relative_to(ROOT)}: {exc}", errors)
+    render_check = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "render_skill_graph.py"), "--check"],
+        capture_output=True,
+        text=True,
+    )
+    if render_check.returncode != 0:
+        detail = (render_check.stderr or render_check.stdout).strip().splitlines()
+        fail(f"Skill graph stale: {detail[0] if detail else 'render_skill_graph.py --check failed'}", errors)
 
     if errors:
         print("DeepOrbit contract validation failed:", file=sys.stderr)

@@ -8,6 +8,7 @@ lifecycle vocabulary is `active | paused | done | archived`; other values
 
 from __future__ import annotations
 
+import json
 import shutil
 from dataclasses import asdict, dataclass
 from datetime import date
@@ -16,9 +17,11 @@ from pathlib import Path, PurePosixPath
 from .config import Config, DEFAULT_DIRS
 from .errors import DeepOrbitError
 from .frontmatter import read_fields, write_fields
+from .tasks import parse_tasks
 
 STATUSES = ("active", "paused", "done", "archived")
 SCAN_DIRS = [*DEFAULT_DIRS, "99_System/Archive"]
+SNAPSHOT_DIR = "99_System/snapshots"
 TRASH_DIR = ".trash"
 CANONICAL_AUTHORS = ("ai", "human", "mixed")
 
@@ -111,6 +114,103 @@ def overview(config: Config) -> dict:
         "counts": dict(sorted(counts.items())),
         "items": [asdict(item) for item in items],
     }
+
+
+# --- progress snapshots ------------------------------------------------------
+#
+# Snapshots give the lifecycle a time dimension: one JSON per day under
+# 99_System/snapshots (knowledge, not cache — they live in the vault and
+# sync with it). Writing is idempotent per day (same-day overwrite), and the
+# interesting output is the delta against the previous snapshot.
+
+
+def _todo_counts(config: Config) -> dict:
+    tasks = parse_tasks(config)
+    return {
+        "total": len(tasks),
+        "open": sum(1 for task in tasks if task.status in ("todo", "doing")),
+        "done": sum(1 for task in tasks if task.status == "done"),
+    }
+
+
+def build_snapshot(config: Config, *, today: date | None = None) -> dict:
+    today = today or date.today()
+    items = scan(config)
+    counts = {status: 0 for status in STATUSES}
+    for item in items:
+        counts[item.status] = counts.get(item.status, 0) + 1
+    return {
+        "date": today.isoformat(),
+        "counts": counts,
+        "items": [{"path": item.path, "status": item.status, "updated": item.updated} for item in items],
+        "todos": _todo_counts(config),
+    }
+
+
+def load_snapshots(config: Config) -> list[dict]:
+    """All on-disk snapshots, ascending by date; corrupt files are skipped."""
+    root = config.vault / SNAPSHOT_DIR
+    if not root.is_dir():
+        return []
+    snapshots: list[dict] = []
+    for path in sorted(root.glob("*.json")):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if isinstance(data, dict) and data.get("date"):
+            snapshots.append(data)
+    return snapshots
+
+
+def snapshot_delta(current: dict, previous: dict | None) -> dict | None:
+    """Newly activated / newly completed items and new done-todo count."""
+    if previous is None:
+        return None
+    prev_status = {item.get("path"): item.get("status", "") for item in previous.get("items", [])}
+    activated = [
+        item["path"]
+        for item in current.get("items", [])
+        if item.get("status") == "active" and prev_status.get(item.get("path")) != "active"
+    ]
+    completed = [
+        item["path"]
+        for item in current.get("items", [])
+        if item.get("status") in ("done", "archived")
+        and prev_status.get(item.get("path")) not in ("done", "archived")
+    ]
+    return {
+        "since": previous.get("date"),
+        "activated": activated,
+        "completed": completed,
+        "done_todos": current.get("todos", {}).get("done", 0) - previous.get("todos", {}).get("done", 0),
+    }
+
+
+def write_snapshot(config: Config, *, today: date | None = None) -> dict:
+    """Persist today's snapshot (same-day overwrite) and diff vs the previous day."""
+    today = today or date.today()
+    current = build_snapshot(config, today=today)
+    previous: dict | None = None
+    for snap in load_snapshots(config):
+        if snap["date"] < current["date"]:
+            previous = snap
+    path = config.vault / SNAPSHOT_DIR / f"{current['date']}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(current, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {
+        "snapshot": str(path.relative_to(config.vault)),
+        **current,
+        "delta": snapshot_delta(current, previous),
+    }
+
+
+def live_delta(config: Config, *, today: date | None = None) -> dict | None:
+    """Delta of the live state against the latest on-disk snapshot, without writing."""
+    today = today or date.today()
+    snapshots = [snap for snap in load_snapshots(config) if snap["date"] <= today.isoformat()]
+    previous = snapshots[-1] if snapshots else None
+    return snapshot_delta(build_snapshot(config, today=today), previous)
 
 
 def _resolve(config: Config, path: str) -> Path:

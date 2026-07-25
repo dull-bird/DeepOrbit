@@ -24,7 +24,7 @@ from .calendar import export_ics
 from .cron import add_job, list_jobs, remove_job, run_due, set_enabled
 from .git_sync import sync_vault
 from .hygiene import scan_hygiene
-from .recipes import list_recipes, run_plan
+from .recipes import list_recipes, run_plan, schedule_recipe
 from .openers import open_note
 from .repolink import write_pointer
 from .work import archive as work_archive
@@ -32,9 +32,11 @@ from .work import overview as work_overview
 from .work import set_status as work_set_status
 from .work import sweep as work_sweep
 from .work import trash as work_trash
+from .work import write_snapshot as work_write_snapshot
 from .schema import build_schema
 from .search import SearchIndex
 from .semantic import ChromaIndex
+from .suggest import record_feedback
 from .suggest import suggest as build_suggestions
 from .tasks import _destination_path, add_task, agenda, complete_task, parse_tasks, progress, update_task
 from .vault import initialize
@@ -107,8 +109,18 @@ def parser() -> argparse.ArgumentParser:
     attach.add_argument("id")
     attach.add_argument("file")
     commands.add_parser("agenda")
-    commands.add_parser("status", help="Overview of every work item by lifecycle status")
-    commands.add_parser("suggest", help="Prioritized suggestions from vault state")
+    status_cmd = commands.add_parser("status", help="Overview of every work item by lifecycle status")
+    status_cmd.add_argument(
+        "--snapshot",
+        action="store_true",
+        help="Persist today's overview to 99_System/snapshots/YYYY-MM-DD.json (idempotent) and diff against the previous snapshot",
+    )
+    suggest_cmd = commands.add_parser("suggest", help="Prioritized suggestions from vault state")
+    suggest_sub = suggest_cmd.add_subparsers(dest="suggest_command")
+    suggest_feedback = suggest_sub.add_parser("feedback", help="Record accepted/dismissed feedback for a suggestion rule")
+    suggest_feedback.add_argument("rule_id")
+    suggest_feedback.add_argument("outcome", choices=["accepted", "dismissed"])
+    commands.add_parser("heartbeat", help="Deterministic context pack for the do.heartbeat patrol (JSON)")
     sweep_cmd = commands.add_parser("sweep", help="Auto-pause active items idle for more than --days days")
     sweep_cmd.add_argument("--days", type=int, default=60)
     sweep_cmd.add_argument("--dry-run", action="store_true")
@@ -140,6 +152,10 @@ def parser() -> argparse.ArgumentParser:
     recipe_sub.add_parser("list")
     recipe_run = recipe_sub.add_parser("run", help="Resolve a recipe into an execution plan (JSON)")
     recipe_run.add_argument("name")
+    recipe_schedule = recipe_sub.add_parser(
+        "schedule", help="Idempotently register a cron job from the recipe's schedule: frontmatter"
+    )
+    recipe_schedule.add_argument("name")
     commands.add_parser("hygiene", help="Detect attachment and code-file violations")
     sync = commands.add_parser("sync", help="Synchronize the vault with Git")
     sync.add_argument("--no-pull", action="store_true", help="Skip git pull before committing")
@@ -455,9 +471,19 @@ def run(args: argparse.Namespace) -> int:
     elif args.command == "agenda":
         _print({key: [asdict(x) for x in value] for key, value in agenda(config).items()})
     elif args.command == "status":
-        _print(work_overview(config))
+        if args.snapshot:
+            _print(work_write_snapshot(config))
+        else:
+            _print(work_overview(config))
     elif args.command == "suggest":
-        _print([asdict(item) for item in build_suggestions(config)])
+        if getattr(args, "suggest_command", None) == "feedback":
+            _print(record_feedback(args.rule_id, args.outcome))
+        else:
+            _print([asdict(item) for item in build_suggestions(config)])
+    elif args.command == "heartbeat":
+        from .heartbeat import build_context
+
+        _print(build_context(config))
     elif args.command == "sweep":
         _print(work_sweep(config, days=args.days, dry_run=args.dry_run))
     elif args.command == "cron":
@@ -497,6 +523,8 @@ def run(args: argparse.Namespace) -> int:
     elif args.command == "recipe":
         if args.recipe_command == "run":
             _print(run_plan(config, args.name))
+        elif args.recipe_command == "schedule":
+            _print(schedule_recipe(config, args.name))
         else:
             _print([asdict(recipe) for recipe in list_recipes(config)])
     elif args.command == "hygiene":

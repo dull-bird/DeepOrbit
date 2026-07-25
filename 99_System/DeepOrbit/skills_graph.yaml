@@ -1,0 +1,232 @@
+# skills_graph.yaml — DeepOrbit 技能关系图规范源（主动参谋系统设计文档 docs/proactive-companion.md）
+#
+# 本文件是技能关系图的唯一事实来源。scripts/render_skill_graph.py 读取本文件，
+# 生成 mermaid flowchart 注入 DeepOrbitPrompt.md；scripts/validate_repo.py 校验一致。
+#
+# 结构约定（render_skill_graph.py 内置的行解析器只支持这个子集，不依赖 PyYAML）：
+#
+#   layers:                  顶层固定三节：layers / systems / edges，键顶格
+#     <layer-id>:            层 id，两个空格缩进；固定四层 rhythm/perception/judgment/action
+#       label: <中文层名>     四个空格缩进
+#       skills:              四个空格缩进，其后列出该层全部技能
+#         - name: do.<name>  六个空格 + "- "，每个技能的第一个键必须是 name
+#           desc: <一行中文描述>      八个空格缩进；不含冒号与全角标点
+#           inputs: [<a>, <b>]        流式列表，半角逗号分隔；可为 []
+#           outputs: [<a>, <b>]
+#   systems:                 非技能节点（CLI 子命令/数据面），两个空格缩进的 key: label
+#   edges:
+#     - from: <id>           两个空格 + "- "；id 可为技能名、systems 键或层 id
+#       to: <id>             四个空格缩进
+#       label: <数据流说明>   半角标点，用于 mermaid 边标签
+#
+# 约束：层内技能的并集必须等于 skills/ 目录下的全部 do.* 技能（33 个）；
+# 每条边的 from/to 必须能解析到已声明的技能、systems 节点或层 id，否则生成器报错。
+
+layers:
+  rhythm:
+    label: 节律层
+    skills:
+      - name: do.daily
+        desc: 每日规划与回顾
+        inputs: [cron, 昨日快照, 日记]
+        outputs: [日报, 今日计划]
+      - name: do.heartbeat
+        desc: 主动巡检与批量简报
+        inputs: [cron, suggest, status, 快照delta, rules]
+        outputs: [批量简报, 待批准提议]
+      - name: do.remind
+        desc: 定时提醒
+        inputs: [do.todo, cron]
+        outputs: [到期提醒]
+      - name: do.agenda
+        desc: 任务日程总览
+        inputs: [do.todo]
+        outputs: [逾期今日将办视图]
+      - name: do.calendar
+        desc: 任务导出 ICS 日历
+        inputs: [do.todo]
+        outputs: [ICS 文件]
+  perception:
+    label: 感知层
+    skills:
+      - name: do.rag
+        desc: 语义检索
+        inputs: [do.rag-index, 查询]
+        outputs: [相关笔记]
+      - name: do.rag-index
+        desc: 本地索引构建
+        inputs: [vault 笔记]
+        outputs: [本地索引]
+      - name: do.search
+        desc: 精确文本搜索
+        inputs: [vault 笔记, 关键词]
+        outputs: [匹配结果]
+      - name: do.recap
+        desc: 周期内容回顾
+        inputs: [近期笔记]
+        outputs: [回顾报告]
+  judgment:
+    label: 判断层
+    skills:
+      - name: do.mentor
+        desc: 方法教练
+        inputs: [status, suggest, profile]
+        outputs: [方法建议, 下一步行动]
+      - name: do.dream
+        desc: 离线整理与模式提升
+        inputs: [vault 笔记, suggest]
+        outputs: [整理提议, profile 观察]
+      - name: do.brainstorm
+        desc: 头脑风暴
+        inputs: [用户想法]
+        outputs: [结构化方案]
+      - name: do.ask
+        desc: 快速问答
+        inputs: [do.rag, 问题]
+        outputs: [回答]
+  action:
+    label: 行动层
+    skills:
+      - name: do.todo
+        desc: 任务捕获与管理
+        inputs: [自然语言, do.heartbeat 提议]
+        outputs: [任务, 提醒]
+      - name: do.research
+        desc: 深度研究
+        inputs: [主题, do.rag]
+        outputs: [研究笔记]
+      - name: do.write
+        desc: 写作
+        inputs: [用户想法]
+        outputs: [文稿]
+      - name: do.kickoff
+        desc: 项目立项
+        inputs: [想法, inbox 笔记]
+        outputs: [项目笔记]
+      - name: do.archive
+        desc: 归档
+        inputs: [完成项]
+        outputs: [归档笔记]
+      - name: do.organize
+        desc: 库整理与去重
+        inputs: [vault]
+        outputs: [整理报告]
+      - name: do.parse-knowledge
+        desc: 文本解析入库
+        inputs: [文本块]
+        outputs: [Area 与 Wiki 笔记]
+      - name: do.fix-links
+        desc: 补齐缺失链接笔记
+        inputs: [Wiki 链接]
+        outputs: [补齐的笔记]
+      - name: do.note-summary
+        desc: 外部内容摘要
+        inputs: [URL, PDF, 音视频]
+        outputs: [摘要笔记]
+      - name: do.pdf-to-markdown
+        desc: PDF 转 Markdown
+        inputs: [PDF]
+        outputs: [Markdown 笔记]
+      - name: do.translate
+        desc: 文档智能翻译
+        inputs: [URL, PDF]
+        outputs: [译文]
+      - name: do.translate-markdown
+        desc: Markdown 翻译
+        inputs: [Markdown]
+        outputs: [译文]
+      - name: do.arxiv-translator
+        desc: arXiv 论文翻译
+        inputs: [arXiv 论文]
+        outputs: [译文 PDF]
+      - name: do.mermaid
+        desc: 图表生成
+        inputs: [结构描述]
+        outputs: [mermaid 图]
+      - name: do.obsidian-open
+        desc: 在 Obsidian 打开笔记
+        inputs: [笔记路径]
+        outputs: [打开的笔记]
+      - name: do.init
+        desc: 库初始化
+        inputs: [vault]
+        outputs: [deeporbit.json, 目录结构]
+      - name: do.link
+        desc: 仓库指针笔记
+        inputs: [仓库路径]
+        outputs: [repo 指针笔记]
+      - name: do.refresh-prompt
+        desc: 提示词安全更新
+        inputs: [DeepOrbitPrompt.md]
+        outputs: [更新的 prompt]
+      - name: do.teach-me
+        desc: 教学画像导出
+        inputs: [vault 知识]
+        outputs: [学习者画像]
+      - name: do.agent
+        desc: 本地 agent 配置
+        inputs: [本地 agent CLI]
+        outputs: [运行时配置]
+
+systems:
+  cron: cron 定时调度
+  status: status 生命周期
+  suggest: suggest 建议引擎
+  profile: profile 用户画像
+  recipes: recipes 配方
+  rules: rules WHEN 规则
+
+edges:
+  # 节点级关键数据流
+  - from: cron
+    to: do.daily
+    label: 定时唤醒
+  - from: cron
+    to: do.heartbeat
+    label: 定时唤醒
+  - from: status
+    to: suggest
+    label: vault 状态
+  - from: rules
+    to: do.heartbeat
+    label: 状态谓词预筛
+  - from: suggest
+    to: do.heartbeat
+    label: 建议上下文
+  - from: suggest
+    to: do.mentor
+    label: 建议
+  - from: suggest
+    to: do.dream
+    label: 建议
+  - from: do.heartbeat
+    to: do.todo
+    label: 提议待批准
+  - from: do.dream
+    to: profile
+    label: 观察学习
+  - from: profile
+    to: do.mentor
+    label: 画像
+  - from: recipes
+    to: do.research
+    label: 编排
+  - from: do.rag-index
+    to: do.rag
+    label: 本地索引
+  - from: do.todo
+    to: do.remind
+    label: 到期任务
+  # 层间数据流（设计文档四层架构）
+  - from: rhythm
+    to: perception
+    label: 定时唤醒
+  - from: perception
+    to: judgment
+    label: vault 状态
+  - from: judgment
+    to: action
+    label: 提议待批准
+  - from: action
+    to: perception
+    label: 新笔记与任务

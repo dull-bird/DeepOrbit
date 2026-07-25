@@ -43,7 +43,7 @@ class SchemaTests(unittest.TestCase):
         names = {cmd["name"] for cmd in self.doc["commands"]}
         self.assertEqual(
             names,
-            {"init", "doctor", "open", "index", "rag", "agenda", "calendar", "status", "suggest", "sync", "sweep", "pause", "resume", "done", "archive", "trash", "serve", "hygiene", "repo-link"},
+            {"init", "doctor", "open", "index", "rag", "agenda", "calendar", "status", "heartbeat", "sync", "sweep", "pause", "resume", "done", "archive", "trash", "serve", "hygiene", "repo-link"},
         )
         init = _command(self.doc["commands"], "init")
         self.assertEqual(init["intent"], {"destructive": False, "idempotent": True, "scope": "directory"})
@@ -66,6 +66,10 @@ class SchemaTests(unittest.TestCase):
         self.assertEqual({cmd["name"] for cmd in cron["commands"]}, {"add", "list", "remove", "run-due", "enable", "disable"})
         remind = _namespace(self.doc, "remind")
         self.assertEqual({cmd["name"] for cmd in remind["commands"]}, {"check", "install"})
+        suggest = _namespace(self.doc, "suggest")
+        self.assertEqual({cmd["name"] for cmd in suggest["commands"]}, {"feedback"})
+        recipe = _namespace(self.doc, "recipe")
+        self.assertEqual({cmd["name"] for cmd in recipe["commands"]}, {"list", "run", "schedule"})
 
     def test_parameter_roles_and_enums(self):
         open_cmd = _command(self.doc["commands"], "open")

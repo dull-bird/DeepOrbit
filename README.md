@@ -114,6 +114,7 @@ Authorship is one invisible frontmatter field, never a visible badge: agents **m
 - `/do:mentor` — a coach, not an assistant: diagnoses from `status` + `suggest` + profile, teaches one method slice at a time (GTD for commitments, PARA for filing, Zettelkasten for knowledge, Atomic Habits for rhythm — boundaries researched in [docs/methodology.md](docs/methodology.md), materialized into each vault), and leaves you with one next action.
 - `/do:dream` — the vault's offline consolidation: promotes repeated themes to Wiki, finds hidden connections, nudges lifecycle decisions, records profile observations. It proposes; you approve.
 - `deeporbit cron add dream "Run the do.dream consolidation workflow" --every daily` — device-local schedules; `cron run-due --agent` reports what's due and wraps each job in the configured agent CLI's handoff command.
+- `/do:heartbeat` — the batched proactive check-in: `deeporbit heartbeat` assembles a context package (suggest issues, status overview, reminders due, delta vs. yesterday's snapshot), the agent evaluates the WHEN rules in `99_System/Rules/` against it, and you get one briefing only when something hits — silence by default, every action propose-approve. Schedule it with `deeporbit cron add heartbeat ... --every daily`.
 - `/do:agent` — detect agent CLIs installed on this machine (omp/claude/gemini/codex), pick one via an ask form, and hand execution to it (ACP/RPC/print). See [docs/agent-cli.md](docs/agent-cli.md).
 - `/do:teach-me` — export vault knowledge into [teach-me](https://github.com/dull-bird/teach-me-skill) with an `origin` provenance block, so imported notes never mix with teach-me's natively accumulated knowledge. See [docs/teach-me-bridge.md](docs/teach-me-bridge.md).
 - `deeporbit --vault . sync` — git sync for the current vault (pull, commit, push when needed). Use it directly or via `deeporbit cron`.
@@ -205,7 +206,7 @@ Tasks remain portable Markdown:
 
 ## Skill catalog
 
-DeepOrbit 2.0 ships **32 `do.*` skills**. `skills/` is the single source of truth; every skill has paired Claude-style Markdown and Gemini TOML commands.
+DeepOrbit 2.0 ships **33 `do.*` skills**. `skills/` is the single source of truth; every skill has paired Claude-style Markdown and Gemini TOML commands.
 
 | Skill | Purpose |
 |---|---|
@@ -220,6 +221,7 @@ DeepOrbit 2.0 ships **32 `do.*` skills**. `skills/` is the single source of trut
 | `do.agenda` | Group overdue, today, upcoming, and unscheduled tasks |
 | `do.calendar` | Export dated tasks to portable ICS |
 | `do.remind` | Install local notifications for timed tasks (launchd + alerter/osascript) |
+| `do.heartbeat` | Batched proactive check-in — silence by default, propose-approve |
 | `do.kickoff` | Turn an idea into a structured project |
 | `do.write` | Polish raw thoughts into personal writing |
 | `do.research` | Checkpointed evidence-based deep research |

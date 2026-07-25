@@ -176,6 +176,27 @@ _METADATA: dict[tuple[str, ...], dict] = {
         "intent": {"destructive": False, "idempotent": True, "scope": "directory"},
         "output": _JSON_OUTPUT,
     },
+    ("suggest", "feedback"): {
+        "summary": "Record accepted/dismissed feedback for a suggestion rule (device-local counters; heartbeat reports acceptance rates)",
+        "tags": ["write"],
+        "intent": {"destructive": False, "idempotent": False, "scope": "global"},
+        "output": _JSON_OUTPUT,
+        "examples": ["deeporbit --vault @main suggest feedback stalled-project accepted"],
+    },
+    ("heartbeat",): {
+        "summary": "Deterministic context pack for the do.heartbeat patrol: suggestions, counts, due reminders, snapshot delta, facts, WHEN rules, feedback rates",
+        "tags": ["read"],
+        "intent": {"destructive": False, "idempotent": True, "scope": "directory"},
+        "output": _JSON_OUTPUT,
+    },
+    ("recipe",): {"summary": "List, resolve, and schedule composable workflow recipes"},
+    ("recipe", "schedule"): {
+        "summary": "Idempotently register a cron job (recipe-<name>) from the recipe's schedule: frontmatter",
+        "tags": ["write"],
+        "intent": {"destructive": False, "idempotent": True, "scope": "global"},
+        "output": _JSON_OUTPUT,
+        "examples": ["deeporbit --vault @main recipe schedule weekly-review"],
+    },
     ("cron",): {"summary": "Schedule recurring DeepOrbit workflows (device-local registry)"},
     ("cron", "add"): {
         "summary": "Register a recurring (--every) or one-shot (--at) natural-language workflow for a vault",
