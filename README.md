@@ -102,6 +102,8 @@ deeporbit --vault ~/Documents/MyVault archive 20_Projects/BigProj         # fold
 deeporbit --vault ~/Documents/MyVault trash 00_Inbox/stale.md             # reversible, into .trash/
 ```
 
+Inside `20_Projects` and `30_Research` the shelving mirrors that state: active work stays at the section root, `pause` files items into `Paused/`, and `archive` into `Archived/` — frontmatter `status` remains the source of truth. Every directory name is customizable in `deeporbit.json` (`directories`), and `init` adopts existing default folders by renaming them to match (see [docs/vault-layout.md](docs/vault-layout.md)).
+
 `99_System/Bases/Work Status.base` is the standing board for active / paused / done / archived work. `99_System/Profile.md` is the vault's picture of the user: stable facts through `profile set`, durable learnings through `profile observe` (timestamped, source-tagged, user-authored facts never silently overwritten).
 
 Folders managed by an external sync (e.g. `60_Notes/微信读书` exported by [weread-vault](https://github.com/dull-bird/weread-vault)) are **read-only zones**: `deeporbit init` detects them via sync frontmatter and records them in `deeporbit.json` (`readonly.directories`). The lifecycle CLI refuses to mutate them, `status` marks them, and suggestions skip them — link to these notes, derive analysis elsewhere.

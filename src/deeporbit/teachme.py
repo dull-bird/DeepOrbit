@@ -24,8 +24,13 @@ from pathlib import Path
 from .config import Config
 from .errors import DeepOrbitError
 
-DEFAULT_EXPORT_DIRS = ("40_Wiki", "60_Notes", "30_Research")
-OPTIONAL_EXPORT_DIRS = ("15_Writings", "20_Projects", "70_Family")
+def default_export_dirs(config: Config) -> tuple[str, str, str]:
+    """Knowledge-layer dirs (wiki, notes, research) under configured names."""
+    return (config.dir("wiki"), config.dir("notes"), config.dir("research"))
+
+
+def optional_export_dirs(config: Config) -> tuple[str, str, str]:
+    return (config.dir("writings"), config.dir("projects"), config.dir("family"))
 
 SCRIPT_ENV = "TEACH_ME_SCRIPT"
 
@@ -78,7 +83,7 @@ def select_export_notes(config: Config, dirs: list[str] | None = None) -> list[P
     and 70_Family are skipped unless their dir is passed explicitly.
     """
     vault = config.vault
-    selected_dirs = list(dirs) if dirs else list(DEFAULT_EXPORT_DIRS)
+    selected_dirs = list(dirs) if dirs else list(default_export_dirs(config))
     readonly = {entry.strip("/") for entry in config.readonly_dirs}
     notes: list[Path] = []
     for rel_dir in selected_dirs:
@@ -122,7 +127,7 @@ def export_to_teach_me(
     notes = select_export_notes(config, dirs)
     if not notes:
         raise TeachMeError(
-            "No exportable notes found. Default dirs: " + ", ".join(DEFAULT_EXPORT_DIRS)
+            "No exportable notes found. Default dirs: " + ", ".join(default_export_dirs(config))
         )
 
     vault_name = config.vault.name

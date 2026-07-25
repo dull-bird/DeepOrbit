@@ -101,12 +101,18 @@ class IntegrationTests(unittest.TestCase):
         note = "30_Research/RAG-Survey.md"
         code, payload = cli("--vault", str(self.vault), "pause", note)
         self.assertEqual((code, payload["status"]), (0, "paused"))
-        fields = read_fields((self.vault / note).read_text(encoding="utf-8"))
+        # research is a status-folder section: pause files the note into Paused/
+        paused_note = "30_Research/Paused/RAG-Survey.md"
+        self.assertEqual(payload["path"], paused_note)
+        self.assertFalse((self.vault / note).exists())
+        fields = read_fields((self.vault / paused_note).read_text(encoding="utf-8"))
         self.assertEqual(fields["updated"], date.today().isoformat())
-        code, payload = cli("--vault", str(self.vault), "resume", note)
+        code, payload = cli("--vault", str(self.vault), "resume", paused_note)
         self.assertEqual(payload["status"], "active")
+        self.assertEqual(payload["path"], note)  # resume returns it to the section root
         code, payload = cli("--vault", str(self.vault), "done", note)
         self.assertEqual(payload["status"], "done")
+        self.assertEqual(payload["path"], note)  # done never moves
         stderr = io.StringIO()
         with redirect_stderr(stderr):
             code = main(["--vault", str(self.vault), "pause", "no/such/note.md"])
@@ -120,8 +126,9 @@ class IntegrationTests(unittest.TestCase):
         code, payload = cli("--vault", str(self.vault), "archive", "20_Projects/ActiveProject")
         self.assertEqual(code, 0)
         moved = self.vault / payload["to"]
-        self.assertEqual(moved.parent.parent.name, "Projects")
-        self.assertEqual(moved.parent.name, f"{date.today():%Y}")
+        # projects is a status-folder section: archive files into <section>/Archived/
+        self.assertEqual(payload["to"], "20_Projects/Archived/ActiveProject")
+        self.assertEqual(moved.parent.name, "Archived")
         self.assertTrue((moved / "ActiveProject.md").is_file())
         self.assertTrue((moved / "assets" / "spec.txt").is_file())  # assets travel with the folder
         fields = read_fields((moved / "ActiveProject.md").read_text(encoding="utf-8"))
@@ -137,7 +144,7 @@ class IntegrationTests(unittest.TestCase):
     def test_archive_never_overwrites(self):
         initialize(self.vault)
         config = load_config(self.vault)
-        dest = self.vault / "99_System" / "Archive" / "Projects" / f"{date.today():%Y}" / "DoneProject.md"
+        dest = self.vault / "20_Projects" / "Archived" / "DoneProject.md"
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text("pre-existing\n", encoding="utf-8")
         from deeporbit.work import archive as work_archive

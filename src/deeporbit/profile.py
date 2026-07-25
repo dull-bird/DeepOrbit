@@ -16,7 +16,8 @@ from pathlib import Path
 from .config import Config
 from .frontmatter import read_fields, write_fields
 
-PROFILE_PATH = "99_System/Profile.md"
+def _profile_path(config: Config) -> str:
+    return f"{config.dir('system')}/Profile.md"
 OBSERVATIONS_HEADER = "## Observations"
 
 DEFAULT_PROFILE = """---
@@ -44,17 +45,17 @@ class ProfileResult:
 
 
 def ensure(config: Config) -> ProfileResult:
-    path = config.vault / PROFILE_PATH
+    path = config.vault / _profile_path(config)
     if path.exists():
-        return ProfileResult(PROFILE_PATH, created=False)
+        return ProfileResult(_profile_path(config), created=False)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(DEFAULT_PROFILE, encoding="utf-8")
-    return ProfileResult(PROFILE_PATH, created=True)
+    return ProfileResult(_profile_path(config), created=True)
 
 
 def show(config: Config) -> dict:
     result = ensure(config)
-    text = (config.vault / PROFILE_PATH).read_text(encoding="utf-8")
+    text = (config.vault / _profile_path(config)).read_text(encoding="utf-8")
     return {
         "path": result.path,
         "fields": read_fields(text),
@@ -64,7 +65,7 @@ def show(config: Config) -> dict:
 
 def set_field(config: Config, key: str, value: str) -> dict:
     result = ensure(config)
-    path = config.vault / PROFILE_PATH
+    path = config.vault / _profile_path(config)
     path.write_text(write_fields(path.read_text(encoding="utf-8"), {key: value}), encoding="utf-8")
     return {"path": result.path, "fields": read_fields(path.read_text(encoding="utf-8"))}
 
@@ -73,7 +74,7 @@ def observe(config: Config, text: str, *, source: str = "agent", today: date | N
     if source not in ("agent", "user"):
         raise ValueError(f"source must be 'agent' or 'user', got {source!r}")
     result = ensure(config)
-    path = config.vault / PROFILE_PATH
+    path = config.vault / _profile_path(config)
     entry = f"- [{today or date.today():%Y-%m-%d}] ({source}) {text}"
     path.write_text(_append_observation(path.read_text(encoding="utf-8"), entry), encoding="utf-8")
     return {"path": result.path, "added": entry}
@@ -85,7 +86,7 @@ FOCUS_HEADER = "## Focus"
 def set_focus(config: Config, text: str) -> dict:
     """Replace the Focus section with a distilled identity summary (dream output)."""
     result = ensure(config)
-    path = config.vault / PROFILE_PATH
+    path = config.vault / _profile_path(config)
     lines = path.read_text(encoding="utf-8").splitlines()
     try:
         start = lines.index(FOCUS_HEADER) + 1
@@ -112,12 +113,12 @@ def compact(config: Config, *, today: date | None = None) -> dict:
     profile stays short while the raw material stays recoverable.
     """
     result = ensure(config)
-    path = config.vault / PROFILE_PATH
+    path = config.vault / _profile_path(config)
     text = path.read_text(encoding="utf-8")
     entries = _observations(text)
     if not entries:
         return {"path": result.path, "archived": 0}
-    archive_dir = config.vault / "99_System" / "Archive" / "Profile"
+    archive_dir = config.vault / config.dir("system") / "Archive" / "Profile"
     archive_dir.mkdir(parents=True, exist_ok=True)
     stamp = (today or date.today()).isoformat()
     archive_file = archive_dir / f"observations-{stamp}.md"

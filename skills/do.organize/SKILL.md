@@ -18,10 +18,13 @@ Analyze the Vault to identify organizational issues: root directory clutter, mes
 You **MUST** open and read `99_System/Templates/Vault_Tree_Template.md` using the `read_file` tool. This document defines the strict, canonical folder hierarchy for the vault.
 Your primary goal is to ensure the actual vault perfectly matches the principles in this template.
 
+0. **Skeleton check (deterministic, run FIRST)**: execute `deeporbit --vault . doctor --strict`. Its JSON reports two machine-readable findings:
+   - `skeleton_missing` — skeleton folders that should exist but don't: the configured top-level directories plus `Paused/` and `Archived/` inside the projects/research sections. Propose `deeporbit --vault . init` to materialize them; init is idempotent and never overwrites.
+   - `skeleton_violations` — root entries outside the whitelist (the skeleton directories, `deeporbit.json`, `DeepOrbitPrompt.md*`, `CLAUDE.md`, `AGENTS.md`, and dot-entries like `.obsidian`/`.git`/`.trash`). Each one is a violation: **ask the user first**, then either file it into the correct section or run `deeporbit --vault . trash <path>` — trash is reversible (items land in `.trash/`), never hard-delete.
 1. **Root Cleanliness**: Ensure no Markdown files exist in the root. The only allowed items in root are:
    - The numbered folders defined in the template (`00_Inbox`, etc.)
    - System directories (`.gemini`, `.agent`, `.agents`, `.obsidian`, `.git`, `.vscode`)
-   - Config files (`DeepOrbitPrompt.md`, `deeporbit.json`, `.gitignore`)
+   - Config/context files (`deeporbit.json`, `DeepOrbitPrompt.md`, `CLAUDE.md`, `AGENTS.md`, `.gitignore`)
 2. **Flag Violations**: Everything else in root is a violation. For each violating item:
 
 1. **Markdown files** → Propose moving to `00_Inbox/` (for triage) or the appropriate numbered folder
@@ -41,6 +44,7 @@ Your primary goal is to ensure the actual vault perfectly matches the principles
 
 ### Step 1: Deterministic Structural Scan & Health Check
 0.5. **Lifecycle triage**: run `deeporbit --vault . status` to see every work item by `active | paused | done | archived`. Flag `done` items for `/do:archive` and long-dormant `active` items as pause candidates — do not treat them as taxonomy problems.
+   - **Paused/Archived shelving**: inside the projects/research sections, an item's location must match its frontmatter `status` (active → section root, paused → `Paused/`, archived → `Archived/`). Run `deeporbit --vault . organize` (dry-run by default) to get the re-filing plan, include it in the proposal, and execute with `deeporbit --vault . organize --apply` only after user approval. Conflicts are reported, never overwritten.
 1. Execute the analysis script: `python3 scripts/analyze_vault.py`.
 2. Wait for the script to output the JSON report.
 3. Read the JSON report to identify:
@@ -105,6 +109,7 @@ Present a comprehensive reorganization proposal, formatted as follows:
 
 ## Rules
 
+- Directory names are configurable: the literal names in this skill (`00_Inbox`, `20_Projects`, …) are the shipped defaults. Always read the `directories` map in `deeporbit.json` first and use the configured names in proposals and commands.
 - Read `deeporbit.json` from the workspace root to determine the interaction language. Use this language for all your responses and generated note contents (e.g. `zh-CN`). **The Obsidian folder paths themselves will ALWAYS remain in English.**
 - Set `author: ai` in frontmatter for every note you create; switch to `author: mixed` when substantially rewriting a human-authored note. Authorship lives in frontmatter only — never add visible badges.
 - Use `do.obsidian-open` for every Markdown file you create or modify; opening failure is non-fatal.

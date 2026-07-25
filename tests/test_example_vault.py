@@ -101,8 +101,12 @@ class ExampleVaultTests(unittest.TestCase):
         path = "30_Research/向量数据库调研.md"
         code, data = self.cli("pause", path)
         self.assertEqual((code, data["status"]), (0, "paused"))
-        code, data = self.cli("resume", path)
+        # research is a status-folder section: pause files the note into Paused/
+        paused_path = f"30_Research/Paused/向量数据库调研.md"
+        self.assertEqual(data["path"], paused_path)
+        code, data = self.cli("resume", paused_path)
         self.assertEqual((code, data["status"]), (0, "active"))
+        self.assertEqual(data["path"], path)
 
     def test_lifecycle_refuses_readonly_zone(self) -> None:
         code, data = self.cli("done", "60_Notes/微信读书/示例书：卡片笔记写作法.md")

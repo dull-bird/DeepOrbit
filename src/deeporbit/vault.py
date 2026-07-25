@@ -5,10 +5,12 @@ import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .config import DEFAULT_DIRS, load_config, save_readonly_dirs
+from .config import DIRECTORIES, load_config, save_readonly_dirs, skeleton_dirs
 from .frontmatter import read_fields
 from .profile import ensure as ensure_profile
 
+# Materialized system surface: the runtime bundle, workflow skills, and
+# Templates/Bases/Prompts overlays stay at the literal 99_System tree.
 SYSTEM_DIRS = [
     "50_Resources/Newsletters",
     "50_Resources/Product_Launches",
@@ -34,6 +36,7 @@ class InitResult:
     created: list[str]
     migrated: list[str]
     conflicts: list[str]
+    adopted: list[str] = field(default_factory=list)
     workflows: list[str] = field(default_factory=list)
     system_files: list[str] = field(default_factory=list)
     guides: list[str] = field(default_factory=list)
@@ -264,6 +267,35 @@ def _merge_directory(source: Path, target: Path, root: Path) -> tuple[list[str],
     return migrated, conflicts
 
 
+def _adopt_default_dirs(root: Path, config, conflicts: list[str]) -> list[str]:
+    """Rename old DIRECTORIES defaults into their configured names.
+
+    Configured name missing + default present with content → rename (adopt).
+    Both present → report a conflict, never merge. An empty default leftover
+    is removed. The literal 99_System materialization is exempt.
+    """
+    adopted: list[str] = []
+    for key, default in DIRECTORIES.items():
+        if key == "system":
+            continue
+        configured = config.dir(key)
+        if configured == default:
+            continue
+        new, old = root / configured, root / default
+        if new.exists():
+            if old.is_dir():
+                conflicts.append(f"{default} and {configured} both exist; not merged")
+            continue
+        if not old.is_dir():
+            continue
+        if any(old.iterdir()):
+            old.rename(new)
+            adopted.append(f"{default} -> {configured}")
+        else:
+            old.rmdir()
+    return adopted
+
+
 def initialize(
     vault: Path | str,
     *,
@@ -273,14 +305,16 @@ def initialize(
 ) -> InitResult:
     root = Path(vault).expanduser().resolve()
     root.mkdir(parents=True, exist_ok=True)
+    config = load_config(root, create=True)
+    conflicts: list[str] = []
+    adopted = _adopt_default_dirs(root, config, conflicts)
     created: list[str] = []
-    for rel in [*DEFAULT_DIRS, "99_System", *SYSTEM_DIRS]:
+    for rel in [*skeleton_dirs(config.directories), *SYSTEM_DIRS]:
         path = root / rel
         if not path.exists():
             path.mkdir(parents=True)
             created.append(rel)
     migrated: list[str] = []
-    conflicts: list[str] = []
     if migrate:
         for old_rel, new_rel in MIGRATIONS.items():
             old = root / old_rel
@@ -288,9 +322,9 @@ def initialize(
                 moved, collided = _merge_directory(old, root / new_rel, root)
                 migrated.extend(moved)
                 conflicts.extend(collided)
-    config = load_config(root, create=True)
-    if ensure_profile(config).created:
-        created.append("99_System/Profile.md")
+    profile = ensure_profile(config)
+    if profile.created:
+        created.append(profile.path)
     repo = Path(repo_source).expanduser().resolve() if repo_source else _default_repo_source()
     workflows: list[str] = []
     source = Path(skills_source).expanduser().resolve() if skills_source else (repo / "skills" if repo else _default_skills_source())
@@ -310,4 +344,14 @@ def initialize(
     readonly_dirs = _detect_readonly_dirs(root, config.readonly_dirs)
     if readonly_dirs != config.readonly_dirs:
         save_readonly_dirs(root, readonly_dirs)
-    return InitResult(created, migrated, conflicts, workflows, system_files, guides, runtime_bundle, readonly_dirs)
+    return InitResult(
+        created=created,
+        migrated=migrated,
+        conflicts=conflicts,
+        adopted=adopted,
+        workflows=workflows,
+        system_files=system_files,
+        guides=guides,
+        runtime_bundle=runtime_bundle,
+        readonly_dirs=readonly_dirs,
+    )

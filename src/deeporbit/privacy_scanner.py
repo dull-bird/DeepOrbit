@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, Literal, Protocol, runtime_checkable
 
+from .config import DEFAULT_DIRS, DIRECTORIES
 from .content_signals import (
     detect_source_signals,
     detect_voice_signals,
@@ -495,20 +496,9 @@ def scan_vault(
     exclude_dirs: list[str] | None = None,
     include_system: bool = True,
 ) -> Iterable[PrivacyScore]:
-    dirs = index_dirs or [
-        "00_Inbox",
-        "10_Diary",
-        "15_Writings",
-        "20_Projects",
-        "30_Research",
-        "40_Wiki",
-        "50_Resources",
-        "60_Notes",
-        "70_Family",
-        "90_Plans",
-    ]
+    dirs = index_dirs or list(DEFAULT_DIRS)
     if include_system:
-        dirs = [*dirs, "99_System"]
+        dirs = [*dirs, DIRECTORIES["system"]]
     exclude = [Path(p) for p in (exclude_dirs or [])]
     for d in dirs:
         dir_path = vault / d

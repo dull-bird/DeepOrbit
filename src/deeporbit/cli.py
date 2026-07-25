@@ -28,6 +28,7 @@ from .recipes import list_recipes, run_plan, schedule_recipe
 from .openers import open_note
 from .repolink import write_pointer
 from .work import archive as work_archive
+from .work import organize as work_organize
 from .work import overview as work_overview
 from .work import set_status as work_set_status
 from .work import sweep as work_sweep
@@ -52,7 +53,17 @@ def parser() -> argparse.ArgumentParser:
     commands = root.add_subparsers(dest="command", required=True)
     init = commands.add_parser("init")
     init.add_argument("--source", help="DeepOrbit repository checkout to materialize into the vault")
-    commands.add_parser("doctor")
+    doctor_cmd = commands.add_parser("doctor")
+    doctor_cmd.add_argument(
+        "--strict",
+        action="store_true",
+        help="Exit 1 when skeleton dirs are missing or root holds non-whitelisted entries (zero-token cron check)",
+    )
+    organize_cmd = commands.add_parser(
+        "organize",
+        help="Re-file projects/research items by frontmatter status (active → root, paused → Paused/, archived → Archived/)",
+    )
+    organize_cmd.add_argument("--apply", action="store_true", help="Perform the moves (default: dry-run plan only)")
     link = commands.add_parser("link", help="Register and resolve external DeepOrbit vaults")
     link_sub = link.add_subparsers(dest="link_command", required=True)
     link_add = link_sub.add_parser("add", help="Register a vault path under a name")
@@ -113,7 +124,7 @@ def parser() -> argparse.ArgumentParser:
     status_cmd.add_argument(
         "--snapshot",
         action="store_true",
-        help="Persist today's overview to 99_System/snapshots/YYYY-MM-DD.json (idempotent) and diff against the previous snapshot",
+        help="Persist today's overview to the system snapshots dir as YYYY-MM-DD.json (idempotent) and diff against the previous snapshot",
     )
     suggest_cmd = commands.add_parser("suggest", help="Prioritized suggestions from vault state")
     suggest_sub = suggest_cmd.add_subparsers(dest="suggest_command")
@@ -171,7 +182,7 @@ def parser() -> argparse.ArgumentParser:
         ("pause", "Mark a note as paused"),
         ("resume", "Return a paused note to active"),
         ("done", "Mark a note as done"),
-        ("archive", "Archive a note or project folder into 99_System/Archive"),
+        ("archive", "Archive a note or project folder (section Archived/ for projects/research)"),
         ("trash", "Move a path into .trash (safe deletion)"),
     ]:
         command = commands.add_parser(verb, help=help_text)
@@ -219,7 +230,7 @@ def parser() -> argparse.ArgumentParser:
         "--dirs",
         nargs="+",
         default=None,
-        help="Vault dirs to export (default: 40_Wiki 60_Notes 30_Research)",
+        help="Vault dirs to export (default: configured wiki/notes/research dirs)",
     )
     teach_me_export.add_argument("--timeout", type=float, default=120.0)
     agent = commands.add_parser("agent", help="Detect and configure the local agent CLI")
@@ -365,7 +376,12 @@ def run(args: argparse.Namespace) -> int:
             candidate = config.vault / candidate
         _print(open_note(candidate, execute=not args.dry_run))
     elif args.command == "doctor":
-        _print(diagnose(config))
+        payload = diagnose(config)
+        _print(payload)
+        if args.strict and (payload["skeleton_missing"] or payload["skeleton_violations"]):
+            return 1
+    elif args.command == "organize":
+        _print(work_organize(config, dry_run=not args.apply))
     elif args.command == "index":
         index = SearchIndex(config)
         if args.action == "status":

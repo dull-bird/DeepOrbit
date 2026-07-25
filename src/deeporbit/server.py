@@ -59,7 +59,7 @@ def build_overview(config: Config) -> dict:
     today = date.today()
     dormant = 0
     for item in items:
-        if item.readonly or item.status != "active" or item.path.startswith("40_Wiki/"):
+        if item.readonly or item.status != "active" or item.path.startswith(config.dir("wiki") + "/"):
             continue
         raw = item.updated or item.mtime
         try:

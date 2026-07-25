@@ -165,10 +165,10 @@ def render_line(task: Task, *, mark: str | None = None) -> str:
 
 def _destination_path(config: Config, destination: str) -> Path:
     if destination == "today":
-        return config.vault / "10_Diary" / f"{dt.date.today().isoformat()}.md"
+        return config.path("diary") / f"{dt.date.today().isoformat()}.md"
     if destination.startswith("project:"):
-        return config.vault / "20_Projects" / f"{destination.split(':', 1)[1]}.md"
-    return config.vault / "00_Inbox" / "Todos.md"
+        return config.path("projects") / f"{destination.split(':', 1)[1]}.md"
+    return config.path("inbox") / "Todos.md"
 
 
 def add_task(

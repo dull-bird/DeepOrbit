@@ -60,9 +60,9 @@ def suggest(
     today = today or date.today()
     items = [item for item in scan(config) if not item.readonly]
     out: list[Suggestion] = []
-    # 40_Wiki is timeless reference (Zettelkasten layer), not lifecycle work:
+    # The wiki is timeless reference (Zettelkasten layer), not lifecycle work:
     # a `status` there is noise, never a dormancy/archival signal.
-    work_items = [item for item in items if not item.path.startswith("40_Wiki/")]
+    work_items = [item for item in items if not item.path.startswith(config.dir("wiki") + "/")]
 
     done = [item for item in work_items if item.status == "done"]
     if done:
@@ -72,7 +72,7 @@ def suggest(
                 priority="high",
                 title=f"Archive {len(done)} completed item(s)",
                 detail=", ".join(item.title for item in done[:5]),
-                action="Run /do:archive to move done work into 99_System/Archive",
+                action="Run /do:archive to move done work into the archive",
             )
         )
 
@@ -141,11 +141,12 @@ def suggest(
             )
         )
 
+    inbox_root = config.path("inbox")
     inbox = [
         path
-        for path in (config.vault / "00_Inbox").glob("*.md")
+        for path in inbox_root.glob("*.md")
         if path.name != "Todos.md"
-    ] if (config.vault / "00_Inbox").is_dir() else []
+    ] if inbox_root.is_dir() else []
     if len(inbox) > inbox_limit:
         out.append(
             Suggestion(
@@ -181,7 +182,7 @@ def suggest(
             )
         )
 
-    if not (config.vault / "10_Diary" / f"{today.isoformat()}.md").exists():
+    if not (config.path("diary") / f"{today.isoformat()}.md").exists():
         out.append(
             Suggestion(
                 id="start-daily",

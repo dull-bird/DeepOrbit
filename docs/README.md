@@ -2,6 +2,7 @@
 
 ## 上手
 - [getting-started.md](getting-started.md) — 安装、初始化、诊断
+- [vault-layout.md](vault-layout.md) — 可配置目录、状态分文件夹与骨架检查
 - [runtime-compatibility.md](runtime-compatibility.md) — 各 agent runtime 的支持矩阵
 
 ## 功能

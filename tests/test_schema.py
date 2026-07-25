@@ -43,7 +43,7 @@ class SchemaTests(unittest.TestCase):
         names = {cmd["name"] for cmd in self.doc["commands"]}
         self.assertEqual(
             names,
-            {"init", "doctor", "open", "index", "rag", "agenda", "calendar", "status", "heartbeat", "sync", "sweep", "pause", "resume", "done", "archive", "trash", "serve", "hygiene", "repo-link"},
+            {"init", "doctor", "open", "index", "rag", "agenda", "calendar", "status", "heartbeat", "sync", "sweep", "pause", "resume", "done", "archive", "trash", "serve", "hygiene", "repo-link", "organize"},
         )
         init = _command(self.doc["commands"], "init")
         self.assertEqual(init["intent"], {"destructive": False, "idempotent": True, "scope": "directory"})

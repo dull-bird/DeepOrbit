@@ -24,10 +24,18 @@ _METADATA: dict[tuple[str, ...], dict] = {
         "examples": ["deeporbit --vault ~/Documents/MyVault init --source /path/to/DeepOrbit"],
     },
     ("doctor",): {
-        "summary": "Diagnose optional capabilities (Obsidian CLI, ChromaDB, plugins)",
+        "summary": "Diagnose optional capabilities (Obsidian CLI, ChromaDB, plugins) and vault skeleton integrity; --strict exits 1 on skeleton gaps or root violations (zero-token cron check)",
         "tags": ["read"],
         "intent": {"destructive": False, "idempotent": True, "scope": "directory"},
         "output": _JSON_OUTPUT,
+        "examples": ["deeporbit --vault @main doctor --strict"],
+    },
+    ("organize",): {
+        "summary": "Re-file projects/research items by frontmatter status (active at section root, paused in Paused/, archived in Archived/); dry-run unless --apply",
+        "tags": ["write"],
+        "intent": {"destructive": False, "idempotent": True, "scope": "directory"},
+        "output": _JSON_OUTPUT,
+        "examples": ["deeporbit --vault @main organize", "deeporbit --vault @main organize --apply"],
     },
     ("open",): {
         "summary": "Open a note through Obsidian CLI, obsidian:// URI, or path fallback",
@@ -140,13 +148,13 @@ _METADATA: dict[tuple[str, ...], dict] = {
         "output": _JSON_OUTPUT,
     },
     ("pause",): {
-        "summary": "Mark a note as paused",
+        "summary": "Mark a note as paused (projects/research items move into the section's Paused/ folder)",
         "tags": ["write"],
         "intent": {"destructive": False, "idempotent": True, "scope": "file"},
         "output": _JSON_OUTPUT,
     },
     ("resume",): {
-        "summary": "Return a paused note to active",
+        "summary": "Return a paused note to active (moves it back to the section root)",
         "tags": ["write"],
         "intent": {"destructive": False, "idempotent": True, "scope": "file"},
         "output": _JSON_OUTPUT,
@@ -158,7 +166,7 @@ _METADATA: dict[tuple[str, ...], dict] = {
         "output": _JSON_OUTPUT,
     },
     ("archive",): {
-        "summary": "Move a note or project folder into 99_System/Archive with archived metadata",
+        "summary": "Archive a note or project folder with archived metadata (projects/research items move into the section's Archived/ folder, everything else into the system Archive)",
         "tags": ["write"],
         "intent": {"destructive": False, "idempotent": False, "scope": "directory"},
         "output": _JSON_OUTPUT,

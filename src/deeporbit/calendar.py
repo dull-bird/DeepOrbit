@@ -15,7 +15,7 @@ def _escape(value: str) -> str:
 
 
 def export_ics(config: Config, output: Path | None = None, *, privacy_mode: str | None = None) -> tuple[Path, int]:
-    output = output or config.vault / "99_System" / "Calendar" / "DeepOrbit.ics"
+    output = output or config.path("system") / "Calendar" / "DeepOrbit.ics"
     output.parent.mkdir(parents=True, exist_ok=True)
     now = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//DeepOrbit//Tasks//EN", "CALSCALE:GREGORIAN"]

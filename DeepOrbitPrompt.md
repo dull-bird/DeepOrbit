@@ -19,21 +19,35 @@ keeping their vault readable without any particular AI runtime or Obsidian plugi
 
 ## Vault model
 
-- `00_Inbox`: quick captures and the default `Todos.md`
-- `10_Diary`: Daily Notes and short-lived context — the agent's auto-generated
-  daily summaries live here (`do.daily`).
-- `15_Writings`: **everything the user writes by hand.** Thematic works (essays,
-  guides, anything with a topical title) live at the root; dated personal
-  entries (`YYYY-MM-DD-标题.md`) belong in `15_Writings/Journal/<year>/` so the
-  root never turns into a flat pile.
-- `20_Projects`: active projects, linked to Areas through `area: "[[...]]"`
-- `30_Research`: research and Areas
-- `40_Wiki`: atomic, reusable concepts
-- `50_Resources`: curated external material
-- `60_Notes`: summaries and raw knowledge captures
-- `70_Family`: family and personal-life records (health, home, care)
-- `90_Plans`: reviewable execution plans and checkpoints
-- `99_System`: templates, Bases, prompts, calendar exports, and archives
+Directories are **logical**, not hardcoded. Each vault resolves paths through the
+`directories` map in its own `deeporbit.json`; the names below are the shipped
+defaults. Renaming any directory in the config is safe — `deeporbit init` adopts
+an existing default folder by renaming it to the configured name, and every
+command follows the mapping.
+
+- inbox (default `00_Inbox`): quick captures and the default `Todos.md`
+- diary (default `10_Diary`): Daily Notes and short-lived context — the agent's
+  auto-generated daily summaries live here (`do.daily`).
+- writings (default `15_Writings`): **everything the user writes by hand.**
+  Thematic works (essays, guides, anything with a topical title) live at the
+  root; dated personal entries (`YYYY-MM-DD-标题.md`) belong in
+  `15_Writings/Journal/<year>/` so the root never turns into a flat pile.
+- projects (default `20_Projects`): active projects, linked to Areas through
+  `area: "[[...]]"`
+- research (default `30_Research`): research and Areas
+- wiki (default `40_Wiki`): atomic, reusable concepts
+- resources (default `50_Resources`): curated external material
+- notes (default `60_Notes`): summaries and raw knowledge captures
+- family (default `70_Family`): family and personal-life records (health, home, care)
+- plans (default `90_Plans`): reviewable execution plans and checkpoints
+- system (default `99_System`): templates, Bases, prompts, calendar exports, and
+  archives
+
+Inside projects and research, lifecycle status is also physical: active items
+sit at the section root, paused items are filed under `Paused/`, archived ones
+under `Archived/` (there is deliberately no `Active/` folder). The frontmatter
+`status` field is always the source of truth — the subfolders are just tidy
+shelving maintained by the lifecycle CLI.
 
 Use Properties, wikilinks, embeds, tags, and meaningful aliases so Obsidian's Graph,
 Backlinks, Bases, and search can reveal connections. Dataview, Tasks, Calendar, and
@@ -205,10 +219,24 @@ the CLI owns every transition:
 - `deeporbit --vault . serve --open` — the local web dashboard (127.0.0.1):
   statistics, one-click lifecycle actions, suggestions, and an ACP agent panel.
 - `deeporbit --vault . pause|resume|done <path>` — flip status and bump `updated`.
-- `deeporbit --vault . archive <path>` — move a note or project folder (assets
-  included) into `99_System/Archive/…` with `archived:` metadata; never overwrites.
+  Inside projects/research, `pause` also files the note (with its same-stem
+  assets folder) into `<section>/Paused/` and `resume` moves it back to the
+  section root; in every other section the transition is frontmatter-only.
+  `done` never moves anything.
+- `deeporbit --vault . archive <path>` — items inside projects/research move into
+  `<section>/Archived/` (flat); everything else moves into `99_System/Archive/…`
+  with `archived:` metadata; never overwrites.
+- `deeporbit --vault . organize [--apply]` — re-file every projects/research item
+  to match its frontmatter `status` (dry-run prints the plan first). Use it to
+  heal drift after manual file moves.
 - `deeporbit --vault . trash <path>` — reversible deletion into `.trash/`;
   protected paths are refused.
+
+Skeleton hygiene: `deeporbit --vault . doctor --strict` exits non-zero when a
+skeleton folder (top-level dirs plus `Paused/`/`Archived/` inside projects and
+research) is missing or the vault root holds anything outside the whitelist
+(skeleton dirs, `deeporbit.json`, prompt/context files, dot entries). It costs
+no LLM tokens — schedule it via cron and organize only when it reports.
 
 Use `/do:archive` for the interactive review flow. `99_System/Bases/Work Status.base`
 gives a standing visual board of active / paused / done / archived work. Keep

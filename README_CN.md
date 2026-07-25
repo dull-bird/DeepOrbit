@@ -97,6 +97,8 @@ deeporbit --vault ~/Documents/MyVault archive 20_Projects/BigProj         # 文�
 deeporbit --vault ~/Documents/MyVault trash 00_Inbox/stale.md             # 可恢复删除，进 .trash/
 ```
 
+在 `20_Projects` 和 `30_Research` 内，文件夹摆放与状态同步：active 留在区根部，`pause` 把条目归入 `Paused/`，`archive` 归入 `Archived/`——frontmatter 的 `status` 永远是真相源。所有目录名都可以在 `deeporbit.json` 的 `directories` 段自定义，`init` 会把已存在的默认目录自动改名收养（见 [docs/vault-layout.md](docs/vault-layout.md)）。
+
 `99_System/Bases/Work Status.base` 是 active / paused / done / archived 的常驻看板。`99_System/Profile.md` 是知识库对你的画像：稳定事实用 `profile set` 维护，日常学到的用 `profile observe` 追加（带时间戳和来源标记，用户亲自写的事实不会被悄悄覆盖）。
 
 由外部同步管理的目录（例如 [weread-vault](https://github.com/dull-bird/weread-vault) 导出的 `60_Notes/微信读书`）是**只读区**：`deeporbit init` 会通过同步 frontmatter 自动识别并写入 `deeporbit.json` 的 `readonly.directories`。生命周期 CLI 拒绝改动这些路径，`status` 会标记它们，建议引擎会跳过——这些笔记随便引用和链接，衍生分析写到自己的目录。

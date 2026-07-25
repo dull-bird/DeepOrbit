@@ -20,11 +20,12 @@ from .remind import check as due_reminders
 from .suggest import acceptance_rates, suggest
 from .work import live_delta, overview
 
-RULES_DIR = "99_System/Rules"
+def _rules_dir(config: Config) -> str:
+    return f"{config.dir('system')}/Rules"
 
 
 def _diary_note_count(config: Config) -> int:
-    root = config.vault / "10_Diary"
+    root = config.path("diary")
     return len(list(root.glob("*.md"))) if root.is_dir() else 0
 
 
@@ -71,7 +72,7 @@ def load_rules(config: Config) -> list[dict]:
     Tolerant by design: a missing directory or an unparseable/incomplete file
     yields an empty (or shorter) list, never an error — rules are advisory.
     """
-    root = config.vault / RULES_DIR
+    root = config.vault / _rules_dir(config)
     if not root.is_dir():
         return []
     rules: list[dict] = []
@@ -95,7 +96,7 @@ def load_rules(config: Config) -> list[dict]:
 
 
 def _inbox_note_count(config: Config) -> int:
-    root = config.vault / "00_Inbox"
+    root = config.path("inbox")
     if not root.is_dir():
         return 0
     return len([path for path in root.glob("*.md") if path.name != "Todos.md"])
@@ -106,7 +107,7 @@ def _diary_streak_days(config: Config, today: dt.date) -> int:
 
     A missing note for today does not break the streak — the day is not over.
     """
-    root = config.vault / "10_Diary"
+    root = config.path("diary")
     if not root.is_dir():
         return 0
     day = today
