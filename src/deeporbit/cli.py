@@ -120,7 +120,8 @@ def parser() -> argparse.ArgumentParser:
     suggest_feedback = suggest_sub.add_parser("feedback", help="Record accepted/dismissed feedback for a suggestion rule")
     suggest_feedback.add_argument("rule_id")
     suggest_feedback.add_argument("outcome", choices=["accepted", "dismissed"])
-    commands.add_parser("heartbeat", help="Deterministic context pack for the do.heartbeat patrol (JSON)")
+    heartbeat_cmd = commands.add_parser("heartbeat", help="Deterministic context pack for the do.heartbeat patrol (JSON)")
+    heartbeat_cmd.add_argument("--gate", action="store_true", help="Zero-token gate: print {notify, reasons} and exit 1 when silent — wrap agent invocations so quiet patrols cost no tokens")
     sweep_cmd = commands.add_parser("sweep", help="Auto-pause active items idle for more than --days days")
     sweep_cmd.add_argument("--days", type=int, default=60)
     sweep_cmd.add_argument("--dry-run", action="store_true")
@@ -481,9 +482,14 @@ def run(args: argparse.Namespace) -> int:
         else:
             _print([asdict(item) for item in build_suggestions(config)])
     elif args.command == "heartbeat":
-        from .heartbeat import build_context
+        from .heartbeat import build_context, evaluate_gate
 
-        _print(build_context(config))
+        context = build_context(config)
+        if args.gate:
+            verdict = evaluate_gate(context)
+            _print(verdict)
+            return 0 if verdict["notify"] else 1
+        _print(context)
     elif args.command == "sweep":
         _print(work_sweep(config, days=args.days, dry_run=args.dry_run))
     elif args.command == "cron":

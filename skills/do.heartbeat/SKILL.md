@@ -21,6 +21,23 @@ This prints a JSON context package: suggest issues, status overview, reminders
 due today, delta vs. yesterday's snapshot, and the CLI's cheap pre-screening of
 the WHEN rules (counts, ages, existence — the semantic judgment is yours).
 
+### Zero-token scheduling (mandatory)
+
+A scheduled patrol MUST NOT invoke an agent when there is nothing to say —
+that would burn model tokens on silence. Every cron/launchd registration of a
+heartbeat goes through the deterministic gate first:
+
+```bash
+deeporbit --vault . heartbeat --gate && <agent invocation>
+```
+
+`--gate` prints `{"notify": bool, "reasons": [...]}` and exits 1 when silent,
+so the shell short-circuits before any model call. The gate fires only on
+facts the CLI can compute (due reminders, stalled projects, inbox over limit,
+broken diary streak, high-priority suggestions) and suppresses rules the user
+has dismissed more than accepted. If you were woken because the gate fired,
+the full context package above tells you which reasons fired.
+
 ## 2. Evaluate WHEN rules (state predicates, not events)
 
 Read every `99_System/Rules/*.md`. Each rule is a **state predicate**

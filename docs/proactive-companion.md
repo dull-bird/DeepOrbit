@@ -56,6 +56,11 @@ OpenClaw Heartbeat 模式：**定时唤醒 agent 执行检查清单，默认沉�
 
 - 调度：复用现有 cron（`cron add heartbeat ... --every daily`），不新建调度器；
   cron = 精确时间做确定的事，heartbeat = 周期检查"有没有该说的事"，职责分离。
+- **零 token 闸门**：定时巡检绝不在无事时唤醒 agent。`deeporbit heartbeat --gate`
+  是确定性判定（退出码 1 = 沉默），注册形式为
+  `deeporbit heartbeat --gate && <agent 调用>`——静默日不消耗任何模型 token。
+  闸门只认 CLI 可算的事实（到期提醒/项目停滞/inbox 超限/日记断更/高优建议），
+  并抑制被用户 dismiss 多于 accept 的规则。
 - 确定性部分（CLI）：`deeporbit heartbeat` 输出上下文包——suggest 建议、
   status 概览、今日到期提醒、与昨日快照的 delta、WHEN 规则预筛结果。
 - 判断部分（skill）：do.heartbeat 契约——读上下文包，按 `99_System/Rules/*.md`

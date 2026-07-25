@@ -23,6 +23,48 @@ from .work import live_delta, overview
 RULES_DIR = "99_System/Rules"
 
 
+def _diary_note_count(config: Config) -> int:
+    root = config.vault / "10_Diary"
+    return len(list(root.glob("*.md"))) if root.is_dir() else 0
+
+
+def evaluate_gate(context: dict, *, inbox_limit: int = 10, diary_habit_notes: int = 3) -> dict:
+    """Deterministic zero-token gate: should an agent be woken at all?
+
+    Fires only on facts the CLI can compute without a model. Rules the user
+    dismissed more than accepted are suppressed (feedback loop). Returns
+    {"notify": bool, "reasons": [...]}; exit-code mapping lives in the CLI.
+    """
+    feedback = context.get("feedback") or {}
+
+    def suppressed(rule_id: str) -> bool:
+        entry = feedback.get(rule_id) or {}
+        return entry.get("dismissed", 0) > entry.get("accepted", 0) and entry.get("dismissed", 0) > 0
+
+    reasons: list[dict] = []
+    due = context.get("reminders_due") or []
+    if due and not suppressed("due-reminders"):
+        reasons.append({"rule": "due-reminders", "detail": f"{len(due)} 个到期提醒"})
+    suggest_ids = [s.get("id") for s in context.get("suggest") or []]
+    stalled = suggest_ids.count("stalled-project")
+    if stalled and not suppressed("stalled-project"):
+        reasons.append({"rule": "stalled-project", "detail": f"{stalled} 个项目停滞"})
+    if "triage-inbox" in suggest_ids and not suppressed("triage-inbox"):
+        reasons.append({"rule": "triage-inbox", "detail": f"inbox 超过 {inbox_limit} 条待处理"})
+    for high in (s for s in (context.get("suggest") or []) if s.get("priority") == "high"):
+        if not suppressed(high.get("id", "")):
+            reasons.append({"rule": high["id"], "detail": high.get("title", "高优先级建议")})
+            break
+    facts = context.get("facts") or {}
+    if (
+        facts.get("diary_streak_days") == 0
+        and facts.get("diary_note_count", 0) >= diary_habit_notes
+        and not suppressed("diary-streak")
+    ):
+        reasons.append({"rule": "diary-streak", "detail": "日记断更"})
+    return {"notify": bool(reasons), "reasons": reasons}
+
+
 def load_rules(config: Config) -> list[dict]:
     """Raw WHEN-THEN rules from 99_System/Rules/*.md frontmatter.
 
@@ -91,6 +133,7 @@ def build_context(config: Config, now: dt.datetime | None = None) -> dict:
             "stalled_projects": sum(1 for item in suggestions if item.id == "stalled-project"),
             "inbox_note_count": _inbox_note_count(config),
             "diary_streak_days": _diary_streak_days(config, today),
+            "diary_note_count": _diary_note_count(config),
         },
         "rules": load_rules(config),
         "feedback": acceptance_rates(),

@@ -14,6 +14,9 @@
 
 ## 设计与调研
 - [architecture.md](architecture.md) — 总体架构
+- [todo-system.md](todo-system.md) — todo 系统设计（2026-07 重设计）
+- [proactive-companion.md](proactive-companion.md) — 主动参谋系统设计（2026-07）
+- [research-references.md](research-references.md) — 两轮重设计引用的论文与一手资料
 - [skill-ecosystem-research.md](skill-ecosystem-research.md) — 外部 skills 与
   开源 NotebookLM 类系统调研（2026-07）
 - [multi-vault-routing-proposal.md](multi-vault-routing-proposal.md) — 多 vault 路由提案

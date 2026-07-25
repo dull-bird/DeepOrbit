@@ -281,6 +281,59 @@ class ProactiveTests(unittest.TestCase):
             code = main(["--vault", str(self.vault), "suggest"])
         self.assertEqual(code, 0)
         self.assertIsInstance(json.loads(buffer.getvalue()), list)
+    # --- zero-token gate -------------------------------------------------
+
+    def _gate(self, **kwargs):
+        from deeporbit.heartbeat import evaluate_gate
+
+        return evaluate_gate(build_context(self.config, now=datetime(2026, 7, 25, 12, 0)), **kwargs)
+
+    def test_gate_silent_on_fresh_vault(self):
+        verdict = self._gate()
+        self.assertFalse(verdict["notify"])
+        self.assertEqual(verdict["reasons"], [])
+
+    def test_gate_fires_on_stalled_project(self):
+        self._write("20_Projects/Old.md", _note(updated=_days_ago(10)))
+        verdict = self._gate()
+        self.assertTrue(verdict["notify"])
+        self.assertIn("stalled-project", [r["rule"] for r in verdict["reasons"]])
+
+    def test_gate_fires_on_due_reminder(self):
+        from deeporbit.tasks import add_task
+
+        add_task(self.config, "晨练", due=str(TODAY), time="00:01")
+        verdict = self._gate()
+        self.assertIn("due-reminders", [r["rule"] for r in verdict["reasons"]])
+
+    def test_gate_diary_requires_established_habit(self):
+        # 2 old notes: below habit threshold → no diary reason
+        for day in ("2026-07-20", "2026-07-21"):
+            self._write(f"10_Diary/{day}.md", "# diary\n")
+        self.assertNotIn("diary-streak", [r["rule"] for r in self._gate()["reasons"]])
+        # third note crosses the habit threshold and the streak is broken → fires
+        self._write("10_Diary/2026-07-22.md", "# diary\n")
+        self.assertIn("diary-streak", [r["rule"] for r in self._gate()["reasons"]])
+
+    def test_gate_suppresses_dismissed_rules(self):
+        self._write("20_Projects/Old.md", _note(updated=_days_ago(10)))
+        record_feedback("stalled-project", "dismissed")
+        verdict = self._gate()
+        self.assertNotIn("stalled-project", [r["rule"] for r in verdict["reasons"]])
+        self.assertFalse(verdict["notify"])
+
+    def test_gate_cli_exit_codes(self):
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            code = main(["--vault", str(self.vault), "heartbeat", "--gate"])
+        self.assertEqual(code, 1)  # silent → exit 1 so shells short-circuit
+        self.assertFalse(json.loads(buffer.getvalue())["notify"])
+        self._write("20_Projects/Old.md", _note(updated=_days_ago(10)))
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            code = main(["--vault", str(self.vault), "heartbeat", "--gate"])
+        self.assertEqual(code, 0)
+        self.assertTrue(json.loads(buffer.getvalue())["notify"])
 
 
 if __name__ == "__main__":
