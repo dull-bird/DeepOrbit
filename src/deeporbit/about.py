@@ -76,23 +76,6 @@ def _write_payload(cfg: Config, payload: dict) -> None:
     )
 
 
-def _user_overrides(cfg: Config) -> dict:
-    """Extract only the fields the user explicitly set (differs from defaults)."""
-    out: dict[str, dict] = {}
-    for key, full in cfg.directories_full.items():
-        default = DIRECTORY_META.get(key, {})
-        entry: dict = {"path": full["path"]}
-        for field_name in ("title", "summary", "when_not", "ai_notes", "custom"):
-            value = full.get(field_name)
-            if value is None:
-                continue
-            if field_name in default and default[field_name] == value:
-                continue
-            entry[field_name] = value
-        out[key] = entry
-    return out
-
-
 def add(
     cfg: Config,
     *,
