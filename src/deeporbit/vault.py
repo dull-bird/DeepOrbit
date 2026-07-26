@@ -306,6 +306,9 @@ def initialize(
     root = Path(vault).expanduser().resolve()
     root.mkdir(parents=True, exist_ok=True)
     config = load_config(root, create=True)
+    from .config import stamp_version
+
+    stamp_version(root)
     conflicts: list[str] = []
     adopted = _adopt_default_dirs(root, config, conflicts)
     created: list[str] = []

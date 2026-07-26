@@ -30,6 +30,20 @@ _METADATA: dict[tuple[str, ...], dict] = {
         "output": _JSON_OUTPUT,
         "examples": ["deeporbit --vault @main doctor --strict"],
     },
+    ("triage",): {
+        "summary": "Classify stray files deterministically: valuable → inbox/research/notes/resources, code/secrets → out-of-vault, junk → trash. Read-only; execution is agent + user approval",
+        "tags": ["read"],
+        "intent": {"destructive": False, "idempotent": True, "scope": "directory"},
+        "output": _JSON_OUTPUT,
+        "examples": ["deeporbit --vault @main triage", "deeporbit --vault @main triage stray.md olddir/"],
+    },
+    ("sync-prompts",): {
+        "summary": "Sync DeepOrbit-managed prompt content (DeepOrbitPrompt.md/AGENTS.md/CLAUDE.md) via conflict-safe managed blocks; user text outside markers is never touched",
+        "tags": ["write"],
+        "intent": {"destructive": False, "idempotent": True, "scope": "directory"},
+        "output": _JSON_OUTPUT,
+        "examples": ["deeporbit --vault @main sync-prompts --dry-run", "deeporbit --vault @main sync-prompts"],
+    },
     ("organize",): {
         "summary": "Re-file projects/research items by frontmatter status (active at section root, paused in Paused/, archived in Archived/); dry-run unless --apply",
         "tags": ["write"],

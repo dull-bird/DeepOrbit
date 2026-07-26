@@ -47,6 +47,16 @@ runs `npx skills add`. They are git-ignored.
 When modifying `README.md` or `README_CN.md`, you **MUST** update both. `README.md` is
 English, `README_CN.md` is Chinese; any content change to one must be mirrored in the other.
 
+### No API keys in core
+DeepOrbit core talks to agents through the CLI surface (`deeporbit __schema`) and JSON
+only. The agent is the model; `src/deeporbit` must NEVER embed LLM clients, API keys,
+or outbound model calls. `tests/test_triage_sync.py::NoApiKeyGuardTests` enforces this.
+
+### Managed prompt files
+System-owned prompt content lives only inside `<!-- deeporbit-managed:NAME -->` blocks
+(`src/deeporbit/sync.py`). User text outside markers is never overwritten; refresh goes
+through `deeporbit sync-prompts`.
+
 ### Skill & command sync
 When adding, removing, or modifying any skill (`skills/`) or command (`commands/`), you
 **MUST** update `README.md` and `README_CN.md` — skill counts, mindmap diagrams, and the

@@ -48,9 +48,16 @@ def _print(value):
 
 
 def parser() -> argparse.ArgumentParser:
+    from . import __version__
+
     root = argparse.ArgumentParser(prog="deeporbit")
+    root.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     root.add_argument("--vault", default=".", help="Obsidian vault path")
     commands = root.add_subparsers(dest="command", required=True)
+    triage_cmd = commands.add_parser("triage", help="Classify stray files: valuable → where, junk → trash (JSON, never moves anything)")
+    triage_cmd.add_argument("paths", nargs="*", help="Vault-relative paths (default: all non-whitelisted root entries)")
+    sync_prompts_cmd = commands.add_parser("sync-prompts", help="Sync DeepOrbit-managed prompt content with conflict-safe managed blocks")
+    sync_prompts_cmd.add_argument("--dry-run", action="store_true")
     init = commands.add_parser("init")
     init.add_argument("--source", help="DeepOrbit repository checkout to materialize into the vault")
     doctor_cmd = commands.add_parser("doctor")
@@ -506,6 +513,26 @@ def run(args: argparse.Namespace) -> int:
             _print(verdict)
             return 0 if verdict["notify"] else 1
         _print(context)
+    elif args.command == "triage":
+        from .triage import triage as run_triage
+
+        _print(run_triage(config, args.paths or None))
+    elif args.command == "sync-prompts":
+        from .sync import agents_stub, claude_stub, extract_section, prompt_pointer_block, sync_file
+
+        vault_path = str(config.vault)
+        bundle = config.path("system") / "DeepOrbit" / "repo" / "DeepOrbitPrompt.md"
+        block = prompt_pointer_block(vault_path)
+        if bundle.exists():
+            routing = extract_section(bundle.read_text(encoding="utf-8"), "## Intent routing")
+            if routing:
+                block = "## DeepOrbit intent routing (managed)\n\n" + routing + "\n\n" + prompt_pointer_block(vault_path)
+        results = [
+            sync_file(config.vault / "DeepOrbitPrompt.md", name="intent-routing", block_content=block, dry_run=args.dry_run),
+            sync_file(config.vault / "AGENTS.md", name="deeporbit-context", block_content=prompt_pointer_block(vault_path), full_content=agents_stub(vault_path), dry_run=args.dry_run),
+            sync_file(config.vault / "CLAUDE.md", name="deeporbit-context", block_content=prompt_pointer_block(vault_path), full_content=claude_stub(), dry_run=args.dry_run),
+        ]
+        _print([asdict(result) for result in results])
     elif args.command == "sweep":
         _print(work_sweep(config, days=args.days, dry_run=args.dry_run))
     elif args.command == "cron":

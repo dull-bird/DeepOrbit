@@ -58,6 +58,7 @@ class Config:
     privacy: dict = field(default_factory=dict)
     agent: dict = field(default_factory=dict)
     directories: dict = field(default_factory=lambda: dict(DIRECTORIES))
+    deeporbit_version: str = ""
 
     def dir(self, name: str) -> str:
         """Vault-relative path for a logical directory ('inbox', 'projects', …)."""
@@ -110,6 +111,7 @@ def _normalized_payload(raw: dict) -> dict:
             "directories": raw.get("readonly", {}).get("directories", []),
         },
         "directories": directories,
+        "deeporbit_version": raw.get("deeporbit_version", ""),
         "privacy": _normalize_privacy(raw.get("privacy", {})),
         "agent": _normalize_agent(raw.get("agent", {})),
     }
@@ -187,7 +189,26 @@ def load_config(vault: Path | str, *, create: bool = False) -> Config:
         privacy=payload["privacy"],
         agent=dict(payload["agent"]),
         directories=dict(payload["directories"]),
+        deeporbit_version=payload["deeporbit_version"],
     )
+
+
+def stamp_version(vault: Path | str) -> str:
+    """Record the running DeepOrbit version into deeporbit.json."""
+    from . import __version__
+
+    root = Path(vault).expanduser().resolve()
+    path = root / CONFIG_NAME
+    raw: dict = {}
+    if path.exists():
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            raw = {}
+    payload = _normalized_payload(raw)
+    payload["deeporbit_version"] = __version__
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return __version__
 
 
 def save_agent(vault: Path | str, agent: dict | None) -> None:
