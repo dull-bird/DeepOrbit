@@ -154,3 +154,84 @@ def test_about_flatten_includes_children(vault):
     assert ("projects", "paused") in pairs
     assert ("projects", "archived") in pairs
     assert ("research", "paused") in pairs
+
+
+from deeporbit.errors import ConfigError
+
+
+def test_about_add_creates_directory_and_entry(vault):
+    cfg = load_config(vault)
+    result = about_mod.add(
+        cfg,
+        logical_name="books",
+        path="80_Books",
+        title="读书笔记",
+        summary="用户自定义",
+    )
+    assert (vault / "80_Books").is_dir()
+    assert result["logical_name"] == "books"
+    cfg2 = load_config(vault)
+    assert cfg2.dir("books") == "80_Books"
+    assert cfg2.directory_meta["books"]["title"] == "读书笔记"
+    assert cfg2.directory_meta["books"]["custom"] is True
+
+
+def test_about_add_conflict_raises(vault):
+    cfg = load_config(vault)
+    with pytest.raises(ConfigError):
+        about_mod.add(cfg, logical_name="inbox", path="X", title="dup")
+
+
+def test_about_add_with_parent_nests_under_children(vault):
+    cfg = load_config(vault)
+    about_mod.add(
+        cfg,
+        logical_name="projects-active",
+        path="20_Projects/Active",
+        title="进行中的项目",
+        parent="projects",
+    )
+    cfg2 = load_config(vault)
+    children = cfg2.directory_meta["projects"]["children"]
+    assert "projects-active" in children
+    assert children["projects-active"]["path"] == "20_Projects/Active"
+
+
+def test_about_set_partial_update(vault):
+    cfg = load_config(vault)
+    about_mod.set_fields(cfg, "inbox", title="新标题")
+    cfg2 = load_config(vault)
+    assert cfg2.directory_meta["inbox"]["title"] == "新标题"
+    # 其他字段保留默认
+    assert cfg2.directory_meta["inbox"]["summary"] == DIRECTORY_META["inbox"]["summary"]
+
+
+def test_about_remove_custom_only(vault):
+    cfg = load_config(vault)
+    about_mod.add(cfg, logical_name="books", path="80_Books", title="读书笔记")
+    cfg = load_config(vault)
+    about_mod.remove(cfg, "books")
+    cfg2 = load_config(vault)
+    assert "books" not in cfg2.directories
+    # 实际目录保留
+    assert (vault / "80_Books").is_dir()
+
+
+def test_about_remove_builtin_rejected(vault):
+    cfg = load_config(vault)
+    with pytest.raises(ConfigError):
+        about_mod.remove(cfg, "inbox")
+
+
+def test_about_sync_rewrites_v3(vault):
+    # 先手动写一个 v2 json 模拟旧 vault
+    (vault / CONFIG_NAME).write_text(
+        json.dumps({"schema_version": 2, "directories": {"inbox": "00_Inbox"}}),
+        encoding="utf-8",
+    )
+    cfg = load_config(vault)
+    result = about_mod.sync(cfg)
+    raw = json.loads((vault / CONFIG_NAME).read_text(encoding="utf-8"))
+    assert raw["schema_version"] == 3
+    assert raw["directories"]["inbox"]["path"] == "00_Inbox"
+    assert result["schema_version"] == 3
