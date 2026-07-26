@@ -185,7 +185,7 @@ DEFAULT_PRIVACY = {
 
 
 def _merge_meta(default: dict, override: dict) -> dict:
-    merged = {**default, **{k: v for k, v in override.items() if v}}
+    merged = {**default, **{k: v for k, v in override.items() if v is not None}}
     if "children" in default or "children" in override:
         default_children = default.get("children") or {}
         override_children = override.get("children") or {}

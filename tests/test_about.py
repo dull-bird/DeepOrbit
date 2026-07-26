@@ -206,6 +206,16 @@ def test_about_set_partial_update(vault):
     assert cfg2.directory_meta["inbox"]["summary"] == DIRECTORY_META["inbox"]["summary"]
 
 
+def test_about_set_empty_string_round_trips(vault):
+    """Explicitly setting a field to "" must not be silently re-defaulted."""
+    cfg = load_config(vault)
+    about_mod.set_fields(cfg, "inbox", summary="")
+    cfg2 = load_config(vault)
+    assert cfg2.directory_meta["inbox"]["summary"] == ""
+    # 其他字段保留默认
+    assert cfg2.directory_meta["inbox"]["title"] == DIRECTORY_META["inbox"]["title"]
+
+
 def test_about_remove_custom_only(vault):
     cfg = load_config(vault)
     about_mod.add(cfg, logical_name="books", path="80_Books", title="读书笔记")
