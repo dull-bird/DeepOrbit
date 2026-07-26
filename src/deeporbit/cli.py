@@ -60,7 +60,12 @@ def parser() -> argparse.ArgumentParser:
     sync_prompts_cmd.add_argument("--dry-run", action="store_true")
     init = commands.add_parser("init")
     init.add_argument("--source", help="DeepOrbit repository checkout to materialize into the vault")
-    about_cmd = commands.add_parser("about", help="Show or edit vault directory semantics (deeporbit.json)")
+    about_cmd = commands.add_parser(
+        "about",
+        help="Show or edit vault directory semantics (deeporbit.json)",
+        epilog="positional <key> is supported via deeporbit's argv pre-processing; see cli.py main()",
+    )
+    about_cmd.add_argument("key", nargs="?", help="Logical name, path, or title (default: full tree)")
     about_cmd.add_argument("--list", action="store_true", help="Flat list of all nodes including children")
     about_cmd.add_argument("--tree", action="store_true", help="Tree view (default when no key given)")
     about_sub = about_cmd.add_subparsers(dest="about_command")

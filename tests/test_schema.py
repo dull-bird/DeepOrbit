@@ -101,6 +101,16 @@ class SchemaTests(unittest.TestCase):
             self.assertEqual(sub["path"], ["about"])
             self.assertIn("summary", sub)
 
+    def test_about_key_positional_exposed(self):
+        """The `key` positional handled by argv pre-processing must surface
+        in help/schema so users and agent harnesses discover it."""
+        about = _namespace(self.doc, "about")
+        positionals = [opt for opt in about.get("options", []) if opt["role"] == "positional"]
+        names = {opt["name"] for opt in positionals}
+        self.assertIn("key", names)
+        key = next(opt for opt in positionals if opt["name"] == "key")
+        self.assertFalse(key["required"])
+
 
 if __name__ == "__main__":
     unittest.main()
