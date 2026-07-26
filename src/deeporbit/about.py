@@ -39,11 +39,15 @@ def tree(cfg: Config) -> list[dict]:
 
 
 def flatten(cfg: Config) -> list[dict]:
-    """All nodes including nested children, as a flat list."""
+    """All nodes including nested children, as a flat list.
+
+    Each node keeps its own ``children`` array (same shape as :func:`tree`)
+    so callers can walk descendants without a second lookup.
+    """
     out: list[dict] = []
 
     def walk(node: dict) -> None:
-        out.append({k: v for k, v in node.items() if k != "children"})
+        out.append(node)
         for child in node["children"]:
             walk(child)
 
@@ -52,8 +56,20 @@ def flatten(cfg: Config) -> list[dict]:
     return out
 
 
+def flat_list(cfg: Config) -> list[dict]:
+    """Like :func:`flatten` but with the ``children`` key stripped.
+
+    Suitable for tabular / list output where descendants appear as siblings.
+    """
+    return [{k: v for k, v in node.items() if k != "children"} for node in flatten(cfg)]
+
+
 def lookup(cfg: Config, key: str) -> dict:
-    """Find one node by logical name, path, or title."""
+    """Find one node by logical name, path, or title.
+
+    Returns the full node (including ``children``) so the shape matches
+    :func:`tree` for the same logical directory.
+    """
     needle = key.strip()
     for node in flatten(cfg):
         if needle in (node["logical_name"], node["path"], node["title"]):

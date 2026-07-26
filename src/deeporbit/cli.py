@@ -414,7 +414,7 @@ def run(args: argparse.Namespace) -> int:
         sub = getattr(args, "about_command", None)
         if sub is None:
             if args.list:
-                _print(about_mod.flatten(config))
+                _print(about_mod.flat_list(config))
             elif args.key:
                 try:
                     _print(about_mod.lookup(config, args.key))

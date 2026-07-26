@@ -156,6 +156,35 @@ def test_about_flatten_includes_children(vault):
     assert ("research", "paused") in pairs
 
 
+def test_about_flatten_preserves_children_shape(vault):
+    """flatten() now keeps each node's own ``children`` array (tree-parity)."""
+    cfg = load_config(vault)
+    flat = about_mod.flatten(cfg)
+    projects = next(n for n in flat if n["logical_name"] == "projects" and n["parent"] is None)
+    child_names = {c["logical_name"] for c in projects["children"]}
+    assert {"paused", "archived"} <= child_names
+
+
+def test_about_flat_list_strips_children(vault):
+    """flat_list() is the stripped variant used by ``--list``."""
+    cfg = load_config(vault)
+    rows = about_mod.flat_list(cfg)
+    assert rows, "expected non-empty list"
+    for row in rows:
+        assert "children" not in row
+    pairs = {(n.get("parent"), n["logical_name"]) for n in rows}
+    assert ("projects", "paused") in pairs
+    assert ("projects", "archived") in pairs
+
+
+def test_about_lookup_returns_children_like_tree(vault):
+    """lookup() returns the same node shape as tree() — children included."""
+    cfg = load_config(vault)
+    node = about_mod.lookup(cfg, "projects")
+    child_names = {c["logical_name"] for c in node["children"]}
+    assert {"paused", "archived"} <= child_names
+
+
 from deeporbit.errors import ConfigError
 
 
