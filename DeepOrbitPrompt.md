@@ -43,6 +43,9 @@ command follows the mapping.
 - system (default `99_System`): templates, Bases, prompts, calendar exports, and
   archives
 
+当需要判断"这条内容应该放哪个目录"时，先 `deeporbit --vault <p> about --json`
+拉取目录语义（title / summary / when_not / ai_notes），再决策。不要凭目录名猜。
+
 Inside projects and research, lifecycle status is also physical: active items
 sit at the section root, paused items are filed under `Paused/`, archived ones
 under `Archived/` (there is deliberately no `Active/` folder). The frontmatter
