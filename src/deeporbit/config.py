@@ -58,8 +58,8 @@ DIRECTORY_META: dict[str, dict] = {
         "when_not": "长期兴趣、没有结束条件的主题放 30_Research",
         "ai_notes": "状态迁移走 deeporbit pause/resume/done/archive；不要手改 frontmatter status",
         "children": {
-            "projects-paused": {"path": "20_Projects/Paused", "title": "已暂停项目"},
-            "projects-archived": {"path": "20_Projects/Archived", "title": "已归档项目"},
+            "paused": {"path": "20_Projects/Paused", "title": "已暂停项目"},
+            "archived": {"path": "20_Projects/Archived", "title": "已归档项目"},
         },
     },
     "research": {
@@ -68,8 +68,8 @@ DIRECTORY_META: dict[str, dict] = {
         "when_not": "有交付物的具体工作放 20_Projects",
         "ai_notes": "同 projects，状态迁移走 CLI",
         "children": {
-            "research-paused": {"path": "30_Research/Paused", "title": "已暂停研究"},
-            "research-archived": {"path": "30_Research/Archived", "title": "已归档研究"},
+            "paused": {"path": "30_Research/Paused", "title": "已暂停研究"},
+            "archived": {"path": "30_Research/Archived", "title": "已归档研究"},
         },
     },
     "wiki": {

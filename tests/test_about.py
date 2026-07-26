@@ -46,3 +46,12 @@ def test_load_config_exposes_directory_meta(vault):
     assert cfg.directory_meta["inbox"]["title"]
     # 默认表 merge：用户 json 没写的字段从默认表补
     assert cfg.directory_meta["inbox"]["summary"]
+
+
+def test_children_keys_unprefixed():
+    projects_children = DIRECTORY_META["projects"]["children"]
+    assert "paused" in projects_children
+    assert "archived" in projects_children
+    research_children = DIRECTORY_META["research"]["children"]
+    assert "paused" in research_children
+    assert "archived" in research_children
