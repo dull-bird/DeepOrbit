@@ -93,6 +93,14 @@ class SchemaTests(unittest.TestCase):
         self.assertIn("deeporbit.json", config_files)
         self.assertIn("~/.config/deeporbit/links.json", config_files)
 
+    def test_about_namespace_and_subcommands(self):
+        about = _namespace(self.doc, "about")
+        names = {cmd["name"] for cmd in about["commands"]}
+        self.assertEqual(names, {"add", "set", "remove", "sync"})
+        for sub in about["commands"]:
+            self.assertEqual(sub["path"], ["about"])
+            self.assertIn("summary", sub)
+
 
 if __name__ == "__main__":
     unittest.main()

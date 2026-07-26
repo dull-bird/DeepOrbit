@@ -235,3 +235,17 @@ def test_about_sync_rewrites_v3(vault):
     assert raw["schema_version"] == 3
     assert raw["directories"]["inbox"]["path"] == "00_Inbox"
     assert result["schema_version"] == 3
+
+
+def test_doctor_flags_v2_schema(tmp_path):
+    (tmp_path / CONFIG_NAME).write_text(
+        json.dumps({"schema_version": 2, "directories": {"inbox": "00_Inbox"}}),
+        encoding="utf-8",
+    )
+    for d in DIRECTORIES.values():
+        (tmp_path / d).mkdir(parents=True, exist_ok=True)
+    from deeporbit.doctor import diagnose
+    cfg = load_config(tmp_path)
+    report = diagnose(cfg)
+    issues = json.dumps(report, ensure_ascii=False)
+    assert "schema_version" in issues or "v3" in issues or "about sync" in issues
