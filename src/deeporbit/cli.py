@@ -60,6 +60,27 @@ def parser() -> argparse.ArgumentParser:
     sync_prompts_cmd.add_argument("--dry-run", action="store_true")
     init = commands.add_parser("init")
     init.add_argument("--source", help="DeepOrbit repository checkout to materialize into the vault")
+    about_cmd = commands.add_parser("about", help="Show or edit vault directory semantics (deeporbit.json)")
+    about_cmd.add_argument("--list", action="store_true", help="Flat list of all nodes including children")
+    about_cmd.add_argument("--tree", action="store_true", help="Tree view (default when no key given)")
+    about_sub = about_cmd.add_subparsers(dest="about_command")
+    about_add = about_sub.add_parser("add", help="Register a new logical directory")
+    about_add.add_argument("logical_name")
+    about_add.add_argument("--path", required=True)
+    about_add.add_argument("--title", required=True)
+    about_add.add_argument("--summary", default="")
+    about_add.add_argument("--when-not", dest="when_not", default="")
+    about_add.add_argument("--ai-notes", dest="ai_notes", default="")
+    about_add.add_argument("--parent", default=None, help="Nest under an existing logical name")
+    about_set = about_sub.add_parser("set", help="Update fields on an existing logical directory")
+    about_set.add_argument("logical_name")
+    about_set.add_argument("--path", default=None)
+    about_set.add_argument("--title", default=None)
+    about_set.add_argument("--summary", default=None)
+    about_set.add_argument("--when-not", dest="when_not", default=None)
+    about_set.add_argument("--ai-notes", dest="ai_notes", default=None)
+    about_sub.add_parser("remove", help="Remove a custom logical directory (does not delete the folder)").add_argument("logical_name")
+    about_sub.add_parser("sync", help="Rewrite deeporbit.json in v3 form, merging defaults")
     doctor_cmd = commands.add_parser("doctor")
     doctor_cmd.add_argument(
         "--strict",
@@ -382,6 +403,41 @@ def run(args: argparse.Namespace) -> int:
         if not candidate.is_absolute():
             candidate = config.vault / candidate
         _print(open_note(candidate, execute=not args.dry_run))
+    elif args.command == "about":
+        from . import about as about_mod
+
+        sub = getattr(args, "about_command", None)
+        if sub is None:
+            if args.list:
+                _print(about_mod.flatten(config))
+            elif args.key:
+                try:
+                    _print(about_mod.lookup(config, args.key))
+                except KeyError as exc:
+                    raise DeepOrbitError(str(exc))
+            else:
+                _print(about_mod.tree(config))
+        elif sub == "sync":
+            _print(about_mod.sync(config))
+        elif sub == "add":
+            _print(about_mod.add(
+                config,
+                logical_name=args.logical_name,
+                path=args.path,
+                title=args.title,
+                summary=args.summary,
+                when_not=args.when_not,
+                ai_notes=args.ai_notes,
+                parent=args.parent,
+            ))
+        elif sub == "set":
+            updates = {k: v for k, v in {
+                "path": args.path, "title": args.title, "summary": args.summary,
+                "when_not": args.when_not, "ai_notes": args.ai_notes,
+            }.items() if v is not None}
+            _print(about_mod.set_fields(config, args.logical_name, **updates))
+        elif sub == "remove":
+            _print(about_mod.remove(config, args.logical_name))
     elif args.command == "doctor":
         payload = diagnose(config)
         _print(payload)
@@ -770,7 +826,27 @@ def main(argv: list[str] | None = None) -> int:
         if argv == ["__schema"]:
             _print(build_schema(parser()))
             return 0
-        return run(parser().parse_args(argv))
+        # Pre-process `about <key>`: argparse's subparser group greedily
+        # matches any positional token, so `about inbox` fails as an unknown
+        # subcommand.  Remove the key from argv before parsing and re-attach
+        # it afterwards.  Known subcommands (add/set/remove/sync) and flags
+        # are left untouched.
+        about_key: str | None = None
+        if "about" in argv:
+            idx = argv.index("about")
+            if idx + 1 < len(argv):
+                candidate = argv[idx + 1]
+                is_subcommand = candidate in ("add", "set", "remove", "sync")
+                is_flag = candidate.startswith("-")
+                if not is_subcommand and not is_flag:
+                    about_key = candidate
+                    argv = argv[: idx + 1] + argv[idx + 2 :]
+        args = parser().parse_args(argv)
+        if about_key is not None:
+            args.key = about_key
+        elif not hasattr(args, "key"):
+            args.key = None
+        return run(args)
     except (DeepOrbitError, RuntimeError, ValueError) as exc:
         print(json.dumps({"error": getattr(exc, "code", exc.__class__.__name__), "message": str(exc)}, ensure_ascii=False), file=sys.stderr)
         return 1

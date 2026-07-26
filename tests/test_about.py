@@ -103,3 +103,54 @@ def test_user_custom_directory_accepted(tmp_path):
     cfg = load_config(tmp_path)
     assert cfg.dir("books") == "80_Books"
     assert cfg.directory_meta["books"]["custom"] is True
+
+
+from deeporbit import about as about_mod
+
+
+def test_about_tree_returns_all_top_level(vault):
+    cfg = load_config(vault)
+    tree = about_mod.tree(cfg)
+    names = {node["logical_name"] for node in tree}
+    for expected in ("inbox", "diary", "projects", "system"):
+        assert expected in names
+    inbox = next(n for n in tree if n["logical_name"] == "inbox")
+    assert inbox["path"] == "00_Inbox"
+    assert inbox["title"] == DIRECTORY_META["inbox"]["title"]
+
+
+def test_about_lookup_by_logical_name(vault):
+    cfg = load_config(vault)
+    node = about_mod.lookup(cfg, "inbox")
+    assert node["logical_name"] == "inbox"
+    assert node["path"] == "00_Inbox"
+
+
+def test_about_lookup_by_path(vault):
+    cfg = load_config(vault)
+    node = about_mod.lookup(cfg, "00_Inbox")
+    assert node["logical_name"] == "inbox"
+
+
+def test_about_lookup_by_title(vault):
+    cfg = load_config(vault)
+    node = about_mod.lookup(cfg, DIRECTORY_META["inbox"]["title"])
+    assert node["logical_name"] == "inbox"
+
+
+def test_about_lookup_unknown_raises(vault):
+    cfg = load_config(vault)
+    with pytest.raises(KeyError):
+        about_mod.lookup(cfg, "no-such-thing")
+
+
+def test_about_flatten_includes_children(vault):
+    cfg = load_config(vault)
+    flat = about_mod.flatten(cfg)
+    # 注意：children 键名是 unprefixed（templates/paused/...），同名 child 可能出现在多个 parent 下，
+    # 因此用 (parent, logical_name) 联合断言
+    pairs = {(n.get("parent"), n["logical_name"]) for n in flat}
+    assert ("system", "templates") in pairs
+    assert ("projects", "paused") in pairs
+    assert ("projects", "archived") in pairs
+    assert ("research", "paused") in pairs
