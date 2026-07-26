@@ -1,5 +1,9 @@
 # Vault 目录布局：可配置目录、状态分文件夹与骨架检查
 
+> **权威数据**：本文档是概念性介绍。目录语义的**机器可读权威数据**在
+> `deeporbit.json` 的 `directories` 段（schema v3），通过 `deeporbit about`
+> 命令查询。两边内容如有出入，以 json 为准。
+
 DeepOrbit 的目录结构由**逻辑名**驱动：代码和 agent 只认 `inbox`、`projects`
 这类逻辑名，实际文件夹名以 vault 根目录 `deeporbit.json` 的 `directories`
 段为准。改目录名不会破坏任何功能——CLI、索引、生命周期、suggest 全部通过

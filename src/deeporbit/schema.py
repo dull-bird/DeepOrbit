@@ -23,6 +23,41 @@ _METADATA: dict[tuple[str, ...], dict] = {
         "output": _JSON_OUTPUT,
         "examples": ["deeporbit --vault ~/Documents/MyVault init --source /path/to/DeepOrbit"],
     },
+    ("about",): {
+        "summary": "Query and edit vault directory semantics stored in deeporbit.json (logical name, path, title, summary, AI usage notes)",
+        "tags": ["read"],
+        "intent": {"destructive": False, "idempotent": True, "scope": "directory"},
+        "output": _JSON_OUTPUT,
+        "examples": [
+            "deeporbit --vault @main about",
+            "deeporbit --vault @main about inbox",
+            "deeporbit --vault @main about --list",
+        ],
+    },
+    ("about", "add"): {
+        "summary": "Register a new logical directory in deeporbit.json and create the folder",
+        "tags": ["write"],
+        "intent": {"destructive": False, "idempotent": False, "scope": "directory"},
+        "output": _JSON_OUTPUT,
+    },
+    ("about", "set"): {
+        "summary": "Update fields on an existing logical directory",
+        "tags": ["write"],
+        "intent": {"destructive": False, "idempotent": True, "scope": "directory"},
+        "output": _JSON_OUTPUT,
+    },
+    ("about", "remove"): {
+        "summary": "Remove a custom logical directory from deeporbit.json (does NOT delete the folder on disk)",
+        "tags": ["write"],
+        "intent": {"destructive": False, "idempotent": False, "scope": "directory"},
+        "output": _JSON_OUTPUT,
+    },
+    ("about", "sync"): {
+        "summary": "Rewrite deeporbit.json in v3 form, merging user overrides with the default DIRECTORY_META table",
+        "tags": ["write"],
+        "intent": {"destructive": False, "idempotent": True, "scope": "directory"},
+        "output": _JSON_OUTPUT,
+    },
     ("doctor",): {
         "summary": "Diagnose optional capabilities (Obsidian CLI, ChromaDB, plugins) and vault skeleton integrity; --strict exits 1 on skeleton gaps or root violations (zero-token cron check)",
         "tags": ["read"],

@@ -93,6 +93,24 @@ class SchemaTests(unittest.TestCase):
         self.assertIn("deeporbit.json", config_files)
         self.assertIn("~/.config/deeporbit/links.json", config_files)
 
+    def test_about_namespace_and_subcommands(self):
+        about = _namespace(self.doc, "about")
+        names = {cmd["name"] for cmd in about["commands"]}
+        self.assertEqual(names, {"add", "set", "remove", "sync"})
+        for sub in about["commands"]:
+            self.assertEqual(sub["path"], ["about"])
+            self.assertIn("summary", sub)
+
+    def test_about_key_positional_exposed(self):
+        """The `key` positional handled by argv pre-processing must surface
+        in help/schema so users and agent harnesses discover it."""
+        about = _namespace(self.doc, "about")
+        positionals = [opt for opt in about.get("options", []) if opt["role"] == "positional"]
+        names = {opt["name"] for opt in positionals}
+        self.assertIn("key", names)
+        key = next(opt for opt in positionals if opt["name"] == "key")
+        self.assertFalse(key["required"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -68,6 +68,8 @@ deeporbit --vault ~/Documents/MyVault agenda
 deeporbit --vault ~/Documents/MyVault rag "index tracking"
 deeporbit --vault ~/Documents/MyVault calendar export
 deeporbit --vault ~/Documents/MyVault open 10_Diary/2026-07-15.md
+deeporbit --vault ~/Documents/MyVault about             # show vault directory semantics
+deeporbit --vault ~/Documents/MyVault about inbox       # details for one directory
 ```
 
 You can also ask your agent naturally: “research index tracking”, “add this to today”, “what is overdue?”, or “find my previous notes about RAG”.

@@ -61,3 +61,9 @@ through `deeporbit sync-prompts`.
 When adding, removing, or modifying any skill (`skills/`) or command (`commands/`), you
 **MUST** update `README.md` and `README_CN.md` — skill counts, mindmap diagrams, and the
 quick-reference table.
+
+### Directory semantics in deeporbit.json
+目录语义（标题、用途、AI 操作约定）由 `deeporbit.json` 的 `directories` 段持有，
+默认表在 `src/deeporbit/config.py` 的 `DIRECTORY_META`。Agent **不直接编辑**
+`deeporbit.json`——通过 `deeporbit about add/set/remove` 操作；查询目录语义走
+`deeporbit about`，不读 json 字段。新 vault 写入时自动升级为 schema v3。

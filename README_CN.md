@@ -63,6 +63,8 @@ deeporbit --vault ~/Documents/MyVault agenda
 deeporbit --vault ~/Documents/MyVault rag "指数跟踪"
 deeporbit --vault ~/Documents/MyVault calendar export
 deeporbit --vault ~/Documents/MyVault open 10_Diary/2026-07-15.md
+deeporbit --vault ~/Documents/MyVault about             # 查看 vault 目录语义
+deeporbit --vault ~/Documents/MyVault about inbox       # 单目录详情
 ```
 
 也可以直接对 Agent 说：「研究指数跟踪」「把这件事加到今天」「有哪些逾期任务？」或「查找我以前关于 RAG 的笔记」。
