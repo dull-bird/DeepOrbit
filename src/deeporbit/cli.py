@@ -820,28 +820,46 @@ def run(args: argparse.Namespace) -> int:
     return 0
 
 
+def _about_subcommands(p: argparse.ArgumentParser) -> list[str]:
+    """Return the registered subcommands of the `about` namespace.
+
+    Walking the parser (instead of hardcoding) keeps this in sync when new
+    subcommands are added.
+    """
+    for action in p._actions:
+        if isinstance(action, argparse._SubParsersAction):
+            about_parser = action.choices.get("about")
+            if about_parser is None:
+                return []
+            for sub_action in about_parser._actions:
+                if isinstance(sub_action, argparse._SubParsersAction):
+                    return list(sub_action.choices.keys())
+    return []
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     try:
+        root_parser = parser()
         if argv == ["__schema"]:
-            _print(build_schema(parser()))
+            _print(build_schema(root_parser))
             return 0
         # Pre-process `about <key>`: argparse's subparser group greedily
         # matches any positional token, so `about inbox` fails as an unknown
         # subcommand.  Remove the key from argv before parsing and re-attach
-        # it afterwards.  Known subcommands (add/set/remove/sync) and flags
-        # are left untouched.
+        # it afterwards.  Known subcommands (derived from the parser) and
+        # flags are left untouched.
         about_key: str | None = None
         if "about" in argv:
             idx = argv.index("about")
             if idx + 1 < len(argv):
                 candidate = argv[idx + 1]
-                is_subcommand = candidate in ("add", "set", "remove", "sync")
+                is_subcommand = candidate in _about_subcommands(root_parser)
                 is_flag = candidate.startswith("-")
                 if not is_subcommand and not is_flag:
                     about_key = candidate
                     argv = argv[: idx + 1] + argv[idx + 2 :]
-        args = parser().parse_args(argv)
+        args = root_parser.parse_args(argv)
         if about_key is not None:
             args.key = about_key
         elif not hasattr(args, "key"):

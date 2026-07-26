@@ -249,3 +249,15 @@ def test_doctor_flags_v2_schema(tmp_path):
     report = diagnose(cfg)
     issues = json.dumps(report, ensure_ascii=False)
     assert "schema_version" in issues or "v3" in issues or "about sync" in issues
+
+
+def test_about_subcommands_derived_from_parser():
+    """_about_subcommands reflects the parser, never a hardcoded tuple."""
+    from deeporbit.cli import _about_subcommands, parser
+
+    names = _about_subcommands(parser())
+    assert names  # non-empty
+    assert "add" in names
+    assert "set" in names
+    assert "remove" in names
+    assert "sync" in names
