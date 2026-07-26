@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from .config import CONFIG_NAME, SCHEMA_VERSION, Config, DIRECTORY_META
+from .config import CONFIG_NAME, DIRECTORIES, SCHEMA_VERSION, Config, DIRECTORY_META
 from .errors import ConfigError
 
 
@@ -178,12 +178,7 @@ def sync(cfg: Config) -> dict:
         elif isinstance(value, dict):
             new_dirs[key] = dict(value)
     # 补齐所有默认 key
-    for key, default_path in (
-        ("inbox", "00_Inbox"), ("diary", "10_Diary"), ("writings", "15_Writings"),
-        ("projects", "20_Projects"), ("research", "30_Research"), ("wiki", "40_Wiki"),
-        ("resources", "50_Resources"), ("notes", "60_Notes"), ("family", "70_Family"),
-        ("plans", "90_Plans"), ("system", "99_System"),
-    ):
+    for key, default_path in DIRECTORIES.items():
         new_dirs.setdefault(key, {"path": default_path})
     payload["directories"] = new_dirs
     _write_payload(cfg, payload)
