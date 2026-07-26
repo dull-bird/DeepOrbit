@@ -10,7 +10,7 @@ from pathlib import Path
 from .errors import ConfigError
 
 CONFIG_NAME = "deeporbit.json"
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 # Logical directory map: the single source of truth for vault layout.
 # deeporbit.json may override any entry under "directories"; every module
@@ -149,6 +149,7 @@ class Config:
     agent: dict = field(default_factory=dict)
     directories: dict = field(default_factory=lambda: dict(DIRECTORIES))
     directory_meta: dict = field(default_factory=dict)
+    directories_full: dict = field(default_factory=dict)  # v3 raw form, for round-trip writing
     deeporbit_version: str = ""
 
     def dir(self, name: str) -> str:
@@ -212,12 +213,30 @@ def _normalize_directory_meta(raw_meta: dict, raw_directories: dict) -> dict:
     }
 
 
+def _normalize_directories(raw_directories: dict) -> dict:
+    """Accept v2 {key: path-str} and v3 {key: {path, ...}}; emit v3 {key: {path, ...}}.
+
+    Unknown keys are preserved (custom directories).
+    """
+    out: dict[str, dict] = {}
+    merged = {**{k: {"path": v} for k, v in DIRECTORIES.items()}, **(raw_directories or {})}
+    for key, value in merged.items():
+        if isinstance(value, str) and value.strip():
+            out[key] = {"path": value.strip()}
+        elif isinstance(value, dict):
+            body = dict(value)
+            path = str(body.pop("path", "") or "").strip()
+            if not path and key in DIRECTORIES:
+                path = DIRECTORIES[key]
+            if not path:
+                continue
+            out[key] = {"path": path, **body}
+    return out
+
+
 def _normalized_payload(raw: dict) -> dict:
-    directories = {
-        **DIRECTORIES,
-        **{k: str(v).strip() for k, v in raw.get("directories", {}).items() if k in DIRECTORIES and isinstance(v, str) and v.strip()},
-    }
-    top_level = [directories[key] for key in ("inbox", "diary", "writings", "projects", "research", "wiki", "resources", "notes", "family", "plans")]
+    directories = _normalize_directories(raw.get("directories", {}))
+    top_level = [directories[key]["path"] for key in ("inbox", "diary", "writings", "projects", "research", "wiki", "resources", "notes", "family", "plans")]
     return {
         "schema_version": SCHEMA_VERSION,
         "vault_id": raw.get("vault_id") or str(uuid.uuid4()),
@@ -309,7 +328,8 @@ def load_config(vault: Path | str, *, create: bool = False) -> Config:
         host=payload["host"],
         privacy=payload["privacy"],
         agent=dict(payload["agent"]),
-        directories=dict(payload["directories"]),
+        directories={key: value["path"] for key, value in payload["directories"].items()},
+        directories_full=dict(payload["directories"]),
         directory_meta=dict(payload["directory_meta"]),
         deeporbit_version=payload["deeporbit_version"],
     )
