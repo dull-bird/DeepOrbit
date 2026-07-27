@@ -6,85 +6,207 @@ const base = import.meta.env.BASE_URL;
 const home = zh ? base : `${base}en/`;
 
 const stats = zh ? [
-  ['31', 'do.* 工作流技能'],
+  ['33', 'do.* 工作流技能'],
   ['11', '语义化目录'],
   ['5', 'Agent 运行时'],
   ['0', '云端账号'],
 ] : [
-  ['31', 'do.* workflow skills'],
+  ['33', 'do.* workflow skills'],
   ['11', 'semantic directories'],
   ['5', 'agent runtimes'],
   ['0', 'cloud accounts'],
 ];
 
-const problems = zh ? [
-  ['任务散落', '待办躺在聊天记录、便签和五个 App 里。没有任何一个地方，称得上“事实”。'],
-  ['项目烂尾', '开始总是雄心勃勃；两周之后，没人记得进行到了哪一步，也没人敢翻旧账。'],
-  ['知识不沉淀', '做过的研究、读过的论文、想通的道理，随着对话窗口关闭一起消失。'],
-] : [
-  ['Scattered tasks', 'Todos live in chat logs, sticky notes, and five different apps. Nowhere counts as the truth.'],
-  ['Stalled projects', 'Every project starts with ambition. Two weeks later, nobody remembers where it stopped.'],
-  ['Knowledge that evaporates', 'Research done, papers read, lessons learned — all gone the moment the chat window closes.'],
+type DirMeta = {
+  lane: number;
+  logical: string;
+  path: string;
+  zh: { title: string; summary: string; when_not: string; ai_notes: string };
+  en: { title: string; summary: string; when_not: string; ai_notes: string };
+};
+
+const DIRS: DirMeta[] = [
+  {
+    lane: 0, logical: 'inbox', path: '00_Inbox',
+    zh: {
+      title: '快速捕获',
+      summary: '未经分类的想法、临时任务、待整理的剪藏；默认 Todos.md 也在这里。',
+      when_not: '已经明确归属的内容直接放到对应目录，不要先进 Inbox 再搬一次。',
+      ai_notes: '添加任务用 deeporbit todo add，不手改 Todos.md；整理用 deeporbit triage，不手移文件。',
+    },
+    en: {
+      title: 'Quick capture',
+      summary: 'Unfiled ideas, ad-hoc tasks, clipped references; the default Todos.md also lives here.',
+      when_not: 'If a piece of content already has a clear home, put it there directly — do not route it through Inbox first.',
+      ai_notes: 'Add tasks with deeporbit todo add instead of editing Todos.md by hand; triage with deeporbit triage instead of moving files manually.',
+    },
+  },
+  {
+    lane: 1, logical: 'diary', path: '10_Diary',
+    zh: {
+      title: '日志',
+      summary: 'Daily Notes 与短期上下文，按日期一篇一个文件。',
+      when_not: '持续性主题（项目、研究、概念）不放日记，放各自目录。',
+      ai_notes: '通过 deeporbit calendar / deeporbit agenda 查询；写新日记用对应技能而不是手建文件。',
+    },
+    en: {
+      title: 'Diary',
+      summary: 'Daily notes and short-lived context, one file per date.',
+      when_not: 'Long-running topics (projects, research, concepts) do not belong here — they go to their own directories.',
+      ai_notes: 'Query through deeporbit calendar / deeporbit agenda; create new entries via the matching skill, not by hand-making files.',
+    },
+  },
+  {
+    lane: 1, logical: 'writings', path: '15_Writings',
+    zh: {
+      title: '写作',
+      summary: '用户亲笔写的内容：随笔、文章、书稿。',
+      when_not: 'AI 生成的草稿放 60_Notes，确认采用后才挪到这里。',
+      ai_notes: '写入前必须先读现有同主题文章，避免覆盖用户文字。',
+    },
+    en: {
+      title: 'Writings',
+      summary: 'Pieces the user wrote by hand: essays, articles, book drafts.',
+      when_not: 'AI-generated drafts go to 60_Notes; only move them here once the user adopts them.',
+      ai_notes: 'Read any existing piece on the same topic before writing — never overwrite the user\'s words.',
+    },
+  },
+  {
+    lane: 1, logical: 'family', path: '70_Family',
+    zh: {
+      title: '家庭',
+      summary: '家庭与个人生活记录。',
+      when_not: '工作相关的内容放对应工作目录。',
+      ai_notes: '默认隐私等级最高；privacy 扫描默认覆盖。',
+    },
+    en: {
+      title: 'Family',
+      summary: 'Family and personal-life records.',
+      when_not: 'Work-related content goes to the matching work directory.',
+      ai_notes: 'Highest default privacy level; covered by the default privacy scan.',
+    },
+  },
+  {
+    lane: 2, logical: 'projects', path: '20_Projects',
+    zh: {
+      title: '项目',
+      summary: '有明确目标与结束条件的工作；status 字段驱动生命周期。',
+      when_not: '长期兴趣、没有结束条件的主题放 30_Research。',
+      ai_notes: '状态迁移走 deeporbit pause/resume/done/archive；不要手改 frontmatter status。',
+    },
+    en: {
+      title: 'Projects',
+      summary: 'Work with a clear goal and a finish condition; the status field drives the lifecycle.',
+      when_not: 'Open-ended interests without an end condition go to 30_Research.',
+      ai_notes: 'Run state transitions through deeporbit pause/resume/done/archive — never hand-edit the frontmatter status.',
+    },
+  },
+  {
+    lane: 2, logical: 'plans', path: '90_Plans',
+    zh: {
+      title: '计划',
+      summary: '可评审的执行计划与检查点。',
+      when_not: '长期目标放 projects；一次性 todo 放 inbox。',
+      ai_notes: '计划文件用 deeporbit 模板生成，不手写。',
+    },
+    en: {
+      title: 'Plans',
+      summary: 'Reviewable execution plans and checkpoints.',
+      when_not: 'Long-term goals live in projects; one-off todos live in inbox.',
+      ai_notes: 'Generate plan files from deeporbit templates — do not hand-write them.',
+    },
+  },
+  {
+    lane: 3, logical: 'research', path: '30_Research',
+    zh: {
+      title: '研究',
+      summary: '开放性的探索与调研，可能没有结论。',
+      when_not: '有交付物的具体工作放 20_Projects。',
+      ai_notes: '同 projects，状态迁移走 CLI。',
+    },
+    en: {
+      title: 'Research',
+      summary: 'Open-ended exploration and investigation; it may never reach a conclusion.',
+      when_not: 'Concrete work with a deliverable goes to 20_Projects.',
+      ai_notes: 'Same as projects: state transitions go through the CLI.',
+    },
+  },
+  {
+    lane: 3, logical: 'wiki', path: '40_Wiki',
+    zh: {
+      title: 'Wiki',
+      summary: '原子、可复用的概念笔记；Zettelkasten 风格。',
+      when_not: '一次性总结、原始剪藏放 60_Notes。',
+      ai_notes: '新增条目用 wikilink 串联，不复制粘贴现有内容。',
+    },
+    en: {
+      title: 'Wiki',
+      summary: 'Atomic, reusable concept notes in Zettelkasten style.',
+      when_not: 'One-off summaries and raw clippings go to 60_Notes.',
+      ai_notes: 'Link new entries with wikilinks; do not copy-paste existing content.',
+    },
+  },
+  {
+    lane: 3, logical: 'resources', path: '50_Resources',
+    zh: {
+      title: '资源',
+      summary: '策展的外部资料：工具、书籍、链接。',
+      when_not: '自己的笔记不放这里。',
+      ai_notes: '附来源 URL 与获取日期。',
+    },
+    en: {
+      title: 'Resources',
+      summary: 'Curated external material: tools, books, links.',
+      when_not: 'Your own notes do not live here.',
+      ai_notes: 'Always attach the source URL and the date it was fetched.',
+    },
+  },
+  {
+    lane: 3, logical: 'notes', path: '60_Notes',
+    zh: {
+      title: '笔记',
+      summary: '摘要、原始知识捕获、AI 生成草稿。',
+      when_not: '定稿的亲笔写作放 15_Writings；概念性内容进 40_Wiki。',
+      ai_notes: '外部同步目录（如微信读书）由 deeporbit 标记为 readonly，不要写入。',
+    },
+    en: {
+      title: 'Notes',
+      summary: 'Summaries, raw knowledge captures, and AI-generated drafts.',
+      when_not: 'Final handwritten pieces go to 15_Writings; conceptual content goes to 40_Wiki.',
+      ai_notes: 'External sync targets (e.g. WeRead) are marked readonly by deeporbit — never write into them.',
+    },
+  },
+  {
+    lane: 4, logical: 'system', path: '99_System',
+    zh: {
+      title: '系统',
+      summary: 'DeepOrbit 自身的模板、Bases、提示词、规则、归档。',
+      when_not: '用户内容永远不要放 99_System。',
+      ai_notes: '本目录大部分内容由 deeporbit sync-prompts / init 物化；手写内容放 managed block 之外。',
+    },
+    en: {
+      title: 'System',
+      summary: 'DeepOrbit\'s own templates, Bases, prompts, rules, and archives.',
+      when_not: 'User content never goes into 99_System.',
+      ai_notes: 'Most of this directory is materialized by deeporbit sync-prompts / init; handwritten content goes outside the managed block.',
+    },
+  },
 ];
 
-const icons = {
-  vault: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l8-4 8 4v8l-8 4-8-4V8z"/><path d="M4 8l8 4 8-4"/><path d="M12 12v8"/></svg>',
-  skills: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/><path d="M3 17.5l9 5 9-5" opacity=".45"/></svg>',
-  lifecycle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 13.6-5.7"/><path d="M20 12a8 8 0 0 1-13.6 5.7"/><path d="M17.5 3v3.3h-3.3"/><path d="M6.5 21v-3.3h3.3"/></svg>',
-  growth: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M12 10c0-4 3-7 8-7 0 4-3 7-8 7z"/><path d="M12 14c0-3-2.5-5.5-6.5-5.5 0 3.5 2.5 5.5 6.5 5.5z"/></svg>',
-  privacy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 5-3 8.5-7 10-4-1.5-7-5-7-10V6l7-3z"/><path d="M9 11.5l2 2 4-4.5"/></svg>',
-} as const;
+const LANES = {
+  zh: ['捕捉', '记录', '推进', '沉淀', '系统'],
+  en: ['Capture', 'Record', 'Act', 'Distill', 'System'],
+};
+const laneNames = zh ? LANES.zh : LANES.en;
 
-type IconKey = keyof typeof icons;
-
-const capabilities: Array<[IconKey, string, string, string]> = zh ? [
-  ['vault', '便携 Markdown 知识库', 'Vault 即事实：纯文本、可 Git 同步、无厂商锁定。换电脑、换工具、换模型，知识原样带走。', '00_Inbox → 99_System'],
-  ['skills', '31 个 do.* 工作流技能', 'daily、todo、agenda、research、recap、dream、mentor……同一套技能，在五个运行时里行为一致。', 'do.todo · do.research · do.dream'],
-  ['lifecycle', '工作生命周期', '每份工作都有状态：active | paused | done | archived。deeporbit serve 打开本地仪表盘，进展一目了然。', 'deeporbit status · serve'],
-  ['growth', '与 teach-me 联动', '沉淀的知识导出为学习者画像：你掌握什么、卡在哪里，系统越用越懂你。', 'do.teach-me · learner profile'],
-  ['privacy', '本地优先，隐私自控', '只读区、隐私阀门、Cron 与 Recipe 自动化——全部运行在你自己的机器上，不需要任何账号。', 'readonly zones · cron · recipes'],
-] : [
-  ['vault', 'A portable Markdown vault', 'The vault is the source of truth: plain text, Git-syncable, zero vendor lock-in. Change computers, tools, or models — knowledge travels as-is.', '00_Inbox → 99_System'],
-  ['skills', '31 do.* workflow skills', 'daily, todo, agenda, research, recap, dream, mentor… The same skills behave the same across five runtimes.', 'do.todo · do.research · do.dream'],
-  ['lifecycle', 'A lifecycle for work', 'Every piece of work carries a status: active | paused | done | archived. deeporbit serve opens a local dashboard that keeps progress visible.', 'deeporbit status · serve'],
-  ['growth', 'Linked with teach-me', 'Distilled knowledge exports into a learner profile — what you have mastered, where you are stuck. A system that knows you better over time.', 'do.teach-me · learner profile'],
-  ['privacy', 'Local-first, privacy on your terms', 'Read-only zones, privacy valves, cron and recipe automation — everything runs on your own machine. No account required.', 'readonly zones · cron · recipes'],
-];
-
-const vaultLanes = zh ? [
-  ['捕捉', '想法与任务的第一站', ['00_Inbox']],
-  ['记录', '日常、写作与生活', ['10_Diary', '15_Writings', '70_Family']],
-  ['推进', '项目与可审阅的计划', ['20_Projects', '90_Plans']],
-  ['沉淀', '研究、概念与资料', ['30_Research', '40_Wiki', '50_Resources', '60_Notes']],
-  ['系统', '模板、Bases 与归档', ['99_System']],
-] : [
-  ['Capture', 'First stop for ideas and tasks', ['00_Inbox']],
-  ['Record', 'Diary, writing, and life', ['10_Diary', '15_Writings', '70_Family']],
-  ['Act', 'Projects and reviewable plans', ['20_Projects', '90_Plans']],
-  ['Distill', 'Research, concepts, resources', ['30_Research', '40_Wiki', '50_Resources', '60_Notes']],
-  ['System', 'Templates, Bases, and archives', ['99_System']],
-];
-
-const dashboardPoints = zh ? [
-  ['全库状态总览', '进行中、已暂停、已完成、待归档——一张图回答“我在做什么”。'],
-  ['一键流转', '暂停、恢复、完成、归档，都由 CLI 安全执行，从不覆盖文件。'],
-  ['建议与 ACP 面板', '基于 vault 状态给出下一步建议，也可以直接让 Agent 接手。'],
-] : [
-  ['Vault-wide overview', 'Active, paused, done, ready to archive — one picture answers “what am I doing”.'],
-  ['One-click transitions', 'Pause, resume, complete, archive — every transition runs through the safe CLI and never overwrites a file.'],
-  ['Suggestions & ACP panel', 'Next steps derived from vault state, with an agent panel ready to take over.'],
-];
-
-const loopSteps = zh ? [
-  ['完成工作', '任务、项目与日常都在 vault 里留下真实轨迹。'],
-  ['提炼学习', 'teach-me 把轨迹提炼成概念、掌握度与薄弱点。'],
-  ['更新画像', '学习者画像随每次工作持续生长，始终留在本地。'],
-  ['更懂你', 'Agent 按画像调整教学与协作——你再带着它出发。'],
-] : [
-  ['Do the work', 'Tasks, projects, and daily notes leave a real trail in the vault.'],
-  ['Distill the learning', 'teach-me turns that trail into concepts, mastery, and weak spots.'],
-  ['Grow the profile', 'Your learner profile compounds with every session, always local.'],
-  ['Know you better', 'Agents teach and collaborate from the profile — and off you go again.'],
+const skills = [
+  'do.agenda', 'do.agent', 'do.archive', 'do.arxiv-translator', 'do.ask',
+  'do.brainstorm', 'do.calendar', 'do.daily', 'do.dream', 'do.fix-links',
+  'do.heartbeat', 'do.init', 'do.kickoff', 'do.link', 'do.mentor',
+  'do.mermaid', 'do.note-summary', 'do.obsidian-open', 'do.organize', 'do.parse-knowledge',
+  'do.pdf-to-markdown', 'do.rag', 'do.rag-index', 'do.recap', 'do.refresh-prompt',
+  'do.remind', 'do.research', 'do.search', 'do.teach-me', 'do.todo',
+  'do.translate', 'do.translate-markdown', 'do.write',
 ];
 
 const runtimes = ['Claude Code', 'Codex', 'Gemini', 'OMP', 'OpenClaw'];
@@ -98,21 +220,21 @@ const quickstart = zh ? [
   ['Initialize a vault', 'Materializes the directory model, templates, Bases, and skill index — existing notes are preserved.', 'deeporbit --vault ~/MyVault init'],
   ['Open the dashboard', 'A local dashboard shows the state of your work: active, paused, done, archived.', 'deeporbit --vault ~/MyVault serve --open'],
 ];
+
+const defaultDir = DIRS[0]; // inbox
+const defaultCopy = zh ? defaultDir.zh : defaultDir.en;
 ---
 
 <!-- ============ Hero ============ -->
 <section class="hero container">
-  <div class="hero-copy">
-    <div class="eyebrow">DeepOrbit 2.0 · {zh ? '本地优先的 Agent Skills 套件' : 'Local-first Agent Skills'}</div>
-    <h1>{zh ? <>你的任务、项目和知识，<br />应该长成<span class="accent">同一个系统。</span></> : <>Your tasks, projects, and knowledge should grow into <span class="accent">one system.</span></>}</h1>
-    <p class="hero-sub">{zh ? 'DeepOrbit 把 Obsidian vault 变成任务、项目与知识管理系统：31 个可移植的工作流技能，跨 Claude Code、Codex、Gemini、OMP 与 OpenClaw 复用——知识留在 Markdown，成长留给你。' : 'DeepOrbit turns an Obsidian vault into a system for tasks, projects, and knowledge: 31 portable workflow skills across Claude Code, Codex, Gemini, OMP, and OpenClaw. Knowledge stays in Markdown; the growth stays with you.'}</p>
-    <div class="actions">
-      <a class="button primary" href={`${home}docs/`}>{zh ? '开始使用' : 'Get started'} <span class="arrow" aria-hidden="true">→</span></a>
-      <a class="button" href="https://github.com/dull-bird/DeepOrbit">GitHub</a>
-    </div>
-  </div>
-  <div class="asset hero-asset" data-asset="hero" role="img" aria-label={zh ? '主视觉插图占位' : 'Hero illustration placeholder'}>
-    <span>{zh ? '主视觉：hero' : 'Illustration: hero'}</span>
+  <div class="eyebrow">DeepOrbit 2.0 · {zh ? '本地优先的 Agent Skills 套件' : 'Local-first Agent Skills'}</div>
+  <h1>{zh ? <>你的任务、项目和知识，<br />应该长成<span class="accent">同一个系统。</span></> : <>Your tasks, projects, and knowledge should grow into <span class="accent">one system.</span></>}</h1>
+  <p class="hero-sub">{zh
+    ? 'DeepOrbit 把 Obsidian vault 变成任务、项目与知识管理的同一份事实源：33 个可移植技能，跨 5 个 Agent 运行时，AI 通过 deeporbit about 直接读懂每个目录的语义与边界。'
+    : 'DeepOrbit turns an Obsidian vault into a single source of truth for tasks, projects, and knowledge: 33 portable skills across 5 agent runtimes. AI reads the semantics and boundaries of every directory through deeporbit about.'}</p>
+  <div class="actions">
+    <a class="button primary" href={`${home}docs/`}>{zh ? '开始使用' : 'Get started'} <span class="arrow" aria-hidden="true">→</span></a>
+    <a class="button" href="https://github.com/dull-bird/DeepOrbit">GitHub</a>
   </div>
 </section>
 
@@ -122,130 +244,130 @@ const quickstart = zh ? [
   ))}
 </section>
 
-<!-- ============ Problems ============ -->
-<section class="container section problems-section">
+<!-- ============ Vault skeleton ============ -->
+<section id="vault" class="container section">
   <div class="section-head">
-    <div class="eyebrow">{zh ? '三个老问题' : 'Three old problems'}</div>
-    <h2>{zh ? '你不是不努力，是系统不支持你。' : 'You are not unproductive. Your system does not support you.'}</h2>
-  </div>
-  <div class="problems-grid">
-    {problems.map(([title, text], i) => (
-      <article class="problem">
-        <span class="problem-num">0{i + 1}</span>
-        <h3>{title}</h3>
-        <p>{text}</p>
-      </article>
-    ))}
-  </div>
-</section>
-
-<!-- ============ Capabilities ============ -->
-<section id="capabilities" class="well">
-  <div class="container section">
-    <div class="section-head">
-      <div class="eyebrow">{zh ? '核心能力' : 'Core capabilities'}</div>
-      <div>
-        <h2>{zh ? '一个 vault，管好任务、项目与知识。' : 'One vault for tasks, projects, and knowledge.'}</h2>
-        <p class="section-intro">{zh ? '不是替你生成更多文本，而是给每一类信息一个人和 Agent 都能长期维护的位置。' : 'Not more generated text — a durable place for every kind of information, maintained by you and your agents.'}</p>
-      </div>
-    </div>
-    <div class="capability-grid">
-      {capabilities.map(([icon, title, text, meta]) => (
-        <article class="capability-card">
-          <span class="card-icon" set:html={icons[icon]} />
-          <h3>{title}</h3>
-          <p>{text}</p>
-          <code>{meta}</code>
-        </article>
-      ))}
-      <article class="capability-card example-card">
-        <span class="card-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>
-        </span>
-        <h3>{zh ? '先逛逛示例 Vault' : 'Tour the example vault'}</h3>
-        <p>{zh ? '不想先装东西？克隆 deeporbit-example-vault，直接看一个活着的 DeepOrbit 知识库长什么样。' : 'Not ready to install? Clone deeporbit-example-vault and see what a living DeepOrbit vault looks like.'}</p>
-        <a class="text-link" href="https://github.com/dull-bird/deeporbit-example-vault">dull-bird/deeporbit-example-vault <span aria-hidden="true">→</span></a>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- ============ Vault model ============ -->
-<section class="container section">
-  <div class="section-head">
-    <div class="eyebrow">{zh ? '工作方式' : 'How it works'}</div>
+    <div class="eyebrow">{zh ? 'Vault 骨架' : 'Vault skeleton'}</div>
     <div>
-      <h2>{zh ? '从一条念头，到可复用的知识。' : 'From a passing thought to reusable knowledge.'}</h2>
-      <p class="section-intro">{zh ? '十一个语义化目录，五条流向。每一条信息都有去处，每一份工作都有状态。' : 'Eleven semantic directories, five lanes. Every piece of information has a destination; every piece of work has a state.'}</p>
+      <h2>{zh ? '5 条轨道，11 个目录。AI 一眼读懂。' : 'Five lanes, eleven directories. AI reads it at a glance.'}</h2>
+      <p class="section-intro">{zh ? '悬停任意节点，看 deeporbit about 给 AI 的描述。' : 'Hover any node to see what deeporbit about tells the AI.'}</p>
     </div>
   </div>
-  <div class="vault-flow" role="list" aria-label={zh ? 'Vault 目录模型' : 'Vault directory model'}>
-    {vaultLanes.map(([lane, desc, folders], i) => (
-      <div class="lane" role="listitem">
-        <div class="lane-head">
-          <span class="lane-dot" data-lane={i}></span>
-          <strong>{lane}</strong>
+  <div class="skeleton-grid">
+    <div class="skeleton-lanes">
+      {laneNames.map((laneName, i) => (
+        <div class="sk-lane" data-lane={i}>
+          <div class="sk-lane-name"><span class="sk-lane-dot" data-lane={i}></span>{laneName}</div>
+          <div class="sk-lane-track">
+            {DIRS.filter((d) => d.lane === i).map((d) => (
+              <button
+                type="button"
+                class:list={['sk-node', d.logical === 'inbox' && 'is-active']}
+                data-logical={d.logical}
+                data-lane={d.lane}
+                aria-label={zh ? d.zh.title : d.en.title}
+              >
+                <span class="sk-dot" aria-hidden="true"></span>
+                <span class="sk-path">{d.path}</span>
+              </button>
+            ))}
+          </div>
         </div>
-        <div class="lane-folders">
-          {(folders as string[]).map((folder) => <code class="folder">{folder}</code>)}
-        </div>
-        <p class="lane-desc">{desc}</p>
+      ))}
+    </div>
+    <aside class="sk-card" aria-live="polite">
+      <div class="sk-card-head">
+        <code class="sk-card-path" id="sk-path">{defaultDir.path}</code>
+        <span class="sk-card-logical" id="sk-logical">{defaultDir.logical}</span>
       </div>
-    ))}
+      <h3 id="sk-title">{defaultCopy.title}</h3>
+      <dl class="sk-fields">
+        <div>
+          <dt>{zh ? '装什么' : 'What goes here'}</dt>
+          <dd id="sk-summary">{defaultCopy.summary}</dd>
+        </div>
+        <div>
+          <dt>{zh ? '什么时候不放这里' : 'When NOT to use'}</dt>
+          <dd id="sk-when-not">{defaultCopy.when_not}</dd>
+        </div>
+        <div>
+          <dt>{zh ? 'AI 使用约定' : 'AI usage'}</dt>
+          <dd id="sk-ai-notes">{defaultCopy.ai_notes}</dd>
+        </div>
+      </dl>
+      <div class="sk-actions">
+        <button type="button" id="sk-cycle" class="text-btn">{zh ? '换一个' : 'Next'}</button>
+        <button
+          type="button"
+          class="text-btn copy-btn"
+          data-copy="deeporbit about"
+          aria-label={zh ? '复制 deeporbit about 命令' : 'Copy the deeporbit about command'}
+        >
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+          <span class="copy-label">{zh ? '复制 deeporbit about' : 'Copy deeporbit about'}</span>
+        </button>
+      </div>
+    </aside>
   </div>
 </section>
 
-<!-- ============ Dashboard ============ -->
+<!-- ============ Why AI can read this ============ -->
 <section class="well">
-  <div class="container section dashboard-grid">
-    <div class="dashboard-copy">
-      <div class="eyebrow">{zh ? '本地仪表盘' : 'Local dashboard'}</div>
-      <h2>{zh ? <><code class="inline-cmd">deeporbit serve</code>：你的工作，一眼看清。</> : <><code class="inline-cmd">deeporbit serve</code>: your work at a glance.</>}</h2>
-      <ul class="dashboard-list">
-        {dashboardPoints.map(([title, text]) => (
-          <li><strong>{title}</strong><p>{text}</p></li>
-        ))}
-      </ul>
+  <div class="container section ai-grid">
+    <div class="ai-copy">
+      <div class="eyebrow">{zh ? '机器可读' : 'Machine-readable'}</div>
+      <h2>{zh ? '以前 AI 靠猜，现在它能问。' : 'AI used to guess. Now it can ask.'}</h2>
+      <p>{zh
+        ? '打开一个 vault，AI 看到的是一堆文件夹名字。00_Inbox 是收件箱吗？30_Research 和 40_Wiki 有什么差别？以前它只能猜——猜错了就把笔记放错地方。'
+        : 'When AI opens a vault, all it sees is a pile of folder names. Is 00_Inbox really an inbox? How is 30_Research different from 40_Wiki? It used to guess — and a wrong guess means a misplaced note.'}</p>
+      <p>{zh
+        ? '现在它跑一句 deeporbit about，每个目录的语义、边界、使用约定都是结构化数据。schema v3 把这些写进 deeporbit.json——单一事实源，AI 直接读。'
+        : 'Now it runs deeporbit about, and every directory\'s semantics, boundaries, and usage conventions come back as structured data. Schema v3 writes them into deeporbit.json — a single source of truth the AI can read directly.'}</p>
     </div>
-    <div class="asset dashboard-asset" data-asset="dashboard" role="img" aria-label={zh ? '仪表盘插图占位' : 'Dashboard illustration placeholder'}>
-      <span>{zh ? '插图：dashboard' : 'Illustration: dashboard'}</span>
+    <div class="terminal" role="img" aria-label={zh ? 'deeporbit about inbox 的输出示例' : 'Sample output of deeporbit about inbox'}>
+      <div class="terminal-bar">
+        <span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-dot"></span>
+        <span class="terminal-title">deeporbit about inbox</span>
+      </div>
+      <pre class="terminal-body"><code>$ deeporbit about inbox
+{'{'}
+  <span class="t-key">"logical_name"</span>: <span class="t-str">"inbox"</span>,
+  <span class="t-key">"path"</span>: <span class="t-str">"00_Inbox"</span>,
+  <span class="t-key">"title"</span>: <span class="t-str">"{zh ? '快速捕获' : 'Quick capture'}"</span>,
+  <span class="t-key">"summary"</span>: <span class="t-str">"{zh ? '未经分类的想法、临时任务、待整理的剪藏' : 'Unfiled ideas, ad-hoc tasks, clipped references'}"</span>,
+  <span class="t-key">"when_not"</span>: <span class="t-str">"{zh ? '已经明确归属的内容直接放到对应目录…' : 'Content with a clear home goes there directly…'}"</span>,
+  <span class="t-key">"ai_notes"</span>: <span class="t-str">"{zh ? '添加任务用 deeporbit todo add…' : 'Add tasks with deeporbit todo add…'}"</span>
+{'}'}</code></pre>
     </div>
   </div>
 </section>
 
-<!-- ============ Growth loop ============ -->
+<!-- ============ Skills cloud ============ -->
 <section class="container section">
   <div class="section-head">
-    <div class="eyebrow sage">{zh ? '成长闭环' : 'The growth loop'}</div>
+    <div class="eyebrow">{zh ? 'Skills' : 'Skills'}</div>
     <div>
-      <h2>{zh ? '不止管理，更是沉淀与成长。' : 'More than management — a loop that compounds.'}</h2>
-      <p class="section-intro">{zh ? 'DeepOrbit 管事，teach-me 管人。每一次完成任务，都让系统更懂你一点。' : 'DeepOrbit manages the work; teach-me understands the worker. Every finished task makes the system know you better.'}</p>
+      <h2>{zh ? '33 个 do.* 技能，跑在这副骨架上。' : '33 do.* skills, running on this skeleton.'}</h2>
+      <p class="section-intro">{zh
+        ? '同一套技能，跨 5 个 Agent 运行时行为一致。技能负责工作流；骨架负责给 AI 一个可以读懂的世界。'
+        : 'The same skills behave identically across five agent runtimes. Skills carry the workflows; the skeleton gives the AI a world it can read.'}</p>
     </div>
   </div>
-  <div class="loop-grid">
-    <ol class="loop-steps">
-      {loopSteps.map(([title, text], i) => (
-        <li>
-          <span class="loop-num">{i + 1}</span>
-          <div><strong>{title}</strong><p>{text}</p></div>
-          {i === loopSteps.length - 1 && <span class="loop-back" aria-hidden="true">↻</span>}
-        </li>
-      ))}
-    </ol>
-    <div class="asset loop-asset" data-asset="learner-profile" role="img" aria-label={zh ? '学习者画像插图占位' : 'Learner profile illustration placeholder'}>
-      <span>{zh ? '插图：learner-profile' : 'Illustration: learner-profile'}</span>
-    </div>
+  <div class="skills-cloud">
+    {skills.map((s) => <code class="skill-pill">{s}</code>)}
   </div>
 </section>
 
-<!-- ============ Runtimes ============ -->
+<!-- ============ Runtimes + growth loop ============ -->
 <section class="well runtime-well">
   <div class="container section runtime-section">
     <div class="section-head">
       <div class="eyebrow">{zh ? '跨运行时' : 'Cross-runtime'}</div>
       <div>
         <h2>{zh ? '选择你的 Agent，而不是被 Agent 选择。' : 'Choose your agent. Do not be chosen by one.'}</h2>
-        <p class="section-intro">{zh ? '同一套 skills/，同一份 Markdown。换一个运行时，只是换一扇窗。' : 'The same skills/ directory, the same Markdown. Switching runtimes is just switching windows.'}</p>
+        <p class="section-intro">{zh
+          ? '同一套 skills/，同一份 Markdown。换一个运行时，只是换一扇窗。搭配 teach-me，每一次工作都会沉淀成学习者画像——系统越用越懂你。'
+          : 'The same skills/ directory, the same Markdown. Switching runtimes is just switching windows. Pair it with teach-me, and every working session compounds into a learner profile — the system knows you better over time.'}</p>
       </div>
     </div>
     <ul class="runtime-badges" aria-label={zh ? '支持的运行时' : 'Supported runtimes'}>
@@ -298,11 +420,8 @@ const quickstart = zh ? [
 <style>
   /* ---------- hero ---------- */
   .hero {
-    display: grid;
-    grid-template-columns: 1.05fr 0.95fr;
-    align-items: center;
-    gap: clamp(40px, 6vw, 88px);
     padding-block: clamp(64px, 10vh, 120px) var(--space-8);
+    max-width: 860px;
   }
   .hero h1 {
     margin-top: var(--space-4);
@@ -312,13 +431,12 @@ const quickstart = zh ? [
   }
   .hero h1 .accent { color: var(--accent); }
   .hero-sub {
-    max-width: 560px;
+    max-width: 720px;
     margin: var(--space-5) 0 0;
     font-size: 1.08rem;
     line-height: 1.85;
   }
   .actions { display: flex; gap: 12px; margin-top: var(--space-6); flex-wrap: wrap; }
-  .hero-asset { aspect-ratio: 4 / 3.2; }
 
   .stats {
     display: grid;
@@ -356,146 +474,226 @@ const quickstart = zh ? [
     line-height: 1.85;
   }
   .well { background: var(--surface); border-block: 1px solid var(--line); }
-  .text-link { color: var(--accent-ink); font-weight: 700; font-size: 0.92rem; }
-  .text-link span { display: inline-block; transition: transform var(--dur) var(--ease); }
-  .text-link:hover span { transform: translateX(4px); }
 
-  /* ---------- problems ---------- */
-  .problems-section { padding-bottom: var(--space-9); }
-  .problems-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
-  .problem {
-    padding: var(--space-6) var(--space-5);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-l);
-    background: var(--paper);
-    transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
-  }
-  .problem:hover { border-color: var(--line-strong); box-shadow: var(--shadow-m); transform: translateY(-3px); }
-  .problem-num { color: var(--accent-ink); font-family: var(--mono); font-size: 0.8rem; }
-  .problem h3 { margin-top: var(--space-3); }
-  .problem p { margin: var(--space-3) 0 0; }
-
-  /* ---------- capabilities ---------- */
-  .capability-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
-  .capability-card {
-    display: flex;
-    flex-direction: column;
-    padding: var(--space-6) var(--space-5);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-l);
-    background: var(--paper);
-    transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
-  }
-  .capability-card:hover { border-color: var(--line-strong); box-shadow: var(--shadow-m); transform: translateY(-3px); }
-  .card-icon {
-    display: inline-flex;
-    width: 40px;
-    height: 40px;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-s);
-    background: var(--accent-soft);
-    color: var(--accent-ink);
-  }
-  .card-icon svg { width: 21px; height: 21px; }
-  .capability-card h3 { margin-top: var(--space-4); font-size: 1.12rem; }
-  .capability-card p { margin: var(--space-3) 0 var(--space-4); font-size: 0.94rem; flex: 1; }
-  .capability-card code { align-self: flex-start; color: var(--muted); font-size: 0.76rem; }
-  .example-card { background: transparent; border-style: dashed; }
-  .example-card .card-icon { background: var(--sage-soft); color: var(--sage-ink); }
-
-  /* ---------- vault flow ---------- */
-  .vault-flow {
+  /* ---------- skeleton map ---------- */
+  .skeleton-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: 1.4fr 1fr;
+    gap: clamp(28px, 4vw, 56px);
+    align-items: start;
+  }
+  .skeleton-lanes {
+    display: grid;
     gap: var(--space-4);
   }
-  .lane {
-    position: relative;
-    padding: var(--space-5) var(--space-4);
+  .sk-lane {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: var(--space-4);
+    align-items: center;
+    padding: var(--space-4) var(--space-5);
     border: 1px solid var(--line);
     border-radius: var(--radius-m);
     background: var(--paper);
-    transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
   }
-  .lane:hover { border-color: var(--line-strong); box-shadow: var(--shadow-s); }
-  .lane:not(:last-child)::after {
-    content: '→';
-    position: absolute;
-    right: calc(-1 * var(--space-4));
-    top: var(--space-5);
-    width: var(--space-4);
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.85rem;
+  .sk-lane-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--ink);
   }
-  .lane-head { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
-  .lane-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
-  .lane-dot[data-lane="1"] { background: color-mix(in srgb, var(--accent) 72%, var(--sage)); }
-  .lane-dot[data-lane="2"] { background: color-mix(in srgb, var(--accent) 45%, var(--sage)); }
-  .lane-dot[data-lane="3"] { background: color-mix(in srgb, var(--accent) 20%, var(--sage)); }
-  .lane-dot[data-lane="4"] { background: var(--sage); }
-  .lane-folders { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--space-4); }
-  .folder {
+  .sk-lane-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .sk-lane-dot[data-lane="1"] { background: color-mix(in srgb, var(--accent) 72%, var(--sage)); }
+  .sk-lane-dot[data-lane="2"] { background: color-mix(in srgb, var(--accent) 45%, var(--sage)); }
+  .sk-lane-dot[data-lane="3"] { background: color-mix(in srgb, var(--accent) 20%, var(--sage)); }
+  .sk-lane-dot[data-lane="4"] { background: var(--sage); }
+  .sk-lane-track {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .sk-node {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-full);
+    background: var(--surface);
+    color: var(--body);
+    font: inherit;
+    font-size: 0.84rem;
+    cursor: pointer;
+    transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), color var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .sk-node:hover { border-color: var(--line-strong); transform: translateY(-1px); color: var(--ink); }
+  .sk-node:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .sk-node.is-active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  .sk-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    transition: transform var(--dur) var(--ease), background var(--dur) var(--ease);
+  }
+  .sk-node[data-lane="1"] .sk-dot { background: color-mix(in srgb, var(--accent) 72%, var(--sage)); }
+  .sk-node[data-lane="2"] .sk-dot { background: color-mix(in srgb, var(--accent) 45%, var(--sage)); }
+  .sk-node[data-lane="3"] .sk-dot { background: color-mix(in srgb, var(--accent) 20%, var(--sage)); }
+  .sk-node[data-lane="4"] .sk-dot { background: var(--sage); }
+  .sk-node:hover .sk-dot { transform: scale(1.45); }
+  .sk-node.is-active .sk-dot { transform: scale(1.3); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+  .sk-path { font-family: var(--mono); font-size: 0.8rem; letter-spacing: -0.01em; }
+
+  .sk-card {
+    position: sticky;
+    top: 96px;
+    padding: var(--space-6);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    background: var(--paper);
+    box-shadow: var(--shadow-s);
+  }
+  .sk-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: var(--space-3);
+  }
+  .sk-card-path {
+    font-family: var(--mono);
+    font-size: 0.78rem;
     padding: 3px 8px;
     border: 1px solid var(--line);
+    border-radius: var(--radius-s);
     background: var(--surface);
-    font-size: 0.72rem;
     color: var(--body);
   }
-  .lane-desc { margin: var(--space-4) 0 0; font-size: 0.82rem; color: var(--muted); }
+  .sk-card-logical {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    color: var(--muted);
+  }
+  .sk-card h3 {
+    margin: 0 0 var(--space-4);
+    font-size: 1.35rem;
+  }
+  .sk-fields { margin: 0; padding: 0; display: grid; gap: var(--space-4); }
+  .sk-fields > div { padding-top: var(--space-3); border-top: 1px solid var(--line); }
+  .sk-fields > div:first-child { padding-top: 0; border-top: 0; }
+  .sk-fields dt {
+    margin: 0 0 4px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+  .sk-fields dd { margin: 0; font-size: 0.94rem; line-height: 1.7; color: var(--body); }
+  .sk-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .text-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-full);
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease), background var(--dur) var(--ease);
+  }
+  .text-btn:hover { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-soft); }
+  .text-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .text-btn svg { flex-shrink: 0; }
 
-  /* ---------- dashboard ---------- */
-  .dashboard-grid {
+  /* ---------- AI-readable section ---------- */
+  .ai-grid {
     display: grid;
     grid-template-columns: 1fr 1.1fr;
     gap: clamp(40px, 6vw, 88px);
     align-items: center;
   }
-  .dashboard-copy h2 { margin-top: var(--space-4); }
-  .inline-cmd { font-size: 0.62em; padding: 0.2em 0.45em; vertical-align: 0.12em; }
-  .dashboard-list { list-style: none; margin: var(--space-6) 0 0; padding: 0; border-top: 1px solid var(--line); }
-  .dashboard-list li { padding: var(--space-4) 0; border-bottom: 1px solid var(--line); }
-  .dashboard-list strong { font-size: 1.02rem; }
-  .dashboard-list p { margin: 6px 0 0; font-size: 0.92rem; }
-  .dashboard-asset { aspect-ratio: 4 / 3; }
-
-  /* ---------- growth loop ---------- */
-  .loop-grid {
-    display: grid;
-    grid-template-columns: 1.15fr 0.85fr;
-    gap: clamp(40px, 6vw, 88px);
-    align-items: center;
+  .ai-copy h2 { margin-top: var(--space-4); }
+  .ai-copy p { margin: var(--space-4) 0 0; line-height: 1.85; font-family: var(--reading); font-size: 1.04rem; }
+  .terminal {
+    border: 1px solid var(--ink);
+    border-radius: var(--radius-m);
+    background: var(--ink);
+    color: var(--paper);
+    overflow: hidden;
+    box-shadow: var(--shadow-m);
   }
-  .loop-steps { list-style: none; margin: 0; padding: 0; counter-reset: step; }
-  .loop-steps li {
-    position: relative;
-    display: grid;
-    grid-template-columns: 44px 1fr auto;
-    gap: var(--space-4);
-    align-items: start;
-    padding: var(--space-5) 0;
-    border-bottom: 1px solid var(--line);
-  }
-  .loop-steps li:first-child { border-top: 1px solid var(--line); }
-  .loop-num {
-    display: inline-flex;
-    width: 34px;
-    height: 34px;
+  .terminal-bar {
+    display: flex;
     align-items: center;
-    justify-content: center;
-    border: 1px solid var(--line-strong);
+    gap: 6px;
+    padding: 10px 14px;
+    border-bottom: 1px solid color-mix(in srgb, var(--paper) 12%, transparent);
+    background: color-mix(in srgb, var(--paper) 4%, transparent);
+  }
+  .terminal-dot {
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    color: var(--sage-ink);
-    font-family: var(--mono);
-    font-size: 0.85rem;
-    background: var(--sage-soft);
+    background: color-mix(in srgb, var(--paper) 22%, transparent);
   }
-  .loop-steps strong { font-size: 1.05rem; }
-  .loop-steps p { margin: 6px 0 0; font-size: 0.92rem; }
-  .loop-back { color: var(--sage-ink); font-size: 1.3rem; line-height: 1; padding-top: 6px; }
-  .loop-asset { aspect-ratio: 1 / 1.1; }
+  .terminal-dot:nth-child(1) { background: #e0655c; }
+  .terminal-dot:nth-child(2) { background: #e3b54f; }
+  .terminal-dot:nth-child(3) { background: #6cb56b; }
+  .terminal-title {
+    margin-left: 8px;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: color-mix(in srgb, var(--paper) 70%, transparent);
+  }
+  .terminal-body {
+    margin: 0;
+    padding: 18px 20px 22px;
+    font-family: var(--mono);
+    font-size: 0.84rem;
+    line-height: 1.7;
+    color: color-mix(in srgb, var(--paper) 92%, transparent);
+    overflow-x: auto;
+  }
+  .terminal-body code { background: transparent; padding: 0; color: inherit; font-size: inherit; }
+  .t-key { color: var(--accent); }
+  .t-str { color: var(--sage); }
+
+  /* ---------- skills cloud ---------- */
+  .skills-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .skill-pill {
+    padding: 5px 11px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-full);
+    background: var(--surface);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--body);
+    transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease), background var(--dur) var(--ease);
+  }
+  .skill-pill:hover { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-soft); }
 
   /* ---------- runtimes ---------- */
   .runtime-section { padding-block: var(--space-8); }
@@ -541,7 +739,7 @@ const quickstart = zh ? [
   .step-cmd { position: relative; }
   .step-cmd pre { margin: 0; padding: 14px 100px 14px 16px; background: var(--ink); border-color: var(--ink); border-radius: var(--radius-s); }
   .step-cmd pre code { padding: 0; background: transparent; color: var(--paper); font-size: 0.82rem; white-space: pre-wrap; word-break: break-all; }
-  .copy-btn {
+  .step-cmd .copy-btn {
     position: absolute;
     top: 50%;
     right: 8px;
@@ -559,7 +757,7 @@ const quickstart = zh ? [
     cursor: pointer;
     transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
   }
-  .copy-btn:hover { background: color-mix(in srgb, var(--paper) 12%, transparent); color: var(--paper); }
+  .step-cmd .copy-btn:hover { background: color-mix(in srgb, var(--paper) 12%, transparent); color: var(--paper); }
   .copy-status { min-height: 1.5em; margin: var(--space-4) 0 0; color: var(--sage-ink); font-size: 0.88rem; }
 
   /* ---------- CTA ---------- */
@@ -583,11 +781,8 @@ const quickstart = zh ? [
 
   /* ---------- responsive ---------- */
   @media (max-width: 960px) {
-    .hero, .dashboard-grid, .loop-grid { grid-template-columns: 1fr; }
-    .hero-asset { order: -1; aspect-ratio: 16 / 9; }
-    .capability-grid { grid-template-columns: repeat(2, 1fr); }
-    .vault-flow { grid-template-columns: repeat(2, 1fr); }
-    .lane:not(:last-child)::after { display: none; }
+    .skeleton-grid, .ai-grid { grid-template-columns: 1fr; }
+    .sk-card { position: static; }
     .quickstart-step { grid-template-columns: 1fr; gap: var(--space-4); }
     .cta { grid-template-columns: 1fr; gap: var(--space-6); }
   }
@@ -597,25 +792,78 @@ const quickstart = zh ? [
     .stats { grid-template-columns: repeat(2, 1fr); }
     .stat:nth-child(2) { border-right: 0; }
     .stat:nth-child(3), .stat:nth-child(4) { border-top: 1px solid var(--line); }
-    .problems-grid, .capability-grid, .vault-flow { grid-template-columns: 1fr; }
+    .sk-lane { grid-template-columns: 1fr; gap: var(--space-3); padding: var(--space-4); }
+    .sk-card { padding: var(--space-5); }
     .cta { margin-inline: 0; padding: var(--space-7) var(--space-6); }
   }
 </style>
 
+<script is:inline define:vars={{ dirsData: DIRS, langNow: lang }}>
+  const isZh = langNow === 'zh';
+  const dirsByLogical = new Map(dirsData.map((d) => [d.logical, d]));
+  const logicalOrder = dirsData.map((d) => d.logical);
+
+  const elPath = document.getElementById('sk-path');
+  const elLogical = document.getElementById('sk-logical');
+  const elTitle = document.getElementById('sk-title');
+  const elSummary = document.getElementById('sk-summary');
+  const elWhenNot = document.getElementById('sk-when-not');
+  const elAiNotes = document.getElementById('sk-ai-notes');
+  const cycleBtn = document.getElementById('sk-cycle');
+  const nodes = Array.from(document.querySelectorAll('.sk-node'));
+
+  let currentLogical = 'inbox';
+
+  function showDir(logical) {
+    const dir = dirsByLogical.get(logical);
+    if (!dir) return;
+    currentLogical = logical;
+    const copy = isZh ? dir.zh : dir.en;
+    if (elPath) elPath.textContent = dir.path;
+    if (elLogical) elLogical.textContent = dir.logical;
+    if (elTitle) elTitle.textContent = copy.title;
+    if (elSummary) elSummary.textContent = copy.summary;
+    if (elWhenNot) elWhenNot.textContent = copy.when_not;
+    if (elAiNotes) elAiNotes.textContent = copy.ai_notes;
+    nodes.forEach((n) => {
+      n.classList.toggle('is-active', n.getAttribute('data-logical') === logical);
+    });
+  }
+
+  nodes.forEach((n) => {
+    const logical = n.getAttribute('data-logical');
+    if (!logical) return;
+    n.addEventListener('mouseenter', () => showDir(logical));
+    n.addEventListener('click', () => showDir(logical));
+    n.addEventListener('focus', () => showDir(logical));
+  });
+
+  if (cycleBtn) {
+    cycleBtn.addEventListener('click', () => {
+      const idx = logicalOrder.indexOf(currentLogical);
+      const next = logicalOrder[(idx + 1) % logicalOrder.length];
+      showDir(next);
+    });
+  }
+
+  showDir('inbox');
+</script>
+
 <script>
-  const status = document.querySelector<HTMLParagraphElement>('.copy-status');
-  document.querySelectorAll<HTMLButtonElement>('.copy-btn').forEach((button) => {
+  const status = document.querySelector('.copy-status');
+  document.querySelectorAll('.copy-btn').forEach((button) => {
     button.addEventListener('click', async () => {
       const zh = document.documentElement.lang === 'zh';
+      const text = button.getAttribute('data-copy') || '';
       try {
-        await navigator.clipboard.writeText(button.dataset.copy || '');
+        await navigator.clipboard.writeText(text);
       } catch {
         if (status) status.textContent = zh
           ? '浏览器未允许剪贴板访问，请直接选择并复制命令。'
           : 'Clipboard access is unavailable. Select and copy the command directly.';
         return;
       }
-      const label = button.querySelector<HTMLSpanElement>('.copy-label');
+      const label = button.querySelector('.copy-label');
       const original = label?.textContent || '';
       if (label) label.textContent = zh ? '已复制' : 'Copied';
       if (status) status.textContent = zh ? '已复制到剪贴板。' : 'Copied to the clipboard.';
