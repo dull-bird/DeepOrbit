@@ -1,6 +1,6 @@
 ---
 name: do.write
-description: Professional writing support for the user's own words. Three service levels (polish / restructure / developmental edit), voice calibration from their past writing, editor's notes that teach, and an anti-slop checklist. Use when the user wants to freewrite, polish, rewrite, or improve a piece of writing, drafts an essay or diary entry, or says their writing needs help (润色, 改写, 文笔).
+description: Professional writing support for the user's own words. Three service levels (polish / restructure / developmental edit), voice calibration from their past writing, editor's notes that teach, AI expansion prompts, and an anti-slop checklist. Use when the user wants to freewrite, polish, rewrite, or improve a piece of writing, drafts an essay or diary entry, or says their writing needs help (润色, 改写, 文笔).
 ---
 
 # `do.write` — 专业写作支持
@@ -78,6 +78,14 @@ description: Professional writing support for the user's own words. Three servic
    每条必须挂一个原则名字。这是教学，不是邀功；想看的人自然会展开。
 7. **成长记录**：发现用户反复出现的习惯（好的或待改的），用
    `deeporbit --vault . profile observe "<一句话>" --source agent` 记下来，下次校准用。
+8. **AI 拓展思考（默认附带）**：如果这是自由写作、观点草稿、随笔或口述稿，默认在文末补一个折叠 callout，给出 2-3 个继续展开的方向。方向要顺着用户原话长出来，不要换题，也不要把正文改成提纲。
+   ```markdown
+   > [!tip] AI Suggestions
+   > 这里有几个可以继续深入的方向：
+   > - **进一步探索**: ...
+   > - **一个问题**: ...
+   > - **相关联想**: ...
+   > ```
 
 ## 落盘
 
@@ -92,5 +100,6 @@ description: Professional writing support for the user's own words. Three servic
 - **改后必教**：没有编辑说明的交付不算完成。
 - **原文必存**：没有原始记录的交付不算完成——一字不差，绝不"顺手优化"原文。
 - **不要工程化**：不主动加 todo、status、next actions。
+- **默认带延展**：没有 AI Suggestions 的写作交付不算完整，除非用户明确要求不扩展。
 - Read `deeporbit.json` for the interaction language; folder paths stay in English.
 - Use `do.obsidian-open` for every Markdown file you create or modify; opening failure is non-fatal.
