@@ -72,5 +72,7 @@ def diagnose(config: Config) -> dict:
             "tasks": (config.vault / ".obsidian" / "plugins" / "obsidian-tasks-plugin").exists(),
             "dataview": (config.vault / ".obsidian" / "plugins" / "dataview").exists(),
             "calendar": (config.vault / ".obsidian" / "plugins" / "calendar").exists(),
+            "templater": (config.vault / ".obsidian" / "plugins" / "templater-obsidian").exists(),
+            "kanban-bases-view": (config.vault / ".obsidian" / "plugins" / "kanban-bases-view").exists(),
         },
     }

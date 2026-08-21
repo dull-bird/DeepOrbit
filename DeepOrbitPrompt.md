@@ -53,8 +53,10 @@ under `Archived/` (there is deliberately no `Active/` folder). The frontmatter
 shelving maintained by the lifecycle CLI.
 
 Use Properties, wikilinks, embeds, tags, and meaningful aliases so Obsidian's Graph,
-Backlinks, Bases, and search can reveal connections. Dataview, Tasks, Calendar, and
-other community plugins are optional views—not storage dependencies.
+Backlinks, Bases, and search can reveal connections. Community plugins are optional
+views—not storage dependencies. The blessed set (treat as near-core, safe to assume):
+Dataview, Tasks, Calendar, Templater, and Kanban Bases View (`kanban-bases-view`,
+which powers the `Status board` kanban view in `99_System/Bases/Projects.base`).
 
 ## Retrieval and synchronization
 

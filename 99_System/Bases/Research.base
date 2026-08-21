@@ -1,7 +1,34 @@
 filters:
   and:
-    - 'type == "reference" || type == "research"'
+    - 'file.inFolder("30_Research")'
+    - or:
+        - 'type == "research"'
+        - 'type == "reference"'
+        - 'type == "report"'
+        - 'status == "active"'
+        - 'status == "paused"'
+        - 'status == "done"'
+        - 'status == "archived"'
 views:
+  - type: table
+    name: All research
+    group_by: type
+    order:
+      - file.name
+      - area
+      - status
+      - created
+      - updated
+      - file.mtime
+    sort:
+      - property: file.mtime
+        direction: DESC
+  - type: kanban-view
+    name: Status board
+    groupByProperty: note.status
+    swimlaneByProperty: note.area
+    cardTitleProperty: note.title
+    quickAddFolder: 30_Research
   - type: table
     name: Research library
     order:
@@ -10,6 +37,3 @@ views:
       - status
       - created
       - updated
-    sort:
-      - property: updated
-        direction: DESC

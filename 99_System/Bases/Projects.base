@@ -1,7 +1,37 @@
 filters:
   and:
-    - 'type == "project"'
+    - 'file.inFolder("20_Projects")'
+    - or:
+        - 'type == "project"'
+        - 'status == "active"'
+        - 'status == "paused"'
+        - 'status == "done"'
+        - 'status == "archived"'
+formulas:
+  days_since_update: 'if(updated, (today() - date(updated)).days, "")'
+properties:
+  formula.days_since_update:
+    displayName: 停滞天数
 views:
+  - type: table
+    name: All projects
+    group_by: status
+    order:
+      - file.name
+      - area
+      - author
+      - updated
+      - formula.days_since_update
+      - file.mtime
+    sort:
+      - property: formula.days_since_update
+        direction: DESC
+  - type: kanban-view
+    name: Status board
+    groupByProperty: note.status
+    swimlaneByProperty: note.area
+    cardTitleProperty: note.title
+    quickAddFolder: 20_Projects
   - type: table
     name: Active projects
     filters:
@@ -12,6 +42,7 @@ views:
       - status
       - area
       - updated
+      - formula.days_since_update
     sort:
       - property: updated
         direction: DESC
@@ -20,6 +51,18 @@ views:
     filters:
       and:
         - 'status == "paused"'
+    order:
+      - file.name
+      - area
+      - updated
+    sort:
+      - property: updated
+        direction: ASC
+  - type: table
+    name: Done — ready to archive
+    filters:
+      and:
+        - 'status == "done"'
     order:
       - file.name
       - area

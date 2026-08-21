@@ -42,7 +42,7 @@ runtime bundle into `99_System/DeepOrbit/repo/` while excluding `.git`,
 virtualenvs, caches, build outputs, `node_modules`, and generated agent install
 directories.
 
-Open the folder as an Obsidian vault. Enable the core Bases, Graph View, Backlinks, Daily Notes, and Canvas plugins. Community plugins are optional.
+Open the folder as an Obsidian vault. Enable the core Bases, Graph View, Backlinks, Daily Notes, and Canvas plugins. Community plugins are optional views, but DeepOrbit blesses a near-core set that its dashboards and templates assume when present: **Dataview**, **Tasks**, **Calendar**, **Templater**, and **Kanban Bases View** (adds the drag-and-drop `Status board` view to `99_System/Bases/Projects.base`; without it the table views still work). `deeporbit doctor` reports which of these are installed.
 
 ## Add knowledge and retrieve it
 
