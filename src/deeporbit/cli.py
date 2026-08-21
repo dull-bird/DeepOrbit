@@ -56,6 +56,8 @@ def parser() -> argparse.ArgumentParser:
     commands = root.add_subparsers(dest="command", required=True)
     triage_cmd = commands.add_parser("triage", help="Classify stray files: valuable → where, junk → trash (JSON, never moves anything)")
     triage_cmd.add_argument("paths", nargs="*", help="Vault-relative paths (default: all non-whitelisted root entries)")
+    triage_cmd.add_argument("--inbox", action="store_true", help="Route the configured inbox dir to concrete destinations instead")
+    triage_cmd.add_argument("--apply", action="store_true", help="Execute safe decisions (reversible trash + non-overwriting moves); review items are still left for the agent")
     sync_prompts_cmd = commands.add_parser("sync-prompts", help="Sync DeepOrbit-managed prompt content with conflict-safe managed blocks")
     sync_prompts_cmd.add_argument("--dry-run", action="store_true")
     init = commands.add_parser("init")
@@ -575,9 +577,12 @@ def run(args: argparse.Namespace) -> int:
             return 0 if verdict["notify"] else 1
         _print(context)
     elif args.command == "triage":
-        from .triage import triage as run_triage
+        from .triage import apply_routes, triage as run_triage
 
-        _print(run_triage(config, args.paths or None))
+        results = run_triage(config, args.paths or None, inbox=args.inbox)
+        if args.apply:
+            results = apply_routes(config, results)
+        _print(results)
     elif args.command == "sync-prompts":
         from .sync import agents_stub, claude_stub, extract_section, prompt_pointer_block, sync_file
 

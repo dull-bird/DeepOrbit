@@ -38,7 +38,7 @@ DIRECTORY_META: dict[str, dict] = {
         "title": "快速捕获",
         "summary": "未经分类的想法、临时任务、待整理的剪藏；默认 Todos.md 也在这里",
         "when_not": "已经明确归属的内容直接放到对应目录，不要先进 Inbox 再搬一次",
-        "ai_notes": "添加任务用 deeporbit todo add，不手改 Todos.md；整理用 deeporbit triage，不手移文件",
+        "ai_notes": "添加任务用 deeporbit todo add，不手改 Todos.md；整理收件箱用 deeporbit triage --inbox，不手移文件",
     },
     "diary": {
         "title": "日志",

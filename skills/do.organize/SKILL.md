@@ -60,8 +60,12 @@ Perform a deep semantic review of the folder structures, especially within `40_W
    - **Actionability**: If two folders overlap so much that the user hesitates where to save a new note, they must be merged.
 3. **Evaluate Hierarchy**: Keep folder hierarchy as flat as possible (ideally ≤2 levels deep). Use links to connect related ideas rather than deep folders.
 
-### Step 2.5: Orphan Clustering & Inbox Isolation
-- **Inbox Protocol (CRITICAL)**: `00_Inbox/` items are intentionally fragmented ideas. Do NOT run RAG automatically on these files and DO NOT propose moving them into `20_Projects` or `30_Research`. Leave them for the user to triage manually via `/do:kickoff`.
+### Step 2.5: Inbox Routing & Orphan Clustering
+- **Inbox Protocol (CRITICAL)**: `00_Inbox/` is a capture buffer, not a storage location — items are meant to flow out. Run `deeporbit --vault . triage --inbox` (read-only JSON) to get a deterministic routing proposal for every inbox item:
+  - Routed destinations (`diary` / `projects` / `research` / `notes` / `resources`, each with a `target` path) and `trash` (empty notes, exact duplicates) can be executed directly with `deeporbit --vault . triage --inbox --apply` — trash is reversible (`.trash/`), moves never overwrite (conflicts are reported and skipped). In an interactive session still show the user what `--apply` will do before running it; unattended/cron runs may apply directly.
+  - `review` items are yours to judge: read each one, then decide a destination or trash. A short ambiguous note is usually an idea (→ `40_Wiki`/`60_Notes`) or a task (→ `deeporbit todo add`, then trash the file); use `/do:kickoff` when it is really a new project.
+  - Never execute semantic (review-item) moves without user approval; use `mv` for keeps and `deeporbit --vault . trash <path>` (reversible) for trash.
+  - Do NOT run RAG automatically on inbox files.
 - **Orphan Clustering (RAG)**: For true `orphan_files` located *outside* of `00_Inbox`, execute `deeporbit --vault . rag "<Orphan Note Content>"` to find the most similar existing folder or Wiki concept. Use this result to propose a logical move for the orphan.
 
 ### Step 3: Proposal Generation

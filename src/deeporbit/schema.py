@@ -66,11 +66,11 @@ _METADATA: dict[tuple[str, ...], dict] = {
         "examples": ["deeporbit --vault @main doctor --strict"],
     },
     ("triage",): {
-        "summary": "Classify stray files deterministically: valuable → inbox/research/notes/resources, code/secrets → out-of-vault, junk → trash. Read-only; execution is agent + user approval",
+        "summary": "Classify stray files deterministically: valuable → inbox/research/notes/resources, code/secrets → out-of-vault, junk → trash. --inbox routes the inbox dir to concrete destinations and flags empty notes + exact duplicates as trash. --apply executes the safe subset (reversible trash, non-overwriting moves); review items always stay for the agent",
         "tags": ["read"],
         "intent": {"destructive": False, "idempotent": True, "scope": "directory"},
         "output": _JSON_OUTPUT,
-        "examples": ["deeporbit --vault @main triage", "deeporbit --vault @main triage stray.md olddir/"],
+        "examples": ["deeporbit --vault @main triage", "deeporbit --vault @main triage stray.md olddir/", "deeporbit --vault @main triage --inbox", "deeporbit --vault @main triage --inbox --apply"],
     },
     ("sync-prompts",): {
         "summary": "Sync DeepOrbit-managed prompt content (DeepOrbitPrompt.md/AGENTS.md/CLAUDE.md) via conflict-safe managed blocks; user text outside markers is never touched",
