@@ -120,6 +120,8 @@ deeporbit --vault ~/Documents/MyVault trash 00_Inbox/stale.md             # 可�
 
 - **Recipe**（`99_System/Recipes/*.md`）是扩展点：声明式的 `cli:` / `skill:` / `note:` 步骤，把 DeepOrbit 和任意其他 skill 串联。`deeporbit --vault . recipe run "Weekly Review"` 将 recipe 解析为执行计划。优先写 recipe，而不是新增基础设施。
 
+可选的学习生活主动记录流程见 [OpenClaw Human Loop](docs/openclaw-human-loop.md)：本人填写日课，Agent 另存整理，同步设备只指定一台调度。示例默认关闭，不改变核心 schema。
+
 这些选择背后的工具调研（PDF/Markdown/HTML 处理器、Obsidian 插件生态、kepano 的 obsidian-skills 等社区项目）见 [docs/tooling-landscape.md](docs/tooling-landscape.md)；更广泛的技能生态与开源 NotebookLM 替代品调研见 [docs/skill-ecosystem-research.md](docs/skill-ecosystem-research.md)。可直接运行的示例库在 [examples/example-vault](examples/example-vault)，并镜像于 [dull-bird/deeporbit-example-vault](https://github.com/dull-bird/deeporbit-example-vault)。
 
 ## Obsidian 插件

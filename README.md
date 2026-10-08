@@ -125,6 +125,8 @@ Authorship is one invisible frontmatter field, never a visible badge: agents **m
 
 - **Recipes** (`99_System/Recipes/*.md`) are the extension point: declarative `cli:` / `skill:` / `note:` steps composing DeepOrbit with any other skill. `deeporbit --vault . recipe run "Weekly Review"` resolves one into an execution plan. Prefer a recipe over new infrastructure.
 
+For an opt-in study and life check-in workflow, see [OpenClaw Human Loop](docs/openclaw-human-loop.md): user-owned daily records, separate agent reports, and one designated scheduler across synced devices. The example is disabled by default and does not change the core schema.
+
 The tooling research behind these choices (PDF/Markdown/HTML processors, the Obsidian plugin ecosystem, community AI-note projects like kepano's obsidian-skills) is in [docs/tooling-landscape.md](docs/tooling-landscape.md); a wider survey of skill ecosystems and open-source NotebookLM alternatives is in [docs/skill-ecosystem-research.md](docs/skill-ecosystem-research.md). A runnable example vault lives in [examples/example-vault](examples/example-vault) and is mirrored at [dull-bird/deeporbit-example-vault](https://github.com/dull-bird/deeporbit-example-vault).
 
 ## Obsidian plugin

@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "vault_id": "REPLACE_WITH_YOUR_VAULT_ID",
+  "enabled": false,
+  "scheduler_owner": null,
+  "timezone": "Asia/Hong_Kong",
+  "trial": {
+    "start": "2026-01-01",
+    "end": "2026-01-14"
+  },
+  "paths": {
+    "daily_template": "99_System/Templates/HumanLoop.md",
+    "daily_dir": "10_Diary/HumanLoop",
+    "agent_dir": "10_Diary/HumanLoop/Agent",
+    "protocol": "99_System/DeepOrbit/HumanLoop.md"
+  },
+  "schedule": {
+    "morning": {
+      "time": "09:00",
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "window_minutes": 25
+    },
+    "evening": {
+      "time": "20:00",
+      "weekdays": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "window_minutes": 30
+    },
+    "weekly": {
+      "time": "20:00",
+      "weekdays": [
+        6
+      ],
+      "window_minutes": 30
+    }
+  },
+  "required_fields": [
+    "Main question:",
+    "Personal action and result:",
+    "My understanding and remaining question:",
+    "Tomorrow first step:",
+    "Life feedback:"
+  ]
+}
