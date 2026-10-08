@@ -185,7 +185,7 @@ class HumanLoopTests(unittest.TestCase):
         self.assertTrue(result["created"])
         self.assertEqual(result["feedback"]["state"], "awaiting")
         path = loop.daily_path(ctx, self.day)
-        self.assertIn("2026-01-05", path.read_text())
+        self.assertIn("2026-01-05", path.read_text(encoding="utf-8"))
         human_bytes = b"\xef\xbb\xbfHuman original\r\nwith exact bytes\x00\n"
         path.write_bytes(human_bytes)
         self.assertFalse(loop.prepare(ctx, "morning", self.now)["created"])
@@ -199,7 +199,7 @@ class HumanLoopTests(unittest.TestCase):
         self.template.write_bytes(original)
         ctx = self.ctx()
         self.assertTrue(loop.prepare(ctx, "morning", self.now)["created"])
-        content = loop.daily_path(ctx, self.day).read_text()
+        content = loop.daily_path(ctx, self.day).read_text(encoding="utf-8")
         front = content.split("---", 2)[1]
         for property in ("type: daily-feedback", "author: ai", "date: 2026-01-05",
                          "created: 2026-01-05", "updated: 2026-01-05", "privacy_level: critical"):
@@ -220,11 +220,11 @@ class HumanLoopTests(unittest.TestCase):
         self.template.write_text(content, encoding="utf-8")
         ctx = self.ctx()
         self.assertTrue(loop.prepare(ctx, "morning", self.now)["created"])
-        rendered = loop.daily_path(ctx, self.day).read_text()
+        rendered = loop.daily_path(ctx, self.day).read_text(encoding="utf-8")
         self.assertIn("[[Journal/DailyPractice/2026-01-05]]", rendered)
         self.assertIn("[[Journal/DailyPractice/Reviews/2026-01-05-morning]]", rendered)
         self.assertNotIn("{{", rendered)
-        self.assertEqual(self.template.read_text(), content)
+        self.assertEqual(self.template.read_text(encoding="utf-8"), content)
 
     def test_concurrent_creator_not_overwritten(self):
         ctx = self.ctx()
@@ -235,7 +235,7 @@ class HumanLoopTests(unittest.TestCase):
             return real_open(file, flags, mode)
         with patch.object(loop.os, "open", side_effect=competing_open):
             self.assertFalse(loop.prepare(ctx, "morning", self.now)["created"])
-        self.assertEqual(path.read_text(), "competing human content")
+        self.assertEqual(path.read_text(encoding="utf-8"), "competing human content")
 
     def test_evening_does_not_create_diary(self):
         now = self.now.replace(hour=20, minute=5)
